@@ -21,6 +21,8 @@
 			"donate": "$t(generic.documentations.donate)",
 			"readme": "$t(generic.documentations.readme)"
 		},
+		"expose-internal-modules": "公開內部模塊",
+		"expose-internal-modules-description-HTML": "<code>obsidian</code>、<code>@codemirror/*</code>、<code>@lezer/*</code>……",
 		"interface": "界面",
 		"open-changelog-on-update": "更新時$t(generic.open)$t(generic.documentations.changelog)"
 	}

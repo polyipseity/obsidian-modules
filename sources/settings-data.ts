@@ -18,6 +18,7 @@ import { PluginLocales } from "../assets/locales.js"
 
 export interface Settings extends PluginContext.Settings {
 	readonly language: Settings.DefaultableLanguage
+	readonly exposeInternalModules: boolean
 
 	readonly openChangelogOnUpdate: boolean
 
@@ -41,6 +42,7 @@ export namespace Settings {
 
 	export const DEFAULT: Persistent = deepFreeze({
 		errorNoticeTimeout: NOTICE_NO_TIMEOUT,
+		exposeInternalModules: true,
 		language: "",
 		noticeTimeout: 5,
 		openChangelogOnUpdate: true,
@@ -58,6 +60,12 @@ export namespace Settings {
 				unc,
 				"errorNoticeTimeout",
 				["number"],
+			),
+			exposeInternalModules: fixTyped(
+				DEFAULT,
+				unc,
+				"exposeInternalModules",
+				["boolean"],
 			),
 			language: fixInSet(
 				DEFAULT,

@@ -1,6 +1,8 @@
 import {
 	AdvancedSettingTab,
 	closeSetting,
+	createChildElement,
+	createDocumentFragment,
 	linkSetting,
 	registerSettingsCommands,
 	resetButton,
@@ -66,6 +68,33 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 			Settings.DEFAULT,
 			Settings.fix,
 		)
+		ui.newSetting(containerEl, setting => {
+			const { settingEl } = setting
+			setting
+				.setName(i18n.t("settings.expose-internal-modules"))
+				.setDesc(createDocumentFragment(settingEl.ownerDocument, frag => {
+					createChildElement(frag, "span", ele => {
+						ele.innerHTML = i18n
+							.t("settings.expose-internal-modules-description-HTML")
+					})
+				}))
+				.addToggle(linkSetting(
+					() => settings.value.exposeInternalModules,
+					async value => settings.mutate(settingsM => {
+						settingsM.exposeInternalModules = value
+					}),
+					() => { this.postMutate() },
+				))
+				.addExtraButton(resetButton(
+					i18n.t("asset:settings.expose-internal-modules-icon"),
+					i18n.t("settings.reset"),
+					async () => settings.mutate(settingsM => {
+						settingsM.exposeInternalModules =
+							Settings.DEFAULT.exposeInternalModules
+					}),
+					() => { this.postMutate() },
+				))
+		})
 		this.newSectionWidget(() => i18n.t("settings.interface"))
 		ui.newSetting(containerEl, setting => {
 			setting

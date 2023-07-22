@@ -21,6 +21,8 @@
 			"donate": "$t(generic.documentations.donate, capitalize)",
 			"readme": "$t(generic.documentations.readme, capitalize)"
 		},
+		"expose-internal-modules": "Expose internal modules",
+		"expose-internal-modules-description-HTML": "<code>obsidian</code>, <code>@codemirror/*</code>, <code>@lezer/*</code>…",
 		"interface": "Interface",
 		"open-changelog-on-update": "$t(generic.open, capitalize) $t(generic.documentations.changelog) on update"
 	}
