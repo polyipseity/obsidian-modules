@@ -13,7 +13,7 @@
 		},
 		"donate": "donate"
 	},
-	"name": "PLACEHOLDER",
+	"name": "Modules",
 	"settings": {
 		"documentation": "$t(generic.documentation, capitalize)",
 		"documentations": {

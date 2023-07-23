@@ -10,7 +10,7 @@ import sveltePreprocess from "svelte-preprocess"
 import { writeFile } from "node:fs/promises"
 
 const ARGV_PRODUCTION = 2,
-	COMMENT = "// repository: https://github.com/polyipseity/obsidian-plugin-template",
+	COMMENT = "// repository: https://github.com/polyipseity/obsidian-modules",
 	DEV = argv[ARGV_PRODUCTION] === "dev",
 	PLUGIN_ID0 = await PLUGIN_ID,
 	BUILD = await context({

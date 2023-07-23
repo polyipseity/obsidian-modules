@@ -13,7 +13,7 @@
 		},
 		"donate": "贊助"
 	},
-	"name": "PLACEHOLDER",
+	"name": "模塊",
 	"settings": {
 		"documentation": "$t(generic.documentation)",
 		"documentations": {

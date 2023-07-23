@@ -13,7 +13,7 @@
 		},
 		"donate": "捐赠"
 	},
-	"name": "PLACEHOLDER",
+	"name": "模块",
 	"settings": {
 		"documentation": "$t(generic.documentation)",
 		"documentations": {

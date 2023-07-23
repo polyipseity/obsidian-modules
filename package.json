@@ -1,7 +1,7 @@
 {
 	"author": "polyipseity",
 	"bugs": {
-		"url": "https://github.com/polyipseity/PLACEHOLDER"
+		"url": "https://github.com/polyipseity/obsidian-modules"
 	},
 	"dependencies": {
 		"@polyipseity/obsidian-plugin-library": "^1.13.2",
@@ -11,7 +11,7 @@
 		"semver": "^7.5.4",
 		"ts-essentials": "^9.3.2"
 	},
-	"description": "PLACEHOLDER",
+	"description": "Reuse JavaScript code using \"require\".",
 	"devDependencies": {
 		"@changesets/cli": "^2.26.2",
 		"@polyipseity/obsidian": "^1.2.8",
@@ -41,7 +41,7 @@
 		"typescript": "^5.1.6",
 		"typescript-svelte-plugin": "^0.3.29"
 	},
-	"displayName": "PLACEHOLDER",
+	"displayName": "Obsidian Modules",
 	"files": [
 		"main.js",
 		"manifest.json",
@@ -57,22 +57,25 @@
 			"url": "https://github.com/sponsors/polyipseity"
 		}
 	],
-	"homepage": "https://github.com/polyipseity/PLACEHOLDER#readme",
+	"homepage": "https://github.com/polyipseity/obsidian-modules#readme",
 	"keywords": [
-		"PLACEHOLDER",
+		"module",
+		"module-loader",
+		"module-system",
+		"modules",
 		"obsidian",
 		"obsidian-plugin",
 		"plugin"
 	],
 	"license": "MIT",
 	"main": "main.js",
-	"name": "PLACEHOLDER",
+	"name": "obsidian-modules",
 	"obsidian": {
 		"authorUrl": "https://github.com/polyipseity",
-		"id": "PLACEHOLDER",
+		"id": "modules",
 		"isDesktopOnly": false,
 		"minAppVersion": "1.2.8",
-		"name": "PLACEHOLDER"
+		"name": "Modules"
 	},
 	"overrides": {
 		"tsconfig-paths": "^4.0.0"
@@ -85,7 +88,7 @@
 	"private": true,
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/polyipseity/PLACEHOLDER.git"
+		"url": "git+https://github.com/polyipseity/obsidian-modules.git"
 	},
 	"scripts": {
 		"build": "npm run check && npm run build:force",
