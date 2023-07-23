@@ -5,8 +5,10 @@
 	},
 	"dependencies": {
 		"@polyipseity/obsidian-plugin-library": "^1.14.0",
+		"acorn": "^8.10.0",
 		"i18next": "^23.2.11",
 		"lodash-es": "^4.17.21",
+		"monkey-around": "^2.3.0",
 		"obsidian": "^1.2.8",
 		"semver": "^7.5.4",
 		"ts-essentials": "^9.3.2"

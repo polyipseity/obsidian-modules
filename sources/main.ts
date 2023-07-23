@@ -8,12 +8,14 @@ import {
 	createI18n,
 	semVerString,
 } from "@polyipseity/obsidian-plugin-library"
+import type { API } from "obsidian-modules"
 import { PLUGIN_UNLOAD_DELAY } from "./magic.js"
 import { PluginLocales } from "../assets/locales.js"
 import { Settings } from "./settings-data.js"
 import { isNil } from "lodash-es"
 import { loadDocumentations } from "./documentations.js"
 import { loadIcons } from "./icons.js"
+import { loadRequire } from "./require/require.js"
 import { loadSettings } from "./settings.js"
 
 export class ModulesPlugin
@@ -23,6 +25,10 @@ export class ModulesPlugin
 	public readonly language: LanguageManager
 	public readonly settings: SettingsManager<Settings>
 	public readonly statusBarHider = new StatusBarHider(this)
+
+	public readonly api: API = Object.freeze({
+		requires: new WeakMap(),
+	})
 
 	public constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest)
@@ -88,6 +94,7 @@ export class ModulesPlugin
 					Promise.resolve().then(() => {
 						loadSettings(this, loadDocumentations(this, isNil(loaded)))
 					}),
+					Promise.resolve().then(() => { loadRequire(this) }),
 				])
 			} catch (error) {
 				self.console.error(error)

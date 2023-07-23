@@ -10,12 +10,18 @@ importers:
       '@polyipseity/obsidian-plugin-library':
         specifier: ^1.14.0
         version: 1.14.0(@capacitor/core@5.2.0)(@codemirror/state@6.0.0)(@codemirror/view@6.0.0)(typescript@5.1.6)
+      acorn:
+        specifier: ^8.10.0
+        version: 8.10.0
       i18next:
         specifier: ^23.2.11
         version: 23.2.11
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
+      monkey-around:
+        specifier: ^2.3.0
+        version: 2.3.0
       obsidian:
         specifier: ^1.2.8
         version: 1.2.8(@codemirror/state@6.0.0)(@codemirror/view@6.0.0)
@@ -916,6 +922,12 @@ packages:
     dependencies:
       acorn: 8.9.0
     dev: true
+
+  /acorn@8.10.0:
+    resolution: {integrity: sha512-F0SAmZ8iUtS//m8DmCTA0jlh6TDKkHQyK6xc6V4KDTyZKA9dnvX9/3sRTVQrWm79glUAZbnmmNcdYwUIHWVybw==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+    dev: false
 
   /acorn@8.9.0:
     resolution: {integrity: sha512-jaVNAFBHNLXspO543WnNNPZFRtavh3skAkITqD0/2aeMkKZTN+254PyhwxFYrk3vQ1xfY+2wbesJMs/JC8/PwQ==}

@@ -30,7 +30,7 @@ This file is automatically opened on first install. You can reopen it in setting
 - Resolves relative paths, vault paths, Markdown links, and wikilinks.
 - Loads Markdown files as code.
 - Loads CommonJS (`module.exports`) and ES modules (`export`).
-- Supports circular dependencies.
+- Supports circular dependencies for CommonJS modules.
 
 ## Installation
 
