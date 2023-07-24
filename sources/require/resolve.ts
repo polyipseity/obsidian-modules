@@ -384,7 +384,7 @@ function parseMarkdownLink(
 			[codePoint("("), codePoint(")")],
 		)
 	if (read2 !== rest.length) { return null }
-	return [path, display]
+	return [self.decodeURI(path), display]
 }
 
 function parseWikilink(
