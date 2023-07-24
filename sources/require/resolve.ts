@@ -74,11 +74,17 @@ abstract class AbstractFileResolve
 		const { cache0 } = this,
 			id0 = this.resolvePath(id, context)
 		if (id0 === null) { return null }
-		const identity = cache0[id0]
+		let identity = cache0[id0]
 		if (identity) {
-			const [, code] = identity
-			if (!isUndefined(code)) {
-				return { code, cwd: getWD(id0), id: id0, identity }
+			identity = this.checkDependencies(identity, context)
+			const { content } = identity
+			if (!isUndefined(content)) {
+				return {
+					code: this.transpile(content, identity),
+					cwd: getWD(id0),
+					id: id0,
+					identity,
+				}
 			}
 		}
 		return null
@@ -94,11 +100,8 @@ abstract class AbstractFileResolve
 		let identity = cache0[id0]
 		try {
 			if (identity) {
-				if (![...context.dependencies.get(identity) ?? []]
-					.every(dep => AbstractFileResolve.globalCache.has(dep))) {
-					identity = this.recache(id0) ?? identity
-				}
-				const [file, content] = identity
+				identity = this.checkDependencies(identity, context)
+				const { file, content } = identity
 				return {
 					code: this.transpile(
 						content ?? await vault.cachedRead(file),
@@ -127,13 +130,13 @@ abstract class AbstractFileResolve
 		const { cache0, context: { app: { vault } } } = this,
 			{ name, path } = file
 		this.uncache(path)
-		const ret = Object.freeze([
+		const ret = {
 			file,
-			...Object.freeze([/\.js$/iu, /\.mjs$/iu, /\.js\.md$/iu, /\.mjs\.md$/iu]
+			...[/\.js$/iu, /\.mjs$/iu, /\.js\.md$/iu, /\.mjs\.md$/iu]
 				.some(regex => regex.exec(name))
-				? [await vault.cachedRead(file)]
-				: []),
-		])
+				? { content: await vault.cachedRead(file) }
+				: {},
+		}
 		AbstractFileResolve.globalCache.add(cache0[path] = ret)
 		return ret
 	}
@@ -144,7 +147,7 @@ abstract class AbstractFileResolve
 		const { cache0 } = this,
 			entry = this.uncache(path)
 		if (!entry) { return null }
-		const ret = Object.freeze([...entry])
+		const ret = { ...entry }
 		AbstractFileResolve.globalCache.add(cache0[path] = ret)
 		return ret
 	}
@@ -158,13 +161,24 @@ abstract class AbstractFileResolve
 		return entry
 	}
 
+	protected checkDependencies(
+		identity: AbstractFileResolve.CacheIdentity,
+		context: Context,
+	): AbstractFileResolve.CacheIdentity {
+		if (![...context.dependencies.get(identity) ?? []]
+			.every(dep => AbstractFileResolve.globalCache.has(dep))) {
+			return this.recache(identity.file.path) ?? identity
+		}
+		return identity
+	}
+
 	protected transpile(
 		content: string,
 		identity?: AbstractFileResolve.CacheIdentity,
 	): string {
 		const { transpiled, transpiles } = this
 		for (const trans of transpiles) {
-			const ret = trans.transpile(content, identity?.[0])
+			const ret = trans.transpile(content, identity?.file)
 			if (ret !== null) {
 				if (identity) {
 					let transed = transpiled.get(trans)
@@ -183,7 +197,10 @@ abstract class AbstractFileResolve
 	protected abstract resolvePath(id: string, context: Context): string | null
 }
 namespace AbstractFileResolve {
-	export type CacheIdentity = readonly [file: TFile, content?: string]
+	export interface CacheIdentity {
+		readonly file: TFile
+		readonly content?: string
+	}
 }
 
 export class CompositeResolve implements Resolve {
