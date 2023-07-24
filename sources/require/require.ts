@@ -194,10 +194,10 @@ function createRequire(
 			cwd: [],
 			dependencies: new WeakMap(),
 		},
-		async import(this: Require, id0: string, opts?: ImportOptions) {
-			const { context, resolve: resolve1 } = this,
+		async import(id0: string, opts?: ImportOptions) {
+			const { context, resolve: resolve1 } = ret,
 				[rd, cache] = resolve0(
-					this,
+					ret,
 					id0,
 					await resolve1.aresolve(id0, context),
 				),
@@ -387,7 +387,7 @@ function patchRequire(
 					self0.console.debug(error)
 					return req(...args)
 				}
-			}, proto, req)
+			}, req) as NodeRequire
 		},
 		toString: aroundIdentityFactory(),
 	})
