@@ -2,6 +2,7 @@ import {
 	type AnyObject,
 	Functions,
 	aroundIdentityFactory,
+	assignExact,
 	launderUnchecked,
 	patchWindows,
 	revealPrivate,
@@ -16,6 +17,7 @@ import {
 	getWD,
 } from "./resolve.js"
 import type {
+	Context,
 	ImportOptions,
 	ModuleCache,
 	Require,
@@ -119,10 +121,29 @@ function createRequire(
 			get,
 		})
 	}
+	function preload(
+		cleanup: Functions,
+		resolved: Resolved,
+		context: Context,
+	): void {
+		const { cwd, identity } = resolved,
+			{ parent, dependencies } = context
+		if (parent) {
+			const dep = dependencies.get(parent) ?? new Set()
+			dependencies.set(parent, dep)
+			dep.add(identity)
+		}
+		cleanup.push(() => { assignExact(context, "parent", parent) })
+		context.parent = identity
+		if (!isUndefined(cwd)) {
+			context.cwd.push(cwd)
+			cleanup.push(() => { context.cwd.pop() })
+		}
+	}
 	const ret: Require = Object.assign((id0: string) => {
 		const { context, resolve: resolve1 } = ret,
 			[rd, cache] = resolve0(ret, id0, resolve1.resolve(id0, context)),
-			{ code, cwd, value } = rd
+			{ code, value } = rd
 		if ("commonJS" in cache) { return cache.commonJS }
 		if ("value" in rd) {
 			cache0(cache, "commonJS", constant(value))
@@ -145,10 +166,7 @@ function createRequire(
 				ranges: false,
 				sourceType: "script",
 			})
-			if (!isUndefined(cwd)) {
-				context.cwd.push(cwd)
-				cleanup.push(() => { context.cwd.pop() })
-			}
+			preload(cleanup, rd, context)
 			new self0.Function("module", "exports", `"use strict"; ${code}`)(
 				module,
 				module.exports,
@@ -162,7 +180,10 @@ function createRequire(
 		}
 	}, {
 		cache: new WeakMap(),
-		context: { cwd: [] },
+		context: {
+			cwd: [],
+			dependencies: new WeakMap(),
+		},
 		async import(this: Require, id0: string, opts?: ImportOptions) {
 			const { context, resolve: resolve1 } = this,
 				[rd, cache] = resolve0(
@@ -170,7 +191,7 @@ function createRequire(
 					id0,
 					await resolve1.aresolve(id0, context),
 				),
-				{ code, cwd, id, value } = rd,
+				{ code, id, value } = rd,
 				key = `esModule${opts?.commonJSInterop ?? true
 					? "WithCommonJS"
 					: ""}` as const
@@ -182,10 +203,7 @@ function createRequire(
 			const cleanup = new Functions({ async: false, settled: true })
 			cache0(cache, key, () => { throw new Error(id) })
 			try {
-				if (!isUndefined(cwd)) {
-					context.cwd.push(cwd)
-					cleanup.push(() => { context.cwd.pop() })
-				}
+				preload(cleanup, rd, context)
 				const url = URL.createObjectURL(new Blob(
 					[
 						key === "esModuleWithCommonJS"

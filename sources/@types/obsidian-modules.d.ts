@@ -155,5 +155,16 @@ declare module "obsidian-modules" {
 		 * Current working directory.
 		 */
 		readonly cwd: string[]
+
+		/**
+		 * Identity of the parent module being loaded.
+		 */
+		parent?: Resolved["identity"]
+
+		/**
+		 * Module dependencies.
+		 */
+		readonly dependencies: WeakMap<Resolved["identity"
+		], Set<Resolved["identity"]>>
 	}
 }

@@ -20,48 +20,38 @@ abstract class AbstractResolve implements Resolve {
 abstract class AbstractFileResolve
 	extends AbstractResolve
 	implements Resolve {
-	protected readonly cache: Record<string, AbstractFileResolve
+	public static readonly globalCache = new WeakSet()
+	protected readonly cache0: Record<string, AbstractFileResolve
 		.CacheIdentity> = {}
 
 	public constructor(
 		context: ModulesPlugin,
 	) {
 		super(context)
-		const { cache, context: { app: { vault } } } = this,
-			cache0 = async (
-				file: TFile,
-			): Promise<AbstractFileResolve.CacheIdentity> =>
-				[
-					file.extension === "js"
-						? await vault.cachedRead(file)
-						: file,
-				]
+		const { context: { app: { vault } } } = this
 		context.registerEvent(vault.on("create", async file => {
 			if (!(file instanceof TFile)) { return }
-			cache[file.path] = await cache0(file)
+			await this.cache(file)
 		}))
 		context.registerEvent(vault.on("rename", async (file, oldPath) => {
-			Reflect.deleteProperty(cache, oldPath)
+			this.uncache(oldPath)
 			if (!(file instanceof TFile)) { return }
-			// eslint-disable-next-line require-atomic-updates
-			cache[file.path] = await cache0(file)
+			await this.cache(file)
 		}))
 		context.registerEvent(vault.on("modify", async file => {
 			if (!(file instanceof TFile)) { return }
-			cache[file.path] = await cache0(file)
+			await this.cache(file)
 		}))
 		context.registerEvent(vault.on("delete", file => {
-			Reflect.deleteProperty(cache, file.path)
+			this.uncache(file.path)
 		}))
 		Promise.all(vault.getFiles()
-			.map(async file => {
-				cache[file.path] = await cache0(file)
-			}))
+			.map(async file => this.cache(file)))
 			.catch(error => { self.console.error(error) })
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
-		const { cache } = this,
+		const { cache0: cache } = this,
 			id0 = this.resolvePath(id, context)
 		if (id0 === null) { return null }
 		const identity = cache[id0]
@@ -78,12 +68,16 @@ abstract class AbstractFileResolve
 		id: string,
 		context: Context,
 	): Promise<Resolved | null> {
-		const { cache, context: { app: { vault, vault: { adapter } } } } = this,
+		const { cache0, context: { app: { vault, vault: { adapter } } } } = this,
 			id0 = this.resolvePath(id, context)
 		if (id0 === null) { return null }
-		const identity = cache[id0]
+		let identity = cache0[id0]
 		try {
 			if (identity) {
+				if (![...context.dependencies.get(identity) ?? []]
+					.every(dep => AbstractFileResolve.globalCache.has(dep))) {
+					identity = this.recache(id0) ?? identity
+				}
 				const [accessor] = identity,
 					code = typeof accessor === "string"
 						? accessor
@@ -100,6 +94,41 @@ abstract class AbstractFileResolve
 			self.console.debug(error)
 			return null
 		}
+	}
+
+	protected async cache(
+		file: TFile,
+	): Promise<AbstractFileResolve.CacheIdentity> {
+		const { cache0, context: { app: { vault } } } = this,
+			{ extension, path } = file
+		this.uncache(path)
+		const ret = Object.freeze([
+			extension === "js"
+				? await vault.cachedRead(file)
+				: file,
+		])
+		AbstractFileResolve.globalCache.add(cache0[path] = ret)
+		return ret
+	}
+
+	protected recache(
+		path: string,
+	): AbstractFileResolve.CacheIdentity | null {
+		const { cache0 } = this,
+			entry = this.uncache(path)
+		if (!entry) { return null }
+		const ret = Object.freeze([...entry])
+		AbstractFileResolve.globalCache.add(cache0[path] = ret)
+		return ret
+	}
+
+	protected uncache(path: string): AbstractFileResolve.CacheIdentity | null {
+		const { cache0 } = this,
+			{ [path]: entry } = cache0
+		if (!entry) { return null }
+		AbstractFileResolve.globalCache.delete(entry)
+		Reflect.deleteProperty(cache0, path)
+		return entry
 	}
 
 	protected abstract resolvePath(id: string, context: Context): string | null
