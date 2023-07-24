@@ -53,6 +53,45 @@ This file is automatically opened on first install. You can reopen it in setting
 ## Usage
 
 - Enable the plugin.
+- Consumer
+- To import a module:
+```JavaScript
+// Recommended:
+await self.require.import("obsidian") // builtin modules such as the Obsidian API
+await self.require.import("vault/path/to/a module.md") // vault path
+await self.require.import("../relative/path/to/a module.js") // relative path
+await self.require.import("[omitted or whatever](markdown/link/to/a%20module.js.md)") // Markdown link
+await self.require.import("[[wikilink/to/a module|ommited or whatever]]") // wikilink
+
+// If `await` is not supported:
+self.require("obsidian")
+self.require("vault/path/to/a module.md")
+self.require("../relative/path/to/a module.js")
+self.require("[ommited or whatever](markdown/link/to/a%20module.js.md)")
+self.require("[[wikilink/to/a module|omitted or whatever]]")
+```
+- To use entities in a module:
+```JavaScript
+const { eat, pi } = await self.require.import("[[module]]")
+eat(2 * pi)
+// OR
+const mod = await self.require.import("[[module]]")
+mod.eat(2 * mod.pi)
+```
+- To create a module, create a JavaScript file or a Markdown file with JavaScript code blocks.
+- Module exports can be CommonJS-style or ES module-style:
+```JavaScript
+// ES module-style, supported by `self.require.import`.
+export function fun() {}
+export const var = "string"
+export default 42 // The default export has the name `default`.
+
+// CommonJS-style, supported by both `self.require` and `self.require.import`.
+module.exports.fun = function() {}
+module.exports.var = "string"
+module.exports.default = 42
+exports.abbreviatedForm = {}
+```
 
 ## Contributing
 
