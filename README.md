@@ -101,7 +101,11 @@ Contributions are welcome!
 
 The todos here, ordered alphabetically, are things planned for the plugin. There are no guarantees that they will be completed. However, we are likely to accept contributions for them.
 
-- (none)
+- Configure whether to resolve internal modules.
+- Configure `require` global name.
+- Configure preloaded files.
+- Configure accepted code block languages.
+- Autocomplete with JSDoc.
 
 ### Translating
 
