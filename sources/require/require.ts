@@ -123,12 +123,8 @@ function createRequire(
 			get,
 		})
 	}
-	function preload(
-		cleanup: Functions,
-		resolved: Resolved,
-		context: Context,
-	): void {
-		const { cwd, identity } = resolved,
+	function depends(resolved: Resolved, context: Context): void {
+		const { identity } = resolved,
 			{ parent, dependencies } = context
 		if (parent) {
 			let dep = dependencies.get(parent)
@@ -138,6 +134,14 @@ function createRequire(
 			}
 			dep.add(identity)
 		}
+	}
+	function preload(
+		cleanup: Functions,
+		resolved: Resolved,
+		context: Context,
+	): void {
+		const { cwd, identity } = resolved,
+			{ parent } = context
 		cleanup.push(() => { assignExact(context, "parent", parent) })
 		context.parent = identity
 		if (!isUndefined(cwd)) {
@@ -149,6 +153,7 @@ function createRequire(
 		const { context, resolve: resolve1 } = ret,
 			[rd, cache] = resolve0(ret, id0, resolve1.resolve(id0, context)),
 			{ code, value } = rd
+		depends(rd, context)
 		if ("commonJS" in cache) { return cache.commonJS }
 		if ("value" in rd) {
 			cache0(cache, "commonJS", constant(value))
@@ -200,6 +205,7 @@ function createRequire(
 				key = `esModule${opts?.commonJSInterop ?? true
 					? "WithCommonJS"
 					: ""}` as const
+			depends(rd, context)
 			if (key in cache) { return cache[key] }
 			if ("value" in rd) {
 				cache0(cache, key, constant(value))
