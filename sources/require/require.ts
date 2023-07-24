@@ -387,7 +387,7 @@ function patchRequire(
 					self0.console.debug(error)
 					return req(...args)
 				}
-			}, req) as NodeRequire
+			}, req) as unknown as NodeRequire
 		},
 		toString: aroundIdentityFactory(),
 	})
