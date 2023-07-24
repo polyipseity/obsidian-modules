@@ -1,1 +1,20 @@
 # obsidian-modules
+
+## 1.0.0
+
+### Major Changes
+
+- 879a4d6: Implement basic functionalities: vault path resolving, caching, module loading, `require` patching, and an API.
+
+### Minor Changes
+
+- 5fbc6b5: Implement resolving relative paths.
+- ce395a7: Add `Resolve#aresolve` to support resolving files on-demand, making `require.import` support loading any files.
+- c9d0d61: Implement dependency tracking so that modules are transitively reloaded.
+- b37eb32: Implement resolving Markdown links and wikilinks.
+- 7120162: Implement Markdown-to-JavaScript transpiler.
+
+### Patch Changes
+
+- 42f93f2: Remove arbitrary restrictions for resolving vault paths and relative paths.
+- ed74c49: Write usage guide.
