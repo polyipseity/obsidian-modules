@@ -1,5 +1,12 @@
 # obsidian-modules
 
+## 1.0.1
+
+### Patch Changes
+
+- ab7c316: Fix `require` not working at all.
+- 3f0f57b: Fix dependency tracking, especially circular ones.
+
 ## 1.0.0
 
 ### Major Changes
