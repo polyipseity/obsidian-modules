@@ -4,6 +4,8 @@
 		"url": "https://github.com/polyipseity/obsidian-modules"
 	},
 	"dependencies": {
+		"@codemirror/state": "^6.2.1",
+		"@codemirror/view": "^6.15.3",
 		"@polyipseity/obsidian-plugin-library": "^1.14.0",
 		"acorn": "^8.10.0",
 		"i18next": "^23.2.11",

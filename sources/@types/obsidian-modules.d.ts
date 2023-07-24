@@ -47,6 +47,11 @@ declare module "obsidian-modules" {
 		 * Cache for loaded modules.
 		 */
 		readonly cache: WeakMap<object, ModuleCache>
+
+		/**
+		 * Context for loading modules.
+		 */
+		readonly context: Context
 	}
 
 	/**
@@ -92,17 +97,22 @@ declare module "obsidian-modules" {
 		 * Resolves a module specifier.
 		 *
 		 * @param id module specifier
+		 * @param context resolve context
 		 * @returns the resolved module data or `null` if not found
 		 */
-		readonly resolve: (id: string) => Resolved | null
+		readonly resolve: (id: string, context: Context) => Resolved | null
 
 		/**
 		 * Resolves a module specifier, supporting async resources.
 		 *
 		 * @param id module specifier
+		 * @param context resolve context
 		 * @returns the resolved module data or `null` if not found
 		 */
-		readonly aresolve: (id: string) => PromiseLike<Resolved | null>
+		readonly aresolve: (
+			id: string,
+			context: Context,
+		) => PromiseLike<Resolved | null>
 	}
 
 	/**
@@ -129,5 +139,21 @@ declare module "obsidian-modules" {
 		 * Exports of the resolved module.
 		 */
 		readonly value?: unknown
+
+		/**
+		 * Working directory of the resolved module.
+		 */
+		readonly cwd?: string
+	}
+
+	/**
+	 * Context for loading modules.
+	 */
+	interface Context {
+
+		/**
+		 * Current working directory.
+		 */
+		readonly cwd: string[]
 	}
 }

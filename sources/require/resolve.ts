@@ -1,4 +1,4 @@
-import type { Resolve, Resolved } from "obsidian-modules"
+import type { Context, Resolve, Resolved } from "obsidian-modules"
 import { TFile, normalizePath } from "obsidian"
 import {
 	dynamicRequire,
@@ -10,8 +10,11 @@ abstract class AbstractResolve implements Resolve {
 	public constructor(
 		protected readonly context: ModulesPlugin,
 	) { }
-	public abstract resolve(id: string): Resolved | null
-	public abstract aresolve(id: string): PromiseLike<Resolved | null>
+	public abstract resolve(id: string, context: Context): Resolved | null
+	public abstract aresolve(
+		id: string,
+		context: Context,
+	): PromiseLike<Resolved | null>
 }
 
 abstract class AbstractFileResolve
@@ -57,23 +60,26 @@ abstract class AbstractFileResolve
 			.catch(error => { self.console.error(error) })
 	}
 
-	public override resolve(id: string): Resolved | null {
+	public override resolve(id: string, context: Context): Resolved | null {
 		const { cache } = this,
-			id0 = this.resolvePath(id)
+			id0 = this.resolvePath(id, context)
 		if (id0 === null) { return null }
 		const identity = cache[id0]
 		if (identity) {
 			const [code] = identity
 			if (typeof code === "string") {
-				return { code, id: id0, identity }
+				return { code, cwd: getWD(id0), id: id0, identity }
 			}
 		}
 		return null
 	}
 
-	public override async aresolve(id: string): Promise<Resolved | null> {
+	public override async aresolve(
+		id: string,
+		context: Context,
+	): Promise<Resolved | null> {
 		const { cache, context: { app: { vault, vault: { adapter } } } } = this,
-			id0 = this.resolvePath(id)
+			id0 = this.resolvePath(id, context)
 		if (id0 === null) { return null }
 		const identity = cache[id0]
 		try {
@@ -82,16 +88,21 @@ abstract class AbstractFileResolve
 					code = typeof accessor === "string"
 						? accessor
 						: await vault.cachedRead(accessor)
-				return { code, id: id0, identity }
+				return { code, cwd: getWD(id0), id: id0, identity }
 			}
-			return { code: await adapter.read(id0), id: id0, identity: [] }
+			return {
+				code: await adapter.read(id0),
+				cwd: getWD(id0),
+				id: id0,
+				identity: [],
+			}
 		} catch (error) {
 			self.console.debug(error)
 			return null
 		}
 	}
 
-	protected abstract resolvePath(id: string): string | null
+	protected abstract resolvePath(id: string, context: Context): string | null
 }
 namespace AbstractFileResolve {
 	export type CacheIdentity = readonly [code: TFile | string]
@@ -106,18 +117,22 @@ export class CompositeResolve implements Resolve {
 		this.delegates = Object.freeze([...delegates])
 	}
 
-	public resolve(id: string): Resolved | null {
+	public resolve(
+		...args: Parameters<Resolve["resolve"]>
+	): ReturnType<Resolve["resolve"]> {
 		for (const de of this.delegates) {
-			const ret = de.resolve(id)
+			const ret = de.resolve(...args)
 			if (ret) { return ret }
 		}
 		return null
 	}
 
-	public async aresolve(id: string): Promise<Resolved | null> {
+	public async aresolve(
+		...args: Parameters<Resolve["aresolve"]>
+	): Promise<Awaited<ReturnType<Resolve["aresolve"]>>> {
 		for (const de of this.delegates) {
 			// eslint-disable-next-line no-await-in-loop
-			const ret = await de.aresolve(id)
+			const ret = await de.aresolve(...args)
 			if (ret) { return ret }
 		}
 		return null
@@ -129,7 +144,7 @@ export class InternalModulesResolve
 	implements Resolve {
 	protected readonly identities: Record<string, object | undefined> = {}
 
-	public override resolve(id: string): Resolved | null {
+	public override resolve(id: string, _1: Context): Resolved | null {
 		let value = null
 		try {
 			value = dynamicRequireSync({}, id)
@@ -140,7 +155,10 @@ export class InternalModulesResolve
 		return this.resolve0(id, value)
 	}
 
-	public override async aresolve(id: string): Promise<Resolved | null> {
+	public override async aresolve(
+		id: string,
+		_1: Context,
+	): Promise<Resolved | null> {
 		let value = null
 		try {
 			value = await dynamicRequire({}, id)
@@ -165,7 +183,7 @@ export class InternalModulesResolve
 export class VaultPathResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolvePath(id: string): string | null {
+	public override resolvePath(id: string, _1: Context): string | null {
 		return parsePath(id)
 	}
 }
@@ -173,15 +191,15 @@ export class VaultPathResolve
 export class RelativePathResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolvePath(id: string): string | null {
-		return parsePath(id)
+	public override resolvePath(id: string, context: Context): string | null {
+		return parsePath(`${context.cwd.at(-1) ?? ""}/${id}`)
 	}
 }
 
 export class MarkdownLinkResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolvePath(id: string): string | null {
+	public override resolvePath(id: string, _1: Context): string | null {
 		return id
 	}
 }
@@ -189,7 +207,7 @@ export class MarkdownLinkResolve
 export class WikilinkResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolvePath(id: string): string | null {
+	public override resolvePath(id: string, _1: Context): string | null {
 		return id
 	}
 }
@@ -209,4 +227,10 @@ function parsePath(path: string): string {
 		}
 		return accu
 	}, []).join("/")
+}
+
+export function getWD(path: string): string {
+	return path.split("/")
+		.slice(0, -1)
+		.join("/")
 }

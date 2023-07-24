@@ -1,8 +1,10 @@
 import {
 	type AnyObject,
+	Functions,
 	aroundIdentityFactory,
 	launderUnchecked,
 	patchWindows,
+	revealPrivate,
 } from "@polyipseity/obsidian-plugin-library"
 import {
 	CompositeResolve,
@@ -11,6 +13,7 @@ import {
 	RelativePathResolve,
 	VaultPathResolve,
 	WikilinkResolve,
+	getWD,
 } from "./resolve.js"
 import type {
 	ImportOptions,
@@ -19,8 +22,15 @@ import type {
 	Resolve,
 	Resolved,
 } from "obsidian-modules"
-import { constant, isObject } from "lodash-es"
+import {
+	type MarkdownFileInfo,
+	MarkdownPreviewRenderer,
+	editorInfoField,
+} from "obsidian"
+import { constant, isObject, isUndefined } from "lodash-es"
+import { EditorView } from "@codemirror/view"
 import type { ModulesPlugin } from "../main.js"
+import type { StateField } from "@codemirror/state"
 import { around } from "monkey-around"
 import { parse } from "acorn"
 
@@ -35,6 +45,52 @@ export function loadRequire(context: ModulesPlugin): void {
 		])
 	context.register(patchWindows(workspace, self0 =>
 		patchRequire(context, self0, resolve)))
+	context.register(around(EditorView.prototype, {
+		update(proto) {
+			return function fn(
+				this: typeof EditorView.prototype,
+				...args: Parameters<typeof proto>
+			): ReturnType<typeof proto> {
+				const { api: { requires } } = context,
+					req = requires.get(self),
+					path = this.state.field(
+						// Typing bug
+						editorInfoField as StateField<MarkdownFileInfo>,
+						false,
+					)?.file?.path
+				if (!isUndefined(path)) { req?.context.cwd.push(getWD(path)) }
+				try {
+					proto.apply(this, args)
+				} finally {
+					if (!isUndefined(path)) {
+						// Runs after all microtasks are done
+						self.setTimeout(() => { req?.context.cwd.pop() }, 0)
+					}
+				}
+			}
+		},
+	}))
+	revealPrivate(context, [MarkdownPreviewRenderer.prototype], rend => {
+		context.register(around(rend, {
+			onRender(proto) {
+				return function fn(
+					this: typeof rend,
+					...args: Parameters<typeof proto>
+				): ReturnType<typeof proto> {
+					const { api: { requires } } = context,
+						req = requires.get(self),
+						{ path } = this.owner.file
+					req?.context.cwd.push(getWD(path))
+					try {
+						proto.apply(this, args)
+					} finally {
+						// Runs after all microtasks are done
+						self.setTimeout(() => { req?.context.cwd.pop() }, 0)
+					}
+				}
+			},
+		}))
+	}, () => { })
 }
 
 function createRequire(
@@ -63,15 +119,17 @@ function createRequire(
 			get,
 		})
 	}
-	const ret = Object.assign((id0: string) => {
-		const [rd, cache] = resolve0(ret, id0, ret.resolve.resolve(id0)),
-			{ code, value } = rd
+	const ret: Require = Object.assign((id0: string) => {
+		const { context, resolve: resolve1 } = ret,
+			[rd, cache] = resolve0(ret, id0, resolve1.resolve(id0, context)),
+			{ code, cwd, value } = rd
 		if ("commonJS" in cache) { return cache.commonJS }
 		if ("value" in rd) {
 			cache0(cache, "commonJS", constant(value))
 			return value
 		}
-		const module = { exports: {} }
+		const module = { exports: {} },
+			cleanup = new Functions({ async: false, settled: true })
 		cache0(cache, "commonJS", () => module.exports)
 		try {
 			parse(code, {
@@ -87,6 +145,10 @@ function createRequire(
 				ranges: false,
 				sourceType: "script",
 			})
+			if (!isUndefined(cwd)) {
+				context.cwd.push(cwd)
+				cleanup.push(() => { context.cwd.pop() })
+			}
 			new self0.Function("module", "exports", `"use strict"; ${code}`)(
 				module,
 				module.exports,
@@ -95,13 +157,20 @@ function createRequire(
 		} catch (error) {
 			cache0(cache, "commonJS", () => { throw error })
 			throw error
+		} finally {
+			cleanup.call()
 		}
 	}, {
 		cache: new WeakMap(),
+		context: { cwd: [] },
 		async import(this: Require, id0: string, opts?: ImportOptions) {
-			const
-				[rd, cache] = resolve0(this, id0, await this.resolve.aresolve(id0)),
-				{ code, id, value } = rd,
+			const { context, resolve: resolve1 } = this,
+				[rd, cache] = resolve0(
+					this,
+					id0,
+					await resolve1.aresolve(id0, context),
+				),
+				{ code, cwd, id, value } = rd,
 				key = `esModule${opts?.commonJSInterop ?? true
 					? "WithCommonJS"
 					: ""}` as const
@@ -110,16 +179,26 @@ function createRequire(
 				cache0(cache, key, constant(value))
 				return value
 			}
+			const cleanup = new Functions({ async: false, settled: true })
 			cache0(cache, key, () => { throw new Error(id) })
-			const url = URL.createObjectURL(new Blob(
-				[
-					`${key === "esModuleWithCommonJS"
-						? "export let module = { exports: {} }; let { exports } = module; "
-						: ""}${code}`,
-				],
-				{ type: "text/javascript" },
-			))
 			try {
+				if (!isUndefined(cwd)) {
+					context.cwd.push(cwd)
+					cleanup.push(() => { context.cwd.pop() })
+				}
+				const url = URL.createObjectURL(new Blob(
+					[
+						key === "esModuleWithCommonJS"
+							? [
+								"export let module = { exports: {} }",
+								"let { exports } = module",
+								code,
+							].join(";")
+							: code,
+					],
+					{ type: "text/javascript" },
+				))
+				cleanup.push(() => { URL.revokeObjectURL(url) })
 				let ret2 = await import(url) as object
 				if (key === "esModuleWithCommonJS") {
 					const mod = ret2,
@@ -251,7 +330,7 @@ function createRequire(
 				cache0(cache, key, () => { throw error })
 				throw error
 			} finally {
-				URL.revokeObjectURL(url)
+				cleanup.call()
 			}
 		},
 		resolve,
