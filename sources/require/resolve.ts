@@ -7,6 +7,7 @@ import {
 import type { Context, Resolve, Resolved } from "obsidian-modules"
 import { TFile, getLinkpath, normalizePath } from "obsidian"
 import type { ModulesPlugin } from "../main.js"
+import type { Transpile } from "./transpile.js"
 import { isUndefined } from "lodash-es"
 
 abstract class AbstractResolve implements Resolve {
@@ -24,14 +25,21 @@ abstract class AbstractFileResolve
 	extends AbstractResolve
 	implements Resolve {
 	public static readonly globalCache = new WeakSet()
+	protected readonly transpiles
+
 	protected readonly cache0: Record<string, AbstractFileResolve
 		.CacheIdentity> = {}
 
+	protected readonly transpiled =
+		new WeakMap<Transpile, WeakSet<AbstractFileResolve.CacheIdentity>>()
+
 	public constructor(
 		context: ModulesPlugin,
+		transpiles: readonly Transpile[],
 	) {
 		super(context)
-		const { context: { app: { vault } } } = this
+		this.transpiles = Object.freeze([...transpiles])
+		const { cache0, context: { app: { vault } }, transpiled } = this
 		context.registerEvent(vault.on("create", async file => {
 			if (!(file instanceof TFile)) { return }
 			await this.cache(file)
@@ -51,13 +59,22 @@ abstract class AbstractFileResolve
 		Promise.all(vault.getFiles()
 			.map(async file => this.cache(file)))
 			.catch(error => { self.console.error(error) })
+		for (const trans of transpiles) {
+			trans.onInvalidate.listen(() => {
+				const transed = transpiled.get(trans)
+				if (!transed) { return }
+				for (const [path, id] of Object.entries(cache0)) {
+					if (transed.has(id)) { this.recache(path) }
+				}
+			})
+		}
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
-		const { cache0: cache } = this,
+		const { cache0 } = this,
 			id0 = this.resolvePath(id, context)
 		if (id0 === null) { return null }
-		const identity = cache[id0]
+		const identity = cache0[id0]
 		if (identity) {
 			const [code] = identity
 			if (typeof code === "string") {
@@ -81,17 +98,22 @@ abstract class AbstractFileResolve
 					.every(dep => AbstractFileResolve.globalCache.has(dep))) {
 					identity = this.recache(id0) ?? identity
 				}
-				const [accessor] = identity,
-					code = typeof accessor === "string"
-						? accessor
-						: await vault.cachedRead(accessor)
-				return { code, cwd: getWD(id0), id: id0, identity }
+				const [file, content] = identity
+				return {
+					code: this.transpile(
+						content ?? await vault.cachedRead(file),
+						identity,
+					),
+					cwd: getWD(id0),
+					id: id0,
+					identity,
+				}
 			}
 			return {
-				code: await adapter.read(id0),
+				code: this.transpile(await adapter.read(id0)),
 				cwd: getWD(id0),
 				id: id0,
-				identity: [],
+				identity: {},
 			}
 		} catch (error) {
 			self.console.debug(error)
@@ -106,9 +128,10 @@ abstract class AbstractFileResolve
 			{ extension, path } = file
 		this.uncache(path)
 		const ret = Object.freeze([
-			extension === "js"
-				? await vault.cachedRead(file)
-				: file,
+			file,
+			...Object.freeze(extension === "js"
+				? [await vault.cachedRead(file)]
+				: []),
 		])
 		AbstractFileResolve.globalCache.add(cache0[path] = ret)
 		return ret
@@ -134,10 +157,32 @@ abstract class AbstractFileResolve
 		return entry
 	}
 
+	protected transpile(
+		content: string,
+		identity?: AbstractFileResolve.CacheIdentity,
+	): string {
+		const { transpiled, transpiles } = this
+		for (const trans of transpiles) {
+			const ret = trans.transpile(content, identity?.[0])
+			if (ret !== null) {
+				if (identity) {
+					let transed = transpiled.get(trans)
+					if (!transed) {
+						transed = new WeakSet()
+						transpiled.set(trans, transed)
+					}
+					transed.add(identity)
+				}
+				return ret
+			}
+		}
+		return content
+	}
+
 	protected abstract resolvePath(id: string, context: Context): string | null
 }
 namespace AbstractFileResolve {
-	export type CacheIdentity = readonly [code: TFile | string]
+	export type CacheIdentity = readonly [file: TFile, content?: string]
 }
 
 export class CompositeResolve implements Resolve {

@@ -31,6 +31,7 @@ import {
 } from "obsidian"
 import { constant, isObject, isUndefined } from "lodash-es"
 import { EditorView } from "@codemirror/view"
+import { MarkdownTranspile } from "./transpile.js"
 import type { ModulesPlugin } from "../main.js"
 import type { StateField } from "@codemirror/state"
 import { around } from "monkey-around"
@@ -38,12 +39,13 @@ import { parse } from "acorn"
 
 export function loadRequire(context: ModulesPlugin): void {
 	const { app: { workspace } } = context,
+		transpiles = [new MarkdownTranspile()],
 		resolve = new CompositeResolve([
 			new InternalModulesResolve(context),
-			new RelativePathResolve(context),
-			new VaultPathResolve(context),
-			new WikilinkResolve(context),
-			new MarkdownLinkResolve(context),
+			new RelativePathResolve(context, transpiles),
+			new VaultPathResolve(context, transpiles),
+			new WikilinkResolve(context, transpiles),
+			new MarkdownLinkResolve(context, transpiles),
 		])
 	context.register(patchWindows(workspace, self0 =>
 		patchRequire(context, self0, resolve)))
