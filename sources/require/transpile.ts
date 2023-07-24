@@ -40,7 +40,9 @@ export class MarkdownTranspile
 				const [, delimiter2, language] = match
 				if (isUndefined(delimiter2) || isUndefined(language)) { continue }
 				delimiter = delimiter2
-				if (language === "js") { code = true }
+				if (["JavaScript", "JS"]
+					.map(lang => lang.toLowerCase())
+					.includes(language.toLowerCase())) { code = true }
 			}
 		}
 		return ret.join("\n")

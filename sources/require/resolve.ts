@@ -129,7 +129,9 @@ abstract class AbstractFileResolve
 		this.uncache(path)
 		const ret = Object.freeze([
 			file,
-			...Object.freeze(extension === "js"
+			...Object.freeze(["js", "mjs"]
+				.map(ext => ext.toLowerCase())
+				.includes(extension.toLowerCase())
 				? [await vault.cachedRead(file)]
 				: []),
 		])
