@@ -83,12 +83,12 @@ mod.eat(2 * mod.pi)
 ```JavaScript
 // ES module-style, supported by `self.require.import`.
 export function fun() {}
-export const var = "string"
+export const variable = "string"
 export default 42 // The default export has the name `default`.
 
 // CommonJS-style, supported by both `self.require` and `self.require.import`.
 module.exports.fun = function() {}
-module.exports.var = "string"
+module.exports.variable = "string"
 module.exports.default = 42
 exports.abbreviatedForm = {}
 ```
