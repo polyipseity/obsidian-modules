@@ -1,10 +1,13 @@
-import type { Context, Resolve, Resolved } from "obsidian-modules"
-import { TFile, normalizePath } from "obsidian"
 import {
+	type CodePoint,
+	codePoint,
 	dynamicRequire,
 	dynamicRequireSync,
 } from "@polyipseity/obsidian-plugin-library"
+import type { Context, Resolve, Resolved } from "obsidian-modules"
+import { TFile, getLinkpath, normalizePath } from "obsidian"
 import type { ModulesPlugin } from "../main.js"
+import { isUndefined } from "lodash-es"
 
 abstract class AbstractResolve implements Resolve {
 	public constructor(
@@ -228,16 +231,28 @@ export class RelativePathResolve
 export class MarkdownLinkResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolvePath(id: string, _1: Context): string | null {
-		return id
+	public override resolvePath(id: string, context: Context): string | null {
+		const { context: { app: { metadataCache } } } = this,
+			link = parseMarkdownLink(id)
+		if (!link) { return null }
+		return metadataCache.getFirstLinkpathDest(
+			getLinkpath(link[0]),
+			context.cwd.at(-1) ?? "",
+		)?.path ?? null
 	}
 }
 
 export class WikilinkResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolvePath(id: string, _1: Context): string | null {
-		return id
+	public override resolvePath(id: string, context: Context): string | null {
+		const { context: { app: { metadataCache } } } = this,
+			link = parseWikilink(id)
+		if (!link) { return null }
+		return metadataCache.getFirstLinkpathDest(
+			getLinkpath(link[0]),
+			context.cwd.at(-1) ?? "",
+		)?.path ?? null
 	}
 }
 
@@ -262,4 +277,75 @@ export function getWD(path: string): string {
 	return path.split("/")
 		.slice(0, -1)
 		.join("/")
+}
+
+function parseMarkdownLink(
+	link: string,
+): readonly [path: string, display: string] | null {
+	function parseComponent(
+		str: string,
+		escaper: CodePoint,
+		delimiters: readonly [CodePoint, CodePoint],
+	): readonly [ret: string, read: number] {
+		const [start, end] = delimiters
+		let ret = "",
+			read = 0,
+			level = 0,
+			escaping = false
+		for (const cp of str) {
+			read += cp.length
+			if (escaping) {
+				ret += cp
+				escaping = false
+				continue
+			}
+			switch (cp) {
+				case escaper:
+					escaping = true
+					break
+				case start:
+					if (level > 0) { ret += cp }
+					++level
+					break
+				case end:
+					--level
+					if (level > 0) { ret += cp }
+					break
+				default:
+					ret += cp
+					break
+			}
+			if (level <= 0) { break }
+		}
+		if (level > 0 ||
+			read <= String.fromCodePoint((str || "\x00").charCodeAt(0)).length) {
+			return ["", -1]
+		}
+		return [ret, read]
+	}
+	const link2 = link.startsWith("!") ? link.slice("!".length) : link,
+		[display, read] = parseComponent(
+			link2,
+			codePoint("\\"),
+			[codePoint("["), codePoint("]")],
+		)
+	if (read < 0) { return null }
+	const rest = link2.slice(read),
+		[path, read2] = parseComponent(
+			rest,
+			codePoint("\\"),
+			[codePoint("("), codePoint(")")],
+		)
+	if (read2 !== rest.length) { return null }
+	return [path, display]
+}
+
+function parseWikilink(
+	link: string,
+): readonly [path: string, display: string] | null {
+	const match = (/^!?\[\[(?<path>[^|]+)\|?(?<display>.*?)\]\]/u).exec(link)
+	if (!match) { return null }
+	const [str, path, display] = match
+	if (str !== link || isUndefined(path) || isUndefined(display)) { return null }
+	return [path, display || (str.includes("|") ? "" : path)]
 }
