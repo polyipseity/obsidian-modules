@@ -125,13 +125,12 @@ abstract class AbstractFileResolve
 		file: TFile,
 	): Promise<AbstractFileResolve.CacheIdentity> {
 		const { cache0, context: { app: { vault } } } = this,
-			{ extension, path } = file
+			{ name, path } = file
 		this.uncache(path)
 		const ret = Object.freeze([
 			file,
-			...Object.freeze(["js", "mjs"]
-				.map(ext => ext.toLowerCase())
-				.includes(extension.toLowerCase())
+			...Object.freeze([/\.js$/iu, /\.mjs$/iu, /\.js\.md$/iu, /\.mjs\.md$/iu]
+				.some(regex => regex.exec(name))
 				? [await vault.cachedRead(file)]
 				: []),
 		])
