@@ -129,8 +129,11 @@ function createRequire(
 		const { cwd, identity } = resolved,
 			{ parent, dependencies } = context
 		if (parent) {
-			const dep = dependencies.get(parent) ?? new Set()
-			dependencies.set(parent, dep)
+			let dep = dependencies.get(parent)
+			if (!dep) {
+				dep = new Set()
+				dependencies.set(parent, dep)
+			}
 			dep.add(identity)
 		}
 		cleanup.push(() => { assignExact(context, "parent", parent) })

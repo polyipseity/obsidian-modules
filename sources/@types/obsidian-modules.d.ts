@@ -46,7 +46,7 @@ declare module "obsidian-modules" {
 		/**
 		 * Cache for loaded modules.
 		 */
-		readonly cache: WeakMap<object, ModuleCache>
+		readonly cache: WeakMap<Resolved["identity"], ModuleCache>
 
 		/**
 		 * Context for loading modules.
