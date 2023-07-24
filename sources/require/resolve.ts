@@ -76,8 +76,8 @@ abstract class AbstractFileResolve
 		if (id0 === null) { return null }
 		const identity = cache0[id0]
 		if (identity) {
-			const [code] = identity
-			if (typeof code === "string") {
+			const [, code] = identity
+			if (!isUndefined(code)) {
 				return { code, cwd: getWD(id0), id: id0, identity }
 			}
 		}
