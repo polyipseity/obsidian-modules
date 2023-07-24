@@ -166,7 +166,6 @@ export class VaultPathResolve
 	extends AbstractFileResolve
 	implements Resolve {
 	public override resolvePath(id: string): string | null {
-		if (!(/^[/\\]/u).exec(id)) { return null }
 		return parsePath(id)
 	}
 }
@@ -175,7 +174,6 @@ export class RelativePathResolve
 	extends AbstractFileResolve
 	implements Resolve {
 	public override resolvePath(id: string): string | null {
-		if (!(/^\.{1,2}[/\\]/u).exec(id)) { return null }
 		return parsePath(id)
 	}
 }
