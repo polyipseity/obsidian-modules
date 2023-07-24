@@ -44,13 +44,13 @@ function createRequire(
 	function resolve0(
 		self1: Require,
 		id: string,
+		resolved: Resolved | null,
 	): readonly [Resolved, ModuleCache] {
-		const rd = self1.resolve.resolve(id)
-		if (!rd) { throw new Error(id) }
-		const { identity } = rd
+		if (!resolved) { throw new Error(id) }
+		const { identity } = resolved
 		let cache = self1.cache.get(identity)
 		if (!cache) { self1.cache.set(identity, cache = {}) }
-		return [rd, cache]
+		return [resolved, cache]
 	}
 	function cache0<T>(
 		cache: ModuleCache,
@@ -64,7 +64,7 @@ function createRequire(
 		})
 	}
 	const ret = Object.assign((id0: string) => {
-		const [rd, cache] = resolve0(ret, id0),
+		const [rd, cache] = resolve0(ret, id0, ret.resolve.resolve(id0)),
 			{ code, value } = rd
 		if ("commonJS" in cache) { return cache.commonJS }
 		if ("value" in rd) {
@@ -99,7 +99,8 @@ function createRequire(
 	}, {
 		cache: new WeakMap(),
 		async import(this: Require, id0: string, opts?: ImportOptions) {
-			const [rd, cache] = resolve0(this, id0),
+			const
+				[rd, cache] = resolve0(this, id0, await this.resolve.aresolve(id0)),
 				{ code, id, value } = rd,
 				key = `esModule${opts?.commonJSInterop ?? true
 					? "WithCommonJS"

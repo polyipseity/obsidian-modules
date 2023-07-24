@@ -1,13 +1,17 @@
 import type { Resolve, Resolved } from "obsidian-modules"
-import { type TAbstractFile, TFile, normalizePath } from "obsidian"
+import { TFile, normalizePath } from "obsidian"
+import {
+	dynamicRequire,
+	dynamicRequireSync,
+} from "@polyipseity/obsidian-plugin-library"
 import type { ModulesPlugin } from "../main.js"
-import { dynamicRequireSync } from "@polyipseity/obsidian-plugin-library"
 
 abstract class AbstractResolve implements Resolve {
 	public constructor(
 		protected readonly context: ModulesPlugin,
 	) { }
 	public abstract resolve(id: string): Resolved | null
+	public abstract aresolve(id: string): PromiseLike<Resolved | null>
 }
 
 abstract class AbstractFileResolve
@@ -21,51 +25,76 @@ abstract class AbstractFileResolve
 	) {
 		super(context)
 		const { cache, context: { app: { vault } } } = this,
-			filter = (file: TAbstractFile): file is TFile => {
-				if (!(file instanceof TFile)) { return false }
-				return file.extension === "js"
-			}
+			cache0 = async (
+				file: TFile,
+			): Promise<AbstractFileResolve.CacheIdentity> =>
+				[
+					file.extension === "js"
+						? await vault.cachedRead(file)
+						: file,
+				]
 		context.registerEvent(vault.on("create", async file => {
-			if (!filter(file)) { return }
-			cache[file.path] = [await vault.cachedRead(file)]
+			if (!(file instanceof TFile)) { return }
+			cache[file.path] = await cache0(file)
 		}))
 		context.registerEvent(vault.on("rename", async (file, oldPath) => {
 			Reflect.deleteProperty(cache, oldPath)
-			if (!filter(file)) { return }
+			if (!(file instanceof TFile)) { return }
 			// eslint-disable-next-line require-atomic-updates
-			cache[file.path] = [await vault.cachedRead(file)]
+			cache[file.path] = await cache0(file)
 		}))
 		context.registerEvent(vault.on("modify", async file => {
-			if (!filter(file)) { return }
-			cache[file.path] = [await vault.cachedRead(file)]
+			if (!(file instanceof TFile)) { return }
+			cache[file.path] = await cache0(file)
 		}))
 		context.registerEvent(vault.on("delete", file => {
 			Reflect.deleteProperty(cache, file.path)
 		}))
 		Promise.all(vault.getFiles()
-			.filter(filter)
 			.map(async file => {
-				cache[file.path] = [await vault.cachedRead(file)]
+				cache[file.path] = await cache0(file)
 			}))
 			.catch(error => { self.console.error(error) })
 	}
 
-	public resolve(id: string): Resolved | null {
-		const id0 = this.resolve0(id)
+	public override resolve(id: string): Resolved | null {
+		const { cache } = this,
+			id0 = this.resolvePath(id)
 		if (id0 === null) { return null }
-		const identity = this.cache[id0]
-		if (!identity) { return null }
-		return {
-			code: identity[0],
-			id: id0,
-			identity,
+		const identity = cache[id0]
+		if (identity) {
+			const [code] = identity
+			if (typeof code === "string") {
+				return { code, id: id0, identity }
+			}
+		}
+		return null
+	}
+
+	public override async aresolve(id: string): Promise<Resolved | null> {
+		const { cache, context: { app: { vault, vault: { adapter } } } } = this,
+			id0 = this.resolvePath(id)
+		if (id0 === null) { return null }
+		const identity = cache[id0]
+		try {
+			if (identity) {
+				const [accessor] = identity,
+					code = typeof accessor === "string"
+						? accessor
+						: await vault.cachedRead(accessor)
+				return { code, id: id0, identity }
+			}
+			return { code: await adapter.read(id0), id: id0, identity: [] }
+		} catch (error) {
+			self.console.debug(error)
+			return null
 		}
 	}
 
-	protected abstract resolve0(id: string): string | null
+	protected abstract resolvePath(id: string): string | null
 }
 namespace AbstractFileResolve {
-	export type CacheIdentity = readonly [code: string]
+	export type CacheIdentity = readonly [code: TFile | string]
 }
 
 export class CompositeResolve implements Resolve {
@@ -80,6 +109,15 @@ export class CompositeResolve implements Resolve {
 	public resolve(id: string): Resolved | null {
 		for (const de of this.delegates) {
 			const ret = de.resolve(id)
+			if (ret) { return ret }
+		}
+		return null
+	}
+
+	public async aresolve(id: string): Promise<Resolved | null> {
+		for (const de of this.delegates) {
+			// eslint-disable-next-line no-await-in-loop
+			const ret = await de.aresolve(id)
 			if (ret) { return ret }
 		}
 		return null
@@ -99,6 +137,21 @@ export class InternalModulesResolve
 			self.console.debug(error)
 			return null
 		}
+		return this.resolve0(id, value)
+	}
+
+	public override async aresolve(id: string): Promise<Resolved | null> {
+		let value = null
+		try {
+			value = await dynamicRequire({}, id)
+		} catch (error) {
+			self.console.debug(error)
+			return null
+		}
+		return this.resolve0(id, value)
+	}
+
+	protected resolve0(id: string, value: unknown): Resolved {
 		return {
 			code: "",
 			id,
@@ -112,7 +165,7 @@ export class InternalModulesResolve
 export class VaultPathResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolve0(id: string): string | null {
+	public override resolvePath(id: string): string | null {
 		if (!(/^[/\\]/u).exec(id)) { return null }
 		return parsePath(id)
 	}
@@ -121,7 +174,7 @@ export class VaultPathResolve
 export class RelativePathResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolve0(id: string): string | null {
+	public override resolvePath(id: string): string | null {
 		if (!(/^\.{1,2}[/\\]/u).exec(id)) { return null }
 		return parsePath(id)
 	}
@@ -130,7 +183,7 @@ export class RelativePathResolve
 export class MarkdownLinkResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolve0(id: string): string | null {
+	public override resolvePath(id: string): string | null {
 		return id
 	}
 }
@@ -138,7 +191,7 @@ export class MarkdownLinkResolve
 export class WikilinkResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolve0(id: string): string | null {
+	public override resolvePath(id: string): string | null {
 		return id
 	}
 }

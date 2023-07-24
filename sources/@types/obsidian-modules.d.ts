@@ -95,6 +95,14 @@ declare module "obsidian-modules" {
 		 * @returns the resolved module data or `null` if not found
 		 */
 		readonly resolve: (id: string) => Resolved | null
+
+		/**
+		 * Resolves a module specifier, supporting async resources.
+		 *
+		 * @param id module specifier
+		 * @returns the resolved module data or `null` if not found
+		 */
+		readonly aresolve: (id: string) => PromiseLike<Resolved | null>
 	}
 
 	/**
