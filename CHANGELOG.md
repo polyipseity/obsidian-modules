@@ -1,5 +1,11 @@
 # obsidian-modules
 
+## 1.0.2
+
+### Patch Changes
+
+- 48ee70f: Make the `require` patch more compatible with other `require` patches.
+
 ## 1.0.1
 
 ### Patch Changes
