@@ -1,5 +1,15 @@
 # obsidian-modules
 
+## 1.1.0
+
+### Minor Changes
+
+- 8e538e7: Add `cwd` option to `require` and `require.import` to manually provide context.
+
+### Patch Changes
+
+- b3791a4: Create `AbstractFileResolve#aresolvePath` so that `metadataCache` is awaited for in async resolve.
+
 ## 1.0.2
 
 ### Patch Changes
