@@ -6,6 +6,7 @@ import {
 } from "@polyipseity/obsidian-plugin-library"
 import type { Context, Resolve, Resolved } from "obsidian-modules"
 import { TFile, getLinkpath, normalizePath } from "obsidian"
+import type { AsyncOrSync } from "ts-essentials"
 import type { ModulesPlugin } from "../main.js"
 import type { Transpile } from "./transpile.js"
 import { isUndefined } from "lodash-es"
@@ -95,7 +96,7 @@ abstract class AbstractFileResolve
 		context: Context,
 	): Promise<Resolved | null> {
 		const { cache0, context: { app: { vault, vault: { adapter } } } } = this,
-			id0 = this.resolvePath(id, context)
+			id0 = await this.aresolvePath(id, context)
 		if (id0 === null) { return null }
 		let identity = cache0[id0]
 		try {
@@ -192,6 +193,12 @@ abstract class AbstractFileResolve
 			}
 		}
 		return content
+	}
+
+	protected aresolvePath(
+		...args: Parameters<typeof this.resolvePath>
+	): AsyncOrSync<ReturnType<typeof this.resolvePath>> {
+		return this.resolvePath(...args)
 	}
 
 	protected abstract resolvePath(id: string, context: Context): string | null
@@ -303,6 +310,21 @@ export class MarkdownLinkResolve
 			context.cwd.at(-1) ?? "",
 		)?.path ?? null
 	}
+
+	protected override aresolvePath(
+		...args: Parameters<typeof this.resolvePath>
+	): AsyncOrSync<ReturnType<typeof this.resolvePath>> {
+		const { context: { app: { workspace } } } = this
+		return new Promise((resolve, reject) => {
+			workspace.onLayoutReady(() => {
+				try {
+					resolve(this.resolvePath(...args))
+				} catch (error) {
+					reject(error)
+				}
+			})
+		})
+	}
 }
 
 export class WikilinkResolve
@@ -316,6 +338,21 @@ export class WikilinkResolve
 			getLinkpath(link[0]),
 			context.cwd.at(-1) ?? "",
 		)?.path ?? null
+	}
+
+	protected override aresolvePath(
+		...args: Parameters<typeof this.resolvePath>
+	): AsyncOrSync<ReturnType<typeof this.resolvePath>> {
+		const { context: { app: { workspace } } } = this
+		return new Promise((resolve, reject) => {
+			workspace.onLayoutReady(() => {
+				try {
+					resolve(this.resolvePath(...args))
+				} catch (error) {
+					reject(error)
+				}
+			})
+		})
 	}
 }
 
