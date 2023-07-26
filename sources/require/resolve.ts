@@ -294,7 +294,7 @@ export class RelativePathResolve
 	extends AbstractFileResolve
 	implements Resolve {
 	public override resolvePath(id: string, context: Context): string | null {
-		return parsePath(`${context.cwd.at(-1) ?? ""}/${id}`)
+		return parsePath(`${context.cwds.at(-1) ?? ""}/${id}`)
 	}
 }
 
@@ -307,7 +307,7 @@ export class MarkdownLinkResolve
 		if (!link) { return null }
 		return metadataCache.getFirstLinkpathDest(
 			getLinkpath(link[0]),
-			context.cwd.at(-1) ?? "",
+			context.cwds.at(-1) ?? "",
 		)?.path ?? null
 	}
 
@@ -336,7 +336,7 @@ export class WikilinkResolve
 		if (!link) { return null }
 		return metadataCache.getFirstLinkpathDest(
 			getLinkpath(link[0]),
-			context.cwd.at(-1) ?? "",
+			context.cwds.at(-1) ?? "",
 		)?.path ?? null
 	}
 

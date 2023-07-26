@@ -21,6 +21,7 @@ import type {
 	ImportOptions,
 	ModuleCache,
 	Require,
+	RequireOptions,
 	Resolve,
 	Resolved,
 } from "obsidian-modules"
@@ -62,13 +63,13 @@ export function loadRequire(context: ModulesPlugin): void {
 						editorInfoField as StateField<MarkdownFileInfo>,
 						false,
 					)?.file?.path
-				if (!isUndefined(path)) { req?.context.cwd.push(getWD(path)) }
+				if (!isUndefined(path)) { req?.context.cwds.push(getWD(path)) }
 				try {
 					proto.apply(this, args)
 				} finally {
 					if (!isUndefined(path)) {
 						// Runs after all microtasks are done
-						self.setTimeout(() => { req?.context.cwd.pop() }, 0)
+						self.setTimeout(() => { req?.context.cwds.pop() }, 0)
 					}
 				}
 			}
@@ -84,12 +85,12 @@ export function loadRequire(context: ModulesPlugin): void {
 					const { api: { requires } } = context,
 						req = requires.get(self),
 						{ path } = this.owner.file
-					req?.context.cwd.push(getWD(path))
+					req?.context.cwds.push(getWD(path))
 					try {
 						proto.apply(this, args)
 					} finally {
 						// Runs after all microtasks are done
-						self.setTimeout(() => { req?.context.cwd.pop() }, 0)
+						self.setTimeout(() => { req?.context.cwds.pop() }, 0)
 					}
 				}
 			},
@@ -145,219 +146,235 @@ function createRequire(
 		cleanup.push(() => { assignExact(context, "parent", parent) })
 		context.parent = identity
 		if (!isUndefined(cwd)) {
-			context.cwd.push(cwd)
-			cleanup.push(() => { context.cwd.pop() })
+			context.cwds.push(cwd)
+			cleanup.push(() => { context.cwds.pop() })
 		}
 	}
-	const ret: Require = Object.assign((id0: string) => {
-		const { context, resolve: resolve1 } = ret,
-			[rd, cache] = resolve0(ret, id0, resolve1.resolve(id0, context)),
-			{ code, value } = rd
-		depends(rd, context)
-		if ("commonJS" in cache) { return cache.commonJS }
-		if ("value" in rd) {
-			cache0(cache, "commonJS", constant(value))
-			return value
-		}
-		const module = { exports: {} },
-			cleanup = new Functions({ async: false, settled: true })
-		cache0(cache, "commonJS", () => module.exports)
+	const ret: Require = Object.assign((id0: string, opts?: RequireOptions) => {
+		const cleanup = new Functions({ async: false, settled: true })
 		try {
-			parse(code, {
-				allowAwaitOutsideFunction: false,
-				allowHashBang: true,
-				allowImportExportEverywhere: false,
-				allowReserved: true,
-				allowReturnOutsideFunction: false,
-				allowSuperOutsideMethod: false,
-				ecmaVersion: "latest",
-				locations: false,
-				preserveParens: true,
-				ranges: false,
-				sourceType: "script",
-			})
-			preload(cleanup, rd, context)
-			new self0.Function("module", "exports", `"use strict"; ${code}`)(
-				module,
-				module.exports,
-			)
-			return module.exports
-		} catch (error) {
-			cache0(cache, "commonJS", () => { throw error })
-			throw error
+			const { context, context: { cwds }, resolve: resolve1 } = ret,
+				cwd = opts?.cwd
+			if (!isUndefined(cwd)) {
+				cwds.push(cwd)
+				cleanup.push(() => cwds.pop())
+			}
+			const [rd, cache] = resolve0(ret, id0, resolve1.resolve(id0, context)),
+				{ code, value } = rd
+			depends(rd, context)
+			if ("commonJS" in cache) { return cache.commonJS }
+			if ("value" in rd) {
+				cache0(cache, "commonJS", constant(value))
+				return value
+			}
+			const module = { exports: {} }
+			cache0(cache, "commonJS", () => module.exports)
+			try {
+				parse(code, {
+					allowAwaitOutsideFunction: false,
+					allowHashBang: true,
+					allowImportExportEverywhere: false,
+					allowReserved: true,
+					allowReturnOutsideFunction: false,
+					allowSuperOutsideMethod: false,
+					ecmaVersion: "latest",
+					locations: false,
+					preserveParens: true,
+					ranges: false,
+					sourceType: "script",
+				})
+				preload(cleanup, rd, context)
+				new self0.Function("module", "exports", `"use strict"; ${code}`)(
+					module,
+					module.exports,
+				)
+				return module.exports
+			} catch (error) {
+				cache0(cache, "commonJS", () => { throw error })
+				throw error
+			}
 		} finally {
 			cleanup.call()
 		}
 	}, {
 		cache: new WeakMap(),
 		context: {
-			cwd: [],
+			cwds: [],
 			dependencies: new WeakMap(),
 		},
 		async import(id0: string, opts?: ImportOptions) {
-			const { context, resolve: resolve1 } = ret,
-				[rd, cache] = resolve0(
-					ret,
-					id0,
-					await resolve1.aresolve(id0, context),
-				),
-				{ code, id, value } = rd,
-				key = `esModule${opts?.commonJSInterop ?? true
-					? "WithCommonJS"
-					: ""}` as const
-			depends(rd, context)
-			if (key in cache) { return cache[key] }
-			if ("value" in rd) {
-				cache0(cache, key, constant(value))
-				return value
-			}
 			const cleanup = new Functions({ async: false, settled: true })
-			cache0(cache, key, () => { throw new Error(id) })
 			try {
-				preload(cleanup, rd, context)
-				const url = URL.createObjectURL(new Blob(
-					[
-						key === "esModuleWithCommonJS"
-							? [
-								"export let module = { exports: {} }",
-								"let { exports } = module",
-								code,
-							].join(";")
-							: code,
-					],
-					{ type: "text/javascript" },
-				))
-				cleanup.push(() => { URL.revokeObjectURL(url) })
-				let ret2 = await import(url) as object
-				if (key === "esModuleWithCommonJS") {
-					const mod = ret2,
-						exports0 = launderUnchecked<AnyObject>(
-							launderUnchecked<AnyObject>(mod)["module"],
-						)["exports"],
-						exports = isObject(exports0) ? exports0 : {},
-						functions = new Map()
-					ret2 = new Proxy(exports, {
-						defineProperty(target, property, attributes): boolean {
-							if (!(attributes.configurable ?? true) &&
-								!Reflect.defineProperty(target, property, attributes)) {
-								return false
-							}
-							return Reflect.defineProperty(mod, property, attributes)
-						},
-						deleteProperty(target, property): boolean {
-							const own = Reflect.getOwnPropertyDescriptor(target, property)
-							if (!(own?.configurable ?? true) &&
-								!Reflect.deleteProperty(target, property)) {
-								return false
-							}
-							return Reflect.deleteProperty(mod, property)
-						},
-						get(target, property, receiver): unknown {
-							const own = Reflect.getOwnPropertyDescriptor(target, property)
-							if (Reflect.has(target, property) ||
-								// eslint-disable-next-line @typescript-eslint/no-extra-parens
-								(!(own?.configurable ?? true) &&
+				const { context, context: { cwds }, resolve: resolve1 } = ret,
+					cwd = opts?.cwd
+				if (!isUndefined(cwd)) {
+					cwds.push(cwd)
+					cleanup.push(() => { cwds.pop() })
+				}
+				const
+					[rd, cache] = resolve0(
+						ret,
+						id0,
+						await resolve1.aresolve(id0, context),
+					),
+					{ code, id, value } = rd,
+					key = `esModule${opts?.commonJSInterop ?? true
+						? "WithCommonJS"
+						: ""}` as const
+				depends(rd, context)
+				if (key in cache) { return cache[key] }
+				if ("value" in rd) {
+					cache0(cache, key, constant(value))
+					return value
+				}
+				cache0(cache, key, () => { throw new Error(id) })
+				try {
+					preload(cleanup, rd, context)
+					const url = URL.createObjectURL(new Blob(
+						[
+							key === "esModuleWithCommonJS"
+								? [
+									"export let module = { exports: {} }",
+									"let { exports } = module",
+									code,
+								].join(";")
+								: code,
+						],
+						{ type: "text/javascript" },
+					))
+					cleanup.push(() => { URL.revokeObjectURL(url) })
+					let ret2 = await import(url) as object
+					if (key === "esModuleWithCommonJS") {
+						const mod = ret2,
+							exports0 = launderUnchecked<AnyObject>(
+								launderUnchecked<AnyObject>(mod)["module"],
+							)["exports"],
+							exports = isObject(exports0) ? exports0 : {},
+							functions = new Map()
+						ret2 = new Proxy(exports, {
+							defineProperty(target, property, attributes): boolean {
+								if (!(attributes.configurable ?? true) &&
+									!Reflect.defineProperty(target, property, attributes)) {
+									return false
+								}
+								return Reflect.defineProperty(mod, property, attributes)
+							},
+							deleteProperty(target, property): boolean {
+								const own = Reflect.getOwnPropertyDescriptor(target, property)
+								if (!(own?.configurable ?? true) &&
+									!Reflect.deleteProperty(target, property)) {
+									return false
+								}
+								return Reflect.deleteProperty(mod, property)
+							},
+							get(target, property, receiver): unknown {
+								const own = Reflect.getOwnPropertyDescriptor(target, property)
+								if (Reflect.has(target, property) ||
 									// eslint-disable-next-line @typescript-eslint/no-extra-parens
-									(!(own?.writable ?? true) || (own?.set && !own.get)))) {
-								return Reflect.get(target, property, receiver)
-							}
-							const ret3: unknown = Reflect.get(
-								mod,
-								property,
-								receiver === target ? mod : receiver,
-							)
-							if (typeof ret3 === "function") {
-								const ret4 = ret3
-								// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-								return functions.get(ret3) ?? (() => {
-									function fn(
-										this: unknown,
-										...args: readonly unknown[]
-									): unknown {
-										// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
-										if (new.target) {
-											return Reflect.construct(
+									(!(own?.configurable ?? true) &&
+										// eslint-disable-next-line @typescript-eslint/no-extra-parens
+										(!(own?.writable ?? true) || (own?.set && !own.get)))) {
+									return Reflect.get(target, property, receiver)
+								}
+								const ret3: unknown = Reflect.get(
+									mod,
+									property,
+									receiver === target ? mod : receiver,
+								)
+								if (typeof ret3 === "function") {
+									const ret4 = ret3
+									// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+									return functions.get(ret3) ?? (() => {
+										function fn(
+											this: unknown,
+											...args: readonly unknown[]
+										): unknown {
+											// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
+											if (new.target) {
+												return Reflect.construct(
+													ret4,
+													args,
+													new.target === fn ? ret4 : new.target,
+												)
+											}
+											return Reflect.apply(
 												ret4,
+												this === ret2 ? mod : this,
 												args,
-												new.target === fn ? ret4 : new.target,
 											)
 										}
-										return Reflect.apply(
-											ret4,
-											this === ret2 ? mod : this,
-											args,
-										)
-									}
-									functions.set(ret3, fn)
-									return fn
-								})()
-							}
-							return ret3
-						},
-						getOwnPropertyDescriptor(
-							target,
-							property,
-						): PropertyDescriptor | undefined {
-							let ret3 = Reflect.getOwnPropertyDescriptor(mod, property)
-							if (ret3 && !(ret3.configurable ?? true) &&
-								!Reflect.defineProperty(target, property, ret3)) {
-								// eslint-disable-next-line no-void
-								ret3 = void 0
-							}
-							return ret3 ?? Reflect.getOwnPropertyDescriptor(target, property)
-						},
-						getPrototypeOf(_0): object | null {
-							return Reflect.getPrototypeOf(mod)
-						},
-						has(target, property): boolean {
-							return Reflect.getOwnPropertyDescriptor(target, property)
-								?.configurable ?? true
-								? Reflect.has(mod, property) || Reflect.has(target, property)
-								: Reflect.has(target, property)
-						},
-						isExtensible(target): boolean {
-							return Reflect.isExtensible(target)
-						},
-						ownKeys(target): ArrayLike<string | symbol> {
-							return [
-								...new Set([
-									Reflect.ownKeys(target),
-									Reflect.ownKeys(mod),
-									Reflect.ownKeys(target)
-										.filter(key2 =>
-											!(Reflect.getOwnPropertyDescriptor(target, key2)
-												?.configurable ?? true)),
-								].flat()),
-							]
-						},
-						preventExtensions(target): boolean {
-							return Reflect.preventExtensions(target)
-						},
-						set(target, property, newValue, receiver): boolean {
-							const own = Reflect.getOwnPropertyDescriptor(target, property)
-							if (!(own?.configurable ?? true) &&
-								// eslint-disable-next-line @typescript-eslint/no-extra-parens
-								(!(own?.writable ?? true) || (own?.get && !own.set)) &&
-								!Reflect.set(target, property, newValue, receiver)) {
-								return false
-							} return Reflect.set(
-								mod,
+										functions.set(ret3, fn)
+										return fn
+									})()
+								}
+								return ret3
+							},
+							getOwnPropertyDescriptor(
+								target,
 								property,
-								newValue,
-								receiver === target ? mod : receiver,
-							)
-						},
-						setPrototypeOf(_0, proto): boolean {
-							return Reflect.setPrototypeOf(mod, proto)
-						},
-					} satisfies Required<Omit<ProxyHandler<typeof exports
-					>, "apply" | "construct">>)
+							): PropertyDescriptor | undefined {
+								let ret3 = Reflect.getOwnPropertyDescriptor(mod, property)
+								if (ret3 && !(ret3.configurable ?? true) &&
+									!Reflect.defineProperty(target, property, ret3)) {
+									// eslint-disable-next-line no-void
+									ret3 = void 0
+								}
+								return ret3 ??
+									Reflect.getOwnPropertyDescriptor(target, property)
+							},
+							getPrototypeOf(_0): object | null {
+								return Reflect.getPrototypeOf(mod)
+							},
+							has(target, property): boolean {
+								return Reflect.getOwnPropertyDescriptor(target, property)
+									?.configurable ?? true
+									? Reflect.has(mod, property) || Reflect.has(target, property)
+									: Reflect.has(target, property)
+							},
+							isExtensible(target): boolean {
+								return Reflect.isExtensible(target)
+							},
+							ownKeys(target): ArrayLike<string | symbol> {
+								return [
+									...new Set([
+										Reflect.ownKeys(target),
+										Reflect.ownKeys(mod),
+										Reflect.ownKeys(target)
+											.filter(key2 =>
+												!(Reflect.getOwnPropertyDescriptor(target, key2)
+													?.configurable ?? true)),
+									].flat()),
+								]
+							},
+							preventExtensions(target): boolean {
+								return Reflect.preventExtensions(target)
+							},
+							set(target, property, newValue, receiver): boolean {
+								const own = Reflect.getOwnPropertyDescriptor(target, property)
+								if (!(own?.configurable ?? true) &&
+									// eslint-disable-next-line @typescript-eslint/no-extra-parens
+									(!(own?.writable ?? true) || (own?.get && !own.set)) &&
+									!Reflect.set(target, property, newValue, receiver)) {
+									return false
+								} return Reflect.set(
+									mod,
+									property,
+									newValue,
+									receiver === target ? mod : receiver,
+								)
+							},
+							setPrototypeOf(_0, proto): boolean {
+								return Reflect.setPrototypeOf(mod, proto)
+							},
+						} satisfies Required<Omit<ProxyHandler<typeof exports
+						>, "apply" | "construct">>)
+					}
+					cache0(cache, key, constant(ret2))
+					return ret2
+				} catch (error) {
+					cache0(cache, key, () => { throw error })
+					throw error
 				}
-				cache0(cache, key, constant(ret2))
-				return ret2
-			} catch (error) {
-				cache0(cache, key, () => { throw error })
-				throw error
 			} finally {
 				cleanup.call()
 			}
@@ -382,6 +399,9 @@ function patchRequire(
 				...args: Parameters<typeof proto>
 			): ReturnType<typeof proto> {
 				try {
+					const args2 = [...args]
+					// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+					if (args2[1]) { args2[1] = Object.assign(() => { }, args2[1]) }
 					return proto.apply(this, args)
 				} catch (error) {
 					self0.console.debug(error)

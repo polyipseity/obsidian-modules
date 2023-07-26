@@ -23,10 +23,11 @@ declare module "obsidian-modules" {
 		 * Imports a module, CommonJS style.
 		 *
 		 * @param id module specifier
+		 * @param opts options
 		 * @return the requested module
 		 * @throws if the requested module cannot be found
 		 */
-		(id: string): unknown
+		(id: string, opts?: RequireOptions): unknown
 
 		/**
 		 * Imports a module, ES-module style.
@@ -55,9 +56,28 @@ declare module "obsidian-modules" {
 	}
 
 	/**
+	 * Options for {@link Require} and {@link Require.import},
+	 */
+	interface CommonOptions {
+
+		/**
+		 * Current working directory for resolving contextual module specifiers.
+		 *
+		 * @default string automatically inferred if possible
+		 */
+		readonly cwd?: string
+	}
+
+	/**
+	 * Options for {@link Require}.
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+	interface RequireOptions extends CommonOptions { }
+
+	/**
 	 * Options for {@link Require.import}.
 	 */
-	interface ImportOptions {
+	interface ImportOptions extends CommonOptions {
 
 		/**
 		 * Enable loading CommonJS modules.
@@ -154,7 +174,7 @@ declare module "obsidian-modules" {
 		/**
 		 * Current working directory.
 		 */
-		readonly cwd: string[]
+		readonly cwds: string[]
 
 		/**
 		 * Identity of the parent module being loaded.
