@@ -79,7 +79,7 @@ eat(2 * pi)
 const mod = await self.require.import("[[module]]")
 mod.eat(2 * mod.pi)
 ```
-- To create a module, create a JavaScript file or a Markdown file with JavaScript code blocks. For `self.require` (but not `self.require.import`), the file needs to have one of the following extensions: `.js`, `.mjs`, `.js.md`, `.mjs.md`.
+- To create a module, create a JavaScript file or a Markdown file with JavaScript code blocks. For `self.require` (but not `self.require.import`), the file needs to have one of the following extensions: `.js`, `.mjs`, `.js.md`, `.mjs.md`. We recommend that your modules do not have global or side effects because modules are cached and thus not reloaded on every request.
 - Module exports can be CommonJS-style or ES module-style:
 ```JavaScript
 // ES module-style, supported by `self.require.import`.
