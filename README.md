@@ -54,7 +54,6 @@ This file is automatically opened on first install. You can reopen it in setting
 ## Usage
 
 - Enable the plugin.
-- Consumer
 - To import a module:
 ```JavaScript
 // Using `self.require.import` is recommended.
