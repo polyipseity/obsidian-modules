@@ -60,6 +60,7 @@ This file is automatically opened on first install. You can reopen it in setting
 // Recommended:
 await self.require.import("obsidian") // builtin modules such as the Obsidian API
 await self.require.import("vault/path/to/a module.md") // vault path
+// The following three requires context and may not be able to infer the current directory. Please file an issue if so.
 await self.require.import("../relative/path/to/a module.js") // relative path
 await self.require.import("[omitted or whatever](markdown/link/to/a%20module.js.md)") // Markdown link
 await self.require.import("[[wikilink/to/a module|ommited or whatever]]") // wikilink
@@ -67,7 +68,9 @@ await self.require.import("[[wikilink/to/a module|ommited or whatever]]") // wik
 // If `await` is not supported:
 self.require("obsidian")
 self.require("vault/path/to/a module.md")
+// The following three requires context and may not be able to infer the current directory. Please file an issue if so.
 self.require("../relative/path/to/a module.js")
+// The following two may not work in startup scripts.
 self.require("[ommited or whatever](markdown/link/to/a%20module.js.md)")
 self.require("[[wikilink/to/a module|omitted or whatever]]")
 ```
