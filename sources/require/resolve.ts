@@ -6,10 +6,10 @@ import {
 } from "@polyipseity/obsidian-plugin-library"
 import type { Context, Resolve, Resolved } from "obsidian-modules"
 import { TFile, getLinkpath, normalizePath } from "obsidian"
-import { identity as idFunc, isEmpty, isUndefined } from "lodash-es"
 import type { AsyncOrSync } from "ts-essentials"
 import type { ModulesPlugin } from "../main.js"
 import type { Transpile } from "./transpile.js"
+import { isUndefined } from "lodash-es"
 
 abstract class AbstractResolve implements Resolve {
 	public constructor(
