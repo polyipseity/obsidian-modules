@@ -6,10 +6,10 @@ import {
 } from "@polyipseity/obsidian-plugin-library"
 import type { Context, Resolve, Resolved } from "obsidian-modules"
 import { TFile, getLinkpath, normalizePath } from "obsidian"
+import { identity as idFunc, isEmpty, isUndefined } from "lodash-es"
 import type { AsyncOrSync } from "ts-essentials"
 import type { ModulesPlugin } from "../main.js"
 import type { Transpile } from "./transpile.js"
-import { isUndefined } from "lodash-es"
 
 abstract class AbstractResolve implements Resolve {
 	public constructor(
@@ -306,7 +306,7 @@ export class MarkdownLinkResolve
 			link = parseMarkdownLink(id)
 		if (!link) { return null }
 		return metadataCache.getFirstLinkpathDest(
-			getLinkpath(link[0]),
+			getLinkpath(link.path),
 			context.cwds.at(-1) ?? "",
 		)?.path ?? null
 	}
@@ -335,7 +335,7 @@ export class WikilinkResolve
 			link = parseWikilink(id)
 		if (!link) { return null }
 		return metadataCache.getFirstLinkpathDest(
-			getLinkpath(link[0]),
+			getLinkpath(link.path),
 			context.cwds.at(-1) ?? "",
 		)?.path ?? null
 	}
@@ -379,9 +379,12 @@ export function getWD(path: string): string {
 		.join("/")
 }
 
-function parseMarkdownLink(
-	link: string,
-): readonly [path: string, display: string] | null {
+function parseMarkdownLink(link: string): {
+	readonly display: string
+	readonly path: string
+	readonly read: number
+	readonly title: string
+} | null {
 	function parseComponent(
 		str: string,
 		escaper: CodePoint,
@@ -431,21 +434,31 @@ function parseMarkdownLink(
 		)
 	if (read < 0) { return null }
 	const rest = link2.slice(read),
-		[path, read2] = parseComponent(
+		[pathtext, read2] = parseComponent(
 			rest,
 			codePoint("\\"),
 			[codePoint("("), codePoint(")")],
 		)
 	if (read2 !== rest.length) { return null }
-	return [self.decodeURI(path), display]
+	// eslint-disable-next-line @typescript-eslint/no-magic-numbers
+	const pathParts = pathtext.split(/ +/u, 2),
+		[, title] =
+			(/^"(?<title>(?:\\"|[^"])*)"$/u).exec(pathParts[1] ?? "\"\"") ?? []
+	if (isUndefined(title)) { return null }
+	return {
+		display,
+		path: self.decodeURI(pathParts[0] ?? ""),
+		read: (link.startsWith("!") ? 1 : 0) + read + read2,
+		title,
+	}
 }
 
 function parseWikilink(
 	link: string,
-): readonly [path: string, display: string] | null {
+): { readonly display: string; readonly path: string } | null {
 	const match = (/^!?\[\[(?<path>[^|]+)\|?(?<display>.*?)\]\]/u).exec(link)
 	if (!match) { return null }
 	const [str, path, display] = match
 	if (str !== link || isUndefined(path) || isUndefined(display)) { return null }
-	return [path, display || (str.includes("|") ? "" : path)]
+	return { display: display || (str.includes("|") ? "" : path), path }
 }
