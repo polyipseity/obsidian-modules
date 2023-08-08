@@ -32,6 +32,7 @@ This file is automatically opened on first install. You can reopen it in setting
 - Supports using other modules inside modules.
 - Loads CommonJS (`module.exports`) and ES modules (`export`).
 - Supports circular dependencies for CommonJS modules.
+- Adds source maps for debugging.
 
 ## Installation
 
