@@ -15,11 +15,11 @@ importers:
         specifier: ^6.2.1
         version: 6.2.1
       '@codemirror/view':
-        specifier: ^6.15.3
-        version: 6.15.3
+        specifier: ^6.16.0
+        version: 6.16.0
       '@polyipseity/obsidian-plugin-library':
         specifier: ^1.14.1
-        version: 1.14.1(@capacitor/core@5.2.0)(@codemirror/state@6.2.1)(@codemirror/view@6.15.3)(typescript@5.1.6)
+        version: 1.14.1(@capacitor/core@5.2.0)(@codemirror/state@6.2.1)(@codemirror/view@6.16.0)(typescript@5.1.6)
       acorn:
         specifier: ^8.10.0
         version: 8.10.0
@@ -34,7 +34,7 @@ importers:
         version: 2.3.0
       obsidian:
         specifier: ^1.2.8
-        version: 1.2.8(@codemirror/state@6.2.1)(@codemirror/view@6.15.3)
+        version: 1.2.8(@codemirror/state@6.2.1)(@codemirror/view@6.16.0)
       semver:
         specifier: ^7.5.4
         version: 7.5.4
@@ -47,7 +47,7 @@ importers:
         version: 2.26.2
       '@polyipseity/obsidian':
         specifier: ^1.2.8
-        version: 1.2.8(@codemirror/state@6.2.1)(@codemirror/view@6.15.3)
+        version: 1.2.8(@codemirror/state@6.2.1)(@codemirror/view@6.16.0)
       '@tsconfig/esm':
         specifier: ^1.0.4
         version: 1.0.4
@@ -341,8 +341,8 @@ packages:
   /@codemirror/state@6.2.1:
     resolution: {integrity: sha512-RupHSZ8+OjNT38zU9fKH2sv+Dnlr8Eb8sl4NOnnqz95mCFTZUaiRP8Xv5MeeaG0px2b8Bnfe7YGwCV3nsBhbuw==}
 
-  /@codemirror/view@6.15.3:
-    resolution: {integrity: sha512-chNgR8H7Ipx7AZUt0+Kknk7BCow/ron3mHd1VZdM7hQXiI79+UlWqcxpCiexTxZQ+iSkqndk3HHAclJOcjSuog==}
+  /@codemirror/view@6.16.0:
+    resolution: {integrity: sha512-1Z2HkvkC3KR/oEZVuW9Ivmp8TWLzGEd8T8TA04TTwPvqogfkHBdYSlflytDOqmkUxM2d1ywTg7X2dU5mC+SXvg==}
     dependencies:
       '@codemirror/state': 6.2.1
       style-mod: 4.0.3
@@ -661,7 +661,7 @@ packages:
       tslib: 2.6.1
     dev: true
 
-  /@polyipseity/obsidian-plugin-library@1.14.1(@capacitor/core@5.2.0)(@codemirror/state@6.2.1)(@codemirror/view@6.15.3)(typescript@5.1.6):
+  /@polyipseity/obsidian-plugin-library@1.14.1(@capacitor/core@5.2.0)(@codemirror/state@6.2.1)(@codemirror/view@6.16.0)(typescript@5.1.6):
     resolution: {integrity: sha512-8ibwLuA+LSQ1KgQplc91xx4/pdKSFScv6JS1kcSSXV+LyiKsP05WIYzjgJyBPSADkwoPAepjWmE1xYgL2ZNGEw==}
     dependencies:
       '@capacitor/filesystem': 5.1.1(@capacitor/core@5.2.0)
@@ -674,7 +674,7 @@ packages:
       lodash-es: 4.17.21
       lucide: 0.265.0
       monkey-around: 2.3.0
-      obsidian: 1.2.8(@codemirror/state@6.2.1)(@codemirror/view@6.15.3)
+      obsidian: 1.2.8(@codemirror/state@6.2.1)(@codemirror/view@6.16.0)
       p-lazy: 4.0.0
       semver: 7.5.4
       source-map: 0.7.4
@@ -688,14 +688,14 @@ packages:
       - typescript
     dev: false
 
-  /@polyipseity/obsidian@1.2.8(@codemirror/state@6.2.1)(@codemirror/view@6.15.3):
+  /@polyipseity/obsidian@1.2.8(@codemirror/state@6.2.1)(@codemirror/view@6.16.0):
     resolution: {integrity: sha512-rlXPpSAmZwxmcxsa163vl8eQMYq7gQwB+fx76NdvG3TC5ln7AG4uVRMfCyLfoePRYc8JxeJoUNujH0bgnePymA==}
     peerDependencies:
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
     dependencies:
       '@codemirror/state': 6.2.1
-      '@codemirror/view': 6.15.3
+      '@codemirror/view': 6.16.0
       '@types/codemirror': 0.0.108
       moment: 2.29.4
     dev: true
@@ -2636,14 +2636,14 @@ packages:
       es-abstract: 1.21.2
     dev: true
 
-  /obsidian@1.2.8(@codemirror/state@6.2.1)(@codemirror/view@6.15.3):
+  /obsidian@1.2.8(@codemirror/state@6.2.1)(@codemirror/view@6.16.0):
     resolution: {integrity: sha512-HrC+feA8o0tXspj4lEAqxb1btwLwHD2oHXSwbbN+CdRHURqbCkuIDLld+nkuyJ1w1c9uvVDRVk8BoeOnWheOrQ==}
     peerDependencies:
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
     dependencies:
       '@codemirror/state': 6.2.1
-      '@codemirror/view': 6.15.3
+      '@codemirror/view': 6.16.0
       '@types/codemirror': 0.0.108
       moment: 2.29.4
     dev: false
