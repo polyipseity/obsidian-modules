@@ -57,7 +57,7 @@ This file is automatically opened on first install. You can reopen it in setting
 - Enable the plugin.
 - To import a module:
 ```JavaScript
-// Using `self.require.import` is recommended.
+// Using `require.import` is recommended.
 await self.require.import("obsidian") // builtin modules such as the Obsidian API
 await self.require.import("vault/path/to/a module.md") // vault path
 // The following three requires context and may not be able to infer the current directory. Please file an issue if so.
@@ -67,7 +67,7 @@ await self.require.import("[[wikilink/to/a module|ommited or whatever]]") // wik
 // You can workaround the inability to infer the current directory.
 await self.require.import("../relative/path/to/a module.js", { cwd: tp.file.folder(true) })
 
-// If `await` is not supported, use `self.require` instead. It has less support for loading modules, however.
+// If `await` is not supported, use `require` instead. It has less support for loading modules, however.
 self.require("obsidian")
 self.require("vault/path/to/a module.md")
 // The following three requires context and may not be able to infer the current directory. Please file an issue if so.
@@ -86,15 +86,15 @@ eat(2 * pi)
 const mod = await self.require.import("[[module]]")
 mod.eat(2 * mod.pi)
 ```
-- To create a module, create a JavaScript file or a Markdown file with JavaScript code blocks. For `self.require` (but not `self.require.import`), the file needs to have one of the following extensions: `.js`, `.mjs`, `.js.md`, `.mjs.md`. We recommend that your modules do not have global or side effects because modules are cached and thus not reloaded on every request.
+- To create a module, create a JavaScript file or a Markdown file with JavaScript code blocks. For `require` (but not `require.import`), the file needs to have one of the following extensions: `.js`, `.mjs`, `.js.md`, `.mjs.md`. We recommend that your modules do not have global or side effects because modules are cached and thus not reloaded on every request.
 - Module exports can be CommonJS-style or ES module-style:
 ```JavaScript
-// ES module-style, supported by `self.require.import`.
+// ES module-style, supported by `require.import`.
 export function fun() {}
 export const variable = "string"
 export default 42 // The default export has the name `default`.
 
-// CommonJS-style, supported by both `self.require` and `self.require.import`.
+// CommonJS-style, supported by both `require` and `require.import`.
 module.exports.fun = function() {}
 module.exports.variable = "string"
 module.exports.default = 42
