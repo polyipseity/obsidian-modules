@@ -113,7 +113,6 @@ The todos here, ordered alphabetically, are things planned for the plugin. There
 - Configure preloaded files.
 - Configure accepted code block languages.
 - Autocomplete with JSDoc.
-- Generate source maps.
 
 ### Translating
 

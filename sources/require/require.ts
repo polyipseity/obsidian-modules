@@ -3,6 +3,8 @@ import {
 	Functions,
 	aroundIdentityFactory,
 	assignExact,
+	attachFunctionSourceMap,
+	attachSourceMap,
 	launderUnchecked,
 	patchWindows,
 	revealPrivate,
@@ -160,7 +162,7 @@ function createRequire(
 				cleanup.push(() => cwds.pop())
 			}
 			const [rd, cache] = resolve0(ret, id0, resolve1.resolve(id0, context)),
-				{ code, value } = rd
+				{ code, id, value } = rd
 			depends(rd, context)
 			if ("commonJS" in cache) { return cache.commonJS }
 			if ("value" in rd) {
@@ -184,7 +186,17 @@ function createRequire(
 					sourceType: "script",
 				})
 				preload(cleanup, rd, context)
-				new self0.Function("module", "exports", `"use strict"; ${code}`)(
+				new self0.Function("module", "exports", attachFunctionSourceMap(
+					self0.Function,
+					`"use strict";${code}`,
+					{
+						deletions: [..."\"use strict\";"].map((_0, idx) => ({
+							column: idx,
+							line: 1,
+						})),
+						source: `modules/${id}`,
+					},
+				))(
 					module,
 					module.exports,
 				)
@@ -230,18 +242,25 @@ function createRequire(
 				cache0(cache, key, () => { throw new Error(id) })
 				try {
 					preload(cleanup, rd, context)
-					const url = URL.createObjectURL(new Blob(
-						[
-							key === "esModuleWithCommonJS"
-								? [
-									"export let module = { exports: {} }",
-									"let { exports } = module",
-									code,
-								].join(";")
-								: code,
-						],
-						{ type: "text/javascript" },
-					))
+					const prefix =
+						key === "esModuleWithCommonJS"
+							? "export let module={exports:{}};let{exports}=module;"
+							: "",
+						url = URL.createObjectURL(new Blob(
+							[
+								attachSourceMap(
+									`${prefix}${code}`,
+									{
+										deletions: [...prefix].map((_0, idx) => ({
+											column: idx,
+											line: 1,
+										})),
+										source: `modules/${id}`,
+									},
+								),
+							],
+							{ type: "text/javascript" },
+						))
 					cleanup.push(() => { URL.revokeObjectURL(url) })
 					let ret2 = await import(url) as object
 					if (key === "esModuleWithCommonJS") {
