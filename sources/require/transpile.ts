@@ -1,4 +1,7 @@
-import { EventEmitterLite } from "@polyipseity/obsidian-plugin-library"
+import {
+	EventEmitterLite,
+	splitLines,
+} from "@polyipseity/obsidian-plugin-library"
 import type { TFile } from "obsidian"
 import { isUndefined } from "lodash-es"
 
@@ -23,7 +26,7 @@ export class MarkdownTranspile
 		const ret = []
 		let delimiter = "",
 			code = false
-		for (const line of content.split(/\r\n|[\n\v\f\r\x85\u2028\u2029]/u)) {
+		for (const line of splitLines(content)) {
 			if (delimiter) {
 				if (line.startsWith(delimiter)) {
 					ret.push(`// ${line}`)
