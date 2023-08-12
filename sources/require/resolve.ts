@@ -247,6 +247,8 @@ export class InternalModulesResolve
 	protected readonly identities: Record<string, object | undefined> = {}
 
 	public override resolve(id: string, _1: Context): Resolved | null {
+		const { context: { settings } } = this
+		if (!settings.value.exposeInternalModules) { return null }
 		let value = null
 		try {
 			value = dynamicRequireSync({}, id)
