@@ -11,7 +11,8 @@
 			"donate": "$t(generic.donate)",
 			"readme": "自述文件"
 		},
-		"donate": "贊助"
+		"donate": "贊助",
+		"name": "名稱"
 	},
 	"name": "模塊",
 	"settings": {
@@ -24,6 +25,8 @@
 		"expose-internal-modules": "公開內部模塊",
 		"expose-internal-modules-description-HTML": "<code>obsidian</code>、<code>@codemirror/*</code>、<code>@lezer/*</code>……",
 		"interface": "界面",
-		"open-changelog-on-update": "更新時$t(generic.open)$t(generic.documentations.changelog)"
+		"open-changelog-on-update": "更新時$t(generic.open)$t(generic.documentations.changelog)",
+		"require-name": "Require$t(generic.name)",
+		"require-name-description-invalid": "使用默認$t(generic.name)，因為指定的$t(generic.name)不可用。"
 	}
 }

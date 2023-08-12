@@ -18,6 +18,7 @@
 			"readme-icon": "$t(asset:generic.documentations.readme-icon)"
 		},
 		"expose-internal-modules-icon": "puzzle",
-		"open-changelog-on-update-icon": "$t(asset:generic.documentations.changelog-icon)"
+		"open-changelog-on-update-icon": "$t(asset:generic.documentations.changelog-icon)",
+		"require-name-icon": "key"
 	}
 }

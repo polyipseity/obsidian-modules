@@ -32,6 +32,7 @@ This file is automatically opened on first install. You can reopen it in setting
 - Supports using other modules inside modules.
 - Loads CommonJS (`module.exports`) and ES modules (`export`).
 - Supports circular dependencies for CommonJS modules.
+- Configurable require name.
 - Adds source maps for debugging.
 
 ## Installation
@@ -109,7 +110,6 @@ Contributions are welcome!
 
 The todos here, ordered alphabetically, are things planned for the plugin. There are no guarantees that they will be completed. However, we are likely to accept contributions for them.
 
-- Configure `require` global name.
 - Configure preloaded files.
 - Configure accepted code block languages.
 - Autocomplete with JSDoc.

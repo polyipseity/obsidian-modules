@@ -40,6 +40,8 @@ import type { StateField } from "@codemirror/state"
 import { around } from "monkey-around"
 import { parse } from "acorn"
 
+export const REQUIRE_TAG = Symbol("require tag")
+
 export function loadRequire(context: ModulesPlugin): void {
 	const { app: { workspace } } = context,
 		transpiles = [new MarkdownTranspile()],
@@ -209,6 +211,7 @@ function createRequire(
 			cleanup.call()
 		}
 	}, {
+		[REQUIRE_TAG]: true,
 		cache: new WeakMap(),
 		context: {
 			cwds: [],
@@ -407,26 +410,71 @@ function patchRequire(
 	self0: typeof globalThis,
 	resolve: Resolve,
 ): () => void {
+	const { settings } = context
+	let destroyer = noop
+	const functions = new Functions({ async: false, settled: true })
+	try {
+		functions.push(() => { destroyer() })
+		destroyer =
+			createAndSetRequire(context, self0, settings.value.requireName, resolve)
+		functions.push(settings.onMutate(
+			set => set.requireName,
+			cur => {
+				destroyer()
+				destroyer = createAndSetRequire(context, self0, cur, resolve)
+			},
+		))
+		return () => { functions.call() }
+	} catch (error) {
+		functions.call()
+		throw error
+	}
+}
+
+function createAndSetRequire(
+	context: ModulesPlugin,
+	self0: typeof globalThis,
+	name: string,
+	resolve: Resolve,
+): () => void {
 	const { api: { requires } } = context,
 		req = createRequire(self0, resolve)
 	requires.set(self0, req)
-	return around(self0, {
-		require(proto) {
-			return Object.assign(function fn(
-				this: typeof self0 | undefined,
-				...args: Parameters<typeof proto>
-			): ReturnType<typeof proto> {
-				try {
-					const args2 = [...args]
-					// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-					if (args2[1]) { args2[1] = Object.assign(() => { }, args2[1]) }
-					return proto.apply(this, args)
-				} catch (error) {
-					self0.console.debug(error)
-					return req(...args)
-				}
-			}, req) as unknown as NodeRequire
-		},
-		toString: aroundIdentityFactory(),
-	})
+	if (name in self0 || name === "require") {
+		return around(self0, {
+			require(proto) {
+				return Object.assign(function fn(
+					this: typeof self0 | undefined,
+					...args: Parameters<typeof proto>
+				): ReturnType<typeof proto> {
+					try {
+						const args2 = [...args]
+						// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+						if (args2[1]) { args2[1] = Object.assign(() => { }, args2[1]) }
+						return proto.apply(this, args)
+					} catch (error) {
+						self0.console.debug(error)
+						return req(...args)
+					}
+				}, req) as unknown as NodeRequire
+			},
+			toString: aroundIdentityFactory(),
+		})
+	}
+	try {
+		Object.defineProperty(self0, name, {
+			configurable: true,
+			enumerable: true,
+			value: req,
+			writable: false,
+		})
+		return () => {
+			if (Reflect.get(self0, name, self0) === req) {
+				Reflect.deleteProperty(self0, name)
+			}
+		}
+	} catch (error) {
+		self0.console.error(error)
+		return createAndSetRequire(context, self0, "require", resolve)
+	}
 }

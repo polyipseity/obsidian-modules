@@ -18,6 +18,7 @@ import { PluginLocales } from "../assets/locales.js"
 
 export interface Settings extends PluginContext.Settings {
 	readonly language: Settings.DefaultableLanguage
+	readonly requireName: string
 	readonly exposeInternalModules: boolean
 
 	readonly openChangelogOnUpdate: boolean
@@ -46,6 +47,7 @@ export namespace Settings {
 		language: "",
 		noticeTimeout: 5,
 		openChangelogOnUpdate: true,
+		requireName: "require",
 	})
 
 	export const DEFAULTABLE_LANGUAGES =
@@ -93,6 +95,12 @@ export namespace Settings {
 			recovery: Object.fromEntries(Object
 				.entries(launderUnchecked(unc.recovery))
 				.map(([key, value]) => [key, String(value)])),
+			requireName: fixTyped(
+				DEFAULT,
+				unc,
+				"requireName",
+				["string"],
+			),
 		})
 	}
 }
