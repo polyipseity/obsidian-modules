@@ -134,7 +134,7 @@ abstract class AbstractFileResolve
 		const ret = {
 			file,
 			...[/\.js$/iu, /\.mjs$/iu, /\.js\.md$/iu, /\.mjs\.md$/iu]
-				.some(regex => regex.exec(name))
+				.some(regex => regex.test(name))
 				? { content: await vault.cachedRead(file) }
 				: {},
 		}
