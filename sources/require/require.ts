@@ -335,7 +335,6 @@ function createRequire(
 								let ret3 = Reflect.getOwnPropertyDescriptor(mod, property)
 								if (ret3 && !(ret3.configurable ?? true) &&
 									!Reflect.defineProperty(target, property, ret3)) {
-									// eslint-disable-next-line no-void
 									ret3 = void 0
 								}
 								return ret3 ??
