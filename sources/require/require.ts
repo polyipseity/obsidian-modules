@@ -32,7 +32,7 @@ import {
 	MarkdownPreviewRenderer,
 	editorInfoField,
 } from "obsidian"
-import { constant, isObject, isUndefined } from "lodash-es"
+import { constant, isObject, isUndefined, noop } from "lodash-es"
 import { EditorView } from "@codemirror/view"
 import { MarkdownTranspile } from "./transpile.js"
 import type { ModulesPlugin } from "../main.js"
@@ -97,7 +97,7 @@ export function loadRequire(context: ModulesPlugin): void {
 				}
 			},
 		}))
-	}, () => { })
+	}, noop)
 }
 
 function createRequire(
