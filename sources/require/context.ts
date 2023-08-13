@@ -7,6 +7,7 @@ import { isUndefined, noop } from "lodash-es"
 import { EditorView } from "@codemirror/view"
 import type { ModulesPlugin } from "../main.js"
 import type { StateField } from "@codemirror/state"
+import type { TemplaterPlugin } from "templater-obsidian"
 import { around } from "monkey-around"
 import { getWD } from "./resolve.js"
 import { revealPrivate } from "@polyipseity/obsidian-plugin-library"
@@ -61,4 +62,55 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 			}
 		},
 	}))
+}
+
+export function patchContextForTemplater(context: ModulesPlugin): void {
+	function patch(plugin: TemplaterPlugin): void {
+		const { templater: { parser } } = plugin
+		plugin.register(around(parser, {
+			// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
+			parse_commands(proto) {
+				return async function fn(
+					this: typeof parser,
+					...args: Parameters<typeof proto>
+				): Promise<Awaited<ReturnType<typeof proto>>> {
+					const { api: { requires } } = context,
+						req = requires.get(self),
+						[, tp] = args
+					req?.context.cwds.push(tp.file.folder(true))
+					try {
+						return await proto.apply(this, args)
+					} finally {
+						req?.context.cwds.pop()
+					}
+				}
+			},
+		}))
+	}
+	revealPrivate(context, [context.app], app2 => {
+		const { plugins } = app2
+		context.register(around(plugins, {
+			loadPlugin(proto) {
+				return async function fn(
+					this: typeof plugins,
+					...args: Parameters<typeof proto>
+				): Promise<Awaited<ReturnType<typeof proto>>> {
+					const ret = await proto.apply(this, args)
+					try {
+						const [id] = args
+						if (ret && id === "templater-obsidian") {
+							type Proto = typeof proto<typeof id>
+							const ret2 = ret as NonNullable<Awaited<ReturnType<Proto>>>
+							patch(ret2)
+						}
+					} catch (error) {
+						self.console.error(error)
+					}
+					return ret
+				}
+			},
+		}))
+		const tp = plugins.getPlugin("templater-obsidian")
+		if (tp) { patch(tp) }
+	}, noop)
 }

@@ -66,7 +66,7 @@ await self.require.import("../relative/path/to/a module.js") // relative path
 await self.require.import("[omitted or whatever](markdown/link/to/a%20module.js.md)") // Markdown link
 await self.require.import("[[wikilink/to/a module|ommited or whatever]]") // wikilink
 // You can workaround the inability to infer the current directory.
-await self.require.import("../relative/path/to/a module.js", { cwd: tp.file.folder(true) })
+await self.require.import("../relative/path/to/a module.js", { cwd: context.currentDirectory })
 
 // If `await` is not supported, use `require` instead. It has less support for loading modules, however.
 self.require("obsidian")
@@ -77,7 +77,7 @@ self.require("../relative/path/to/a module.js")
 self.require("[ommited or whatever](markdown/link/to/a%20module.js.md)")
 self.require("[[wikilink/to/a module|omitted or whatever]]")
 // You can workaround the inability to infer the current directory.
-self.require("../relative/path/to/a module.js", { cwd: tp.file.folder(true) })
+self.require("../relative/path/to/a module.js", { cwd: context.currentDirectory })
 ```
 - To use entities in a module:
 ```JavaScript

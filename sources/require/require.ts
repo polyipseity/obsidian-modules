@@ -26,7 +26,11 @@ import type {
 	Resolved,
 } from "obsidian-modules"
 import { constant, isObject, isUndefined, noop } from "lodash-es"
-import { patchContextForEditor, patchContextForPreview } from "./context.js"
+import {
+	patchContextForEditor,
+	patchContextForPreview,
+	patchContextForTemplater,
+} from "./context.js"
 import { MarkdownTranspile } from "./transpile.js"
 import type { ModulesPlugin } from "../main.js"
 import { around } from "monkey-around"
@@ -48,6 +52,7 @@ export function loadRequire(context: ModulesPlugin): void {
 		patchRequire(context, self0, resolve)))
 	patchContextForPreview(context)
 	patchContextForEditor(context)
+	patchContextForTemplater(context)
 }
 
 function createRequire(
