@@ -34,6 +34,7 @@ This file is automatically opened on first install. You can reopen it in setting
 - Supports circular dependencies for CommonJS modules.
 - Configurable require name.
 - Adds source maps for debugging.
+- Supports popular plugins like Dataview and Templater.
 
 ## Installation
 
