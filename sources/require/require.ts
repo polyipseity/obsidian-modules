@@ -124,7 +124,11 @@ function createRequire(
 				cache0(cache, "commonJS", constant(value))
 				return value
 			}
-			const module = { exports: {} }
+			const module = {
+				exports: {
+					[Symbol.toStringTag]: "Module",
+				},
+			}
 			cache0(cache, "commonJS", () => module.exports)
 			try {
 				parse(code, {
@@ -155,7 +159,9 @@ function createRequire(
 					module,
 					module.exports,
 				)
-				return module.exports
+				const { exports } = module
+				exports[Symbol.toStringTag] = "Module"
+				return exports
 			} catch (error) {
 				cache0(cache, "commonJS", () => { throw error })
 				throw error
@@ -200,7 +206,11 @@ function createRequire(
 					preload(cleanup, rd, context)
 					const prefix =
 						key === "esModuleWithCommonJS"
-							? "export let module={exports:{}};let{exports}=module;"
+							? [
+								"export let module={exports:{[Symbol.toStringTag]:\"Module\"}}",
+								"let{exports}=module",
+								"",
+							].join(";")
 							: "",
 						url = URL.createObjectURL(new Blob(
 							[
@@ -224,8 +234,11 @@ function createRequire(
 							exports0 = launderUnchecked<AnyObject>(
 								launderUnchecked<AnyObject>(mod)["module"],
 							)["exports"],
-							exports = isObject(exports0) ? exports0 : {},
+							exports: {
+								[Symbol.toStringTag]?: "Module"
+							} = isObject(exports0) ? exports0 : {},
 							functions = new Map()
+						exports[Symbol.toStringTag] = "Module"
 						ret2 = new Proxy(exports, {
 							defineProperty(target, property, attributes): boolean {
 								if (!(attributes.configurable ?? true) &&
