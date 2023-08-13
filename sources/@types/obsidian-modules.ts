@@ -188,3 +188,4 @@ declare module "obsidian-modules" {
 		], Set<Resolved["identity"]>>
 	}
 }
+import type { } from "obsidian-modules"
