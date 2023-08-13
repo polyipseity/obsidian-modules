@@ -5,6 +5,7 @@
 		"open-documentation-readme": "$t(generic.open)$t(generic.documentations.readme)"
 	},
 	"generic": {
+		"case-insensitive": "不区分大小写",
 		"documentation": "文档",
 		"documentations": {
 			"changelog": "更改日志",
@@ -16,6 +17,10 @@
 	},
 	"name": "模块",
 	"settings": {
+		"Markdown-code-block-languages-to-load": "要加载的Markdown代码块语言",
+		"Markdown-code-block-languages-to-load-description": "$t(generic.case-insensitive)。$t(generic.list-description)",
+		"Markdown-code-block-languages-to-load-edit": "$t(generic.edit)",
+		"Markdown-code-block-languages-to-load-edit-description": "$t(generic.case-insensitive)。",
 		"documentation": "$t(generic.documentation)",
 		"documentations": {
 			"changelog": "$t(generic.documentations.changelog)",

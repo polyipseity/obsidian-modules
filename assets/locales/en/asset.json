@@ -12,6 +12,8 @@
 		}
 	},
 	"settings": {
+		"Markdown-code-block-languages-to-load-edit-icon": "$t(asset:generic.edit-list-icon)",
+		"Markdown-code-block-languages-to-load-icon": "code",
 		"documentations": {
 			"changelog-icon": "$t(asset:generic.documentations.changelog-icon)",
 			"donate-icon": "$t(asset:generic.documentations.donate-icon)",

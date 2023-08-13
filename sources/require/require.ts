@@ -44,7 +44,7 @@ export const REQUIRE_TAG = Symbol("require tag")
 
 export function loadRequire(context: ModulesPlugin): void {
 	const { app: { workspace } } = context,
-		transpiles = [new MarkdownTranspile()],
+		transpiles = [new MarkdownTranspile(context)],
 		resolve = new CompositeResolve([
 			new InternalModulesResolve(context),
 			new RelativePathResolve(context, transpiles),

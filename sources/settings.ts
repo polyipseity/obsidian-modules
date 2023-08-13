@@ -2,6 +2,7 @@ import {
 	AdvancedSettingTab,
 	type AnyObject,
 	DOMClasses,
+	ListModal,
 	cloneAsWritable,
 	closeSetting,
 	createChildElement,
@@ -12,10 +13,10 @@ import {
 	resetButton,
 	rulesList,
 } from "@polyipseity/obsidian-plugin-library"
+import { constant, identity, isObject } from "lodash-es"
 import type { ModulesPlugin } from "./main.js"
 import { REQUIRE_TAG } from "./require/require.js"
 import { Settings } from "./settings-data.js"
-import { isObject } from "lodash-es"
 import type { loadDocumentations } from "./documentations.js"
 import semverLt from "semver/functions/lt.js"
 
@@ -174,6 +175,52 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 						async () => settings.mutate(settingsM => {
 							settingsM.preloadingRules =
 								cloneAsWritable(Settings.DEFAULT.preloadingRules)
+						}),
+						() => { this.postMutate() },
+					))
+			})
+			.newSetting(containerEl, setting => {
+				const pf = "settings.Markdown-code-block-languages-to-load" as const
+				setting
+					.setName(i18n.t(pf))
+					.setDesc(i18n.t(`${pf}-description`, {
+						count: settings.value.markdownCodeBlockLanguagesToLoad.length,
+						interpolation: { escapeValue: false },
+					}))
+					.addButton(button => {
+						button
+							.setIcon(i18n.t(`asset:${pf}-edit-icon`))
+							.setTooltip(i18n.t(`${pf}-edit`))
+							.onClick(() => {
+								new ListModal(
+									context,
+									ListModal.stringInputter<string>({
+										back: identity,
+										forth: identity,
+									}),
+									constant(""),
+									settings.value.markdownCodeBlockLanguagesToLoad,
+									{
+										callback: async (value): Promise<void> => {
+											await settings.mutate(settingsM => {
+												settingsM.markdownCodeBlockLanguagesToLoad = value
+											})
+											this.postMutate()
+										},
+										description: () => i18n.t(`${pf}-edit-description`),
+										title: () => i18n.t(pf),
+									},
+								).open()
+							})
+					})
+					.addExtraButton(resetButton(
+						i18n.t(`asset:${pf}-icon`),
+						i18n.t("settings.reset"),
+						async () => settings.mutate(settingsM => {
+							settingsM.markdownCodeBlockLanguagesToLoad =
+								cloneAsWritable(
+									Settings.DEFAULT.markdownCodeBlockLanguagesToLoad,
+								)
 						}),
 						() => { this.postMutate() },
 					))

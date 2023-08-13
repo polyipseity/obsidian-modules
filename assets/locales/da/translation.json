@@ -5,6 +5,7 @@
 		"open-documentation-readme": "$t(generic.open, capitalize) $t(generic.documentations.readme)"
 	},
 	"generic": {
+		"case-insensitive": "case-insensitive",
 		"documentation": "documentation",
 		"documentations": {
 			"changelog": "changelog",
@@ -16,6 +17,10 @@
 	},
 	"name": "Modules",
 	"settings": {
+		"Markdown-code-block-languages-to-load": "Markdown code block languages to load",
+		"Markdown-code-block-languages-to-load-description": "$t(generic.case-insensitive, capitalize). $t(generic.list-description, capitalize)",
+		"Markdown-code-block-languages-to-load-edit": "$t(generic.edit, capitalize)",
+		"Markdown-code-block-languages-to-load-edit-description": "$t(generic.case-insensitive, capitalize).",
 		"documentation": "$t(generic.documentation, capitalize)",
 		"documentations": {
 			"changelog": "$t(generic.documentations.changelog, capitalize)",

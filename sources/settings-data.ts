@@ -22,6 +22,7 @@ export interface Settings extends PluginContext.Settings {
 	readonly requireName: string
 	readonly exposeInternalModules: boolean
 	readonly preloadingRules: readonly string[]
+	readonly markdownCodeBlockLanguagesToLoad: readonly string[]
 
 	readonly openChangelogOnUpdate: boolean
 
@@ -47,6 +48,7 @@ export namespace Settings {
 		errorNoticeTimeout: NOTICE_NO_TIMEOUT,
 		exposeInternalModules: true,
 		language: "",
+		markdownCodeBlockLanguagesToLoad: ["JS", "JavaScript"],
 		noticeTimeout: 5,
 		openChangelogOnUpdate: true,
 		preloadingRules: ["+/\\.m?js(?:\\.md)?$/iu"],
@@ -82,6 +84,12 @@ export namespace Settings {
 				semVerString,
 				String(unc.lastReadChangelogVersion),
 				NULL_SEM_VER_STRING,
+			),
+			markdownCodeBlockLanguagesToLoad: fixArray(
+				DEFAULT,
+				unc,
+				"markdownCodeBlockLanguagesToLoad",
+				["string"],
 			),
 			noticeTimeout: fixTyped(
 				DEFAULT,
