@@ -1,5 +1,7 @@
 import {
 	type CodePoint,
+	Rules,
+	SettingRules,
 	codePoint,
 	dynamicRequire,
 	dynamicRequireSync,
@@ -26,6 +28,7 @@ abstract class AbstractFileResolve
 	extends AbstractResolve
 	implements Resolve {
 	public static readonly globalCache = new WeakSet()
+	protected readonly preloadRules
 	protected readonly transpiles
 
 	protected readonly cache0: Record<string, AbstractFileResolve
@@ -39,8 +42,21 @@ abstract class AbstractFileResolve
 		transpiles: readonly Transpile[],
 	) {
 		super(context)
+		this.preloadRules = new SettingRules(
+			context,
+			set => set.preloadingRules,
+			Rules.pathInterpreter,
+		)
 		this.transpiles = Object.freeze([...transpiles])
-		const { cache0, context: { app: { vault } }, transpiled } = this
+		const
+			{
+				cache0,
+				context: { app: { vault } },
+				transpiled,
+				preloadRules,
+			} = this,
+			preloadFiles = async (): Promise<unknown> =>
+				Promise.all(vault.getFiles().map(async file => this.cache(file)))
 		context.registerEvent(vault.on("create", async file => {
 			if (!(file instanceof TFile)) { return }
 			await this.cache(file)
@@ -57,9 +73,6 @@ abstract class AbstractFileResolve
 		context.registerEvent(vault.on("delete", file => {
 			this.uncache(file.path)
 		}))
-		Promise.all(vault.getFiles()
-			.map(async file => this.cache(file)))
-			.catch(error => { self.console.error(error) })
 		for (const trans of transpiles) {
 			trans.onInvalidate.listen(() => {
 				const transed = transpiled.get(trans)
@@ -69,6 +82,8 @@ abstract class AbstractFileResolve
 				}
 			})
 		}
+		context.register(preloadRules.onChanged.listen(preloadFiles))
+		preloadFiles().catch(error => { self.console.error(error) })
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
@@ -128,13 +143,12 @@ abstract class AbstractFileResolve
 	protected async cache(
 		file: TFile,
 	): Promise<AbstractFileResolve.CacheIdentity> {
-		const { cache0, context: { app: { vault } } } = this,
-			{ name, path } = file
+		const { cache0, context: { app: { vault } }, preloadRules } = this,
+			{ path } = file
 		this.uncache(path)
 		const ret = {
 			file,
-			...[/\.js$/iu, /\.mjs$/iu, /\.js\.md$/iu, /\.mjs\.md$/iu]
-				.some(regex => regex.test(name))
+			...preloadRules.test(path)
 				? { content: await vault.cachedRead(file) }
 				: {},
 		}

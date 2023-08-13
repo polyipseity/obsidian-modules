@@ -6,6 +6,7 @@ import {
 	type SemVerString,
 	cloneAsWritable,
 	deepFreeze,
+	fixArray,
 	fixInSet,
 	fixTyped,
 	launderUnchecked,
@@ -20,6 +21,7 @@ export interface Settings extends PluginContext.Settings {
 	readonly language: Settings.DefaultableLanguage
 	readonly requireName: string
 	readonly exposeInternalModules: boolean
+	readonly preloadingRules: readonly string[]
 
 	readonly openChangelogOnUpdate: boolean
 
@@ -47,6 +49,7 @@ export namespace Settings {
 		language: "",
 		noticeTimeout: 5,
 		openChangelogOnUpdate: true,
+		preloadingRules: ["+/\\.m?js(?:\\.md)?$/iu"],
 		requireName: "require",
 	})
 
@@ -91,6 +94,12 @@ export namespace Settings {
 				unc,
 				"openChangelogOnUpdate",
 				["boolean"],
+			),
+			preloadingRules: fixArray(
+				DEFAULT,
+				unc,
+				"preloadingRules",
+				["string"],
 			),
 			recovery: Object.fromEntries(Object
 				.entries(launderUnchecked(unc.recovery))

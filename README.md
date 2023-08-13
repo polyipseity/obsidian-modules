@@ -87,7 +87,9 @@ eat(2 * pi)
 const mod = await self.require.import("[[module]]")
 mod.eat(2 * mod.pi)
 ```
-- To create a module, create a JavaScript file or a Markdown file with JavaScript code blocks. For `require` (but not `require.import`), the file needs to have one of the following extensions: `.js`, `.mjs`, `.js.md`, `.mjs.md`. We recommend that your modules do not have global or side effects because modules are cached and thus not reloaded on every request.
+- To create a module, create a JavaScript file or a Markdown file with JavaScript code blocks.
+	- For `require` (but not `require.import`), the module file needs to be preloaded, which can be configured in settings. By default, preloaded files have the following extensions: `.js`, `.mjs`, `.js.md`, `.mjs.md`
+	- Modules should not have global or side effects because they are cached and thus not reloaded on every requiring.
 - Module exports can be CommonJS-style or ES module-style:
 ```JavaScript
 // ES module-style, supported by `require.import`.
@@ -110,7 +112,6 @@ Contributions are welcome!
 
 The todos here, ordered alphabetically, are things planned for the plugin. There are no guarantees that they will be completed. However, we are likely to accept contributions for them.
 
-- Configure preloaded files.
 - Configure accepted code block languages.
 - Autocomplete with JSDoc.
 

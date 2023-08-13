@@ -2,6 +2,7 @@ import {
 	AdvancedSettingTab,
 	type AnyObject,
 	DOMClasses,
+	cloneAsWritable,
 	closeSetting,
 	createChildElement,
 	createDocumentFragment,
@@ -9,6 +10,7 @@ import {
 	linkSetting,
 	registerSettingsCommands,
 	resetButton,
+	rulesList,
 } from "@polyipseity/obsidian-plugin-library"
 import type { ModulesPlugin } from "./main.js"
 import { REQUIRE_TAG } from "./require/require.js"
@@ -27,6 +29,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 		super.onLoad()
 		const {
 			containerEl,
+			context,
 			context: { language: { value: i18n }, settings, version },
 			docs,
 			ui,
@@ -128,6 +131,49 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 						async () => settings.mutate(settingsM => {
 							settingsM.exposeInternalModules =
 								Settings.DEFAULT.exposeInternalModules
+						}),
+						() => { this.postMutate() },
+					))
+			})
+			.newSetting(containerEl, setting => {
+				const { settingEl } = setting
+				setting
+					.setName(i18n.t("settings.preloading-rules"))
+					.setDesc(createDocumentFragment(settingEl.ownerDocument, frag => {
+						createChildElement(frag, "span", ele => {
+							ele.innerHTML =
+								i18n.t("settings.preloading-rules-description-HTML", {
+									count: settings.value.preloadingRules.length,
+									interpolation: { escapeValue: false },
+								})
+						})
+					}))
+					.addButton(button => {
+						button
+							.setIcon(i18n.t("asset:settings.preloading-rules-edit-icon"))
+							.setTooltip(i18n.t("settings.preloading-rules-edit"))
+							.onClick(() => {
+								rulesList(
+									context,
+									settings.value.preloadingRules,
+									{
+										callback: async (value): Promise<void> => {
+											await settings.mutate(settingsM => {
+												settingsM.preloadingRules = value
+											})
+											this.postMutate()
+										},
+										title: () => i18n.t("settings.preloading-rules"),
+									},
+								).open()
+							})
+					})
+					.addExtraButton(resetButton(
+						i18n.t("asset:settings.preloading-rules-icon"),
+						i18n.t("settings.reset"),
+						async () => settings.mutate(settingsM => {
+							settingsM.preloadingRules =
+								cloneAsWritable(Settings.DEFAULT.preloadingRules)
 						}),
 						() => { this.postMutate() },
 					))
