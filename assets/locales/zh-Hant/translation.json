@@ -18,7 +18,7 @@
 	"name": "模塊",
 	"settings": {
 		"Markdown-code-block-languages-to-load": "要加載的Markdown代碼塊語言",
-		"Markdown-code-block-languages-to-load-description": "$t(generic.case-insensitive)。$t(generic.list-description)",
+		"Markdown-code-block-languages-to-load-description": "$t(generic.list-description)",
 		"Markdown-code-block-languages-to-load-edit": "$t(generic.edit)",
 		"Markdown-code-block-languages-to-load-edit-description": "$t(generic.case-insensitive)。",
 		"documentation": "$t(generic.documentation)",
