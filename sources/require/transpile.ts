@@ -3,25 +3,17 @@ import {
 	type Fixed,
 	cloneAsWritable,
 	deepFreeze,
-	dynamicRequire,
-	dynamicRequireLazy,
 	fixTyped,
 	launderUnchecked,
 	markFixed,
 	splitLines,
 } from "@polyipseity/obsidian-plugin-library"
+import { createProject, createProjectSync, ts } from "@ts-morph/bootstrap"
 import type { AsyncOrSync } from "ts-essentials"
-import { BUNDLE } from "../import.js"
 import type { CacheIdentity } from "./resolve.js"
 import type { ModulesPlugin } from "../main.js"
 import type { TFile } from "obsidian"
 import { isUndefined } from "lodash-es"
-
-const
-	tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")
-	>(BUNDLE, "@ts-morph/bootstrap"),
-	tsMorphBootstrapSync = dynamicRequireLazy<typeof import("@ts-morph/bootstrap")
-	>(BUNDLE, "@ts-morph/bootstrap")
 
 export interface Transpile {
 	readonly onInvalidate: EventEmitterLite<readonly []>
@@ -108,7 +100,7 @@ export class TypeScriptTranspile
 			header2.language = "TypeScript"
 		}
 		if (header2.language !== "TypeScript") { return null }
-		const { createProjectSync, ts } = tsMorphBootstrapSync,
+		const
 			project = createProjectSync({
 				compilerOptions: {
 					inlineSourceMap: true,
@@ -149,7 +141,7 @@ export class TypeScriptTranspile
 				header2.language = "TypeScript"
 			}
 			if (header2.language !== "TypeScript") { return null }
-			const { createProject, ts } = await tsMorphBootstrap,
+			const
 				project = await createProject({
 					compilerOptions: {
 						inlineSourceMap: true,
