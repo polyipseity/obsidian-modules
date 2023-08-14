@@ -11,7 +11,7 @@
 [repository]: https://github.com/polyipseity/obsidian-modules
 [trailer]: https://raw.githubusercontent.com/polyipseity/obsidian-modules/main/assets/trailer.png
 
-Reuse JavaScript code using "require".
+Reuse JavaScript and related languages like TypeScript code using "require".
 
 [![Buy Me a Coffee/embed]][Buy Me a Coffee]
 
@@ -25,7 +25,7 @@ This file is automatically opened on first install. You can reopen it in setting
 
 ## Features
 
-- Reuse JavaScript code from anywhere in your vault.
+- Reuse JavaScript and TypeScript code from anywhere in your vault.
 - No configuration needed.
 - Resolves relative paths, vault paths, Markdown links, and wikilinks.
 - Loads Markdown files as code.
@@ -88,10 +88,26 @@ eat(2 * pi)
 const mod = await self.require.import("[[module]]")
 mod.eat(2 * mod.pi)
 ```
-- To create a module, create a JavaScript file or a Markdown file with JavaScript code blocks.
-	- For `require` (but not `require.import`), the module file needs to be preloaded, which can be configured in settings. By default, preloaded files have the following extensions: `.js`, `.mjs`, `.js.md`, `.mjs.md`
+- To create a module, create a JavaScript or related language file or a Markdown file with JavaScript or related language code blocks.
+	- For `require` (but not `require.import`), the module file needs to be preloaded, which can be configured in settings. By default, preloaded files have the following extensions: `.js`, `.js.md`, `.mjs`, `.mjs.md`, `.ts.md`, `.mts.md`, `.ts`, `.ts.md`
 	- Modules should not have global or side effects because they are cached and thus not reloaded on every requiring.
 	- For Markdown files, code block languages that are loaded can be configured in settings.
+	- For non-JavaScript languages, ensure the module file has the correct file extension (also applies to `.xxx.md`) or prepend the following metadata:
+```TypeScript
+// { "language": "TypeScript" }
+
+export const variable: string = "string"
+```
+````Markdown
+---
+module:
+  language: TypeScript
+---
+
+```TypeScript
+export const variable: string = "string"
+```
+````
 - Module exports can be CommonJS-style or ES module-style:
 ```JavaScript
 // ES module-style, supported by `require.import`.

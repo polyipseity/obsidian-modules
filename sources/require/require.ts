@@ -25,13 +25,13 @@ import type {
 	Resolve,
 	Resolved,
 } from "obsidian-modules"
+import { MarkdownTranspile, TypeScriptTranspile } from "./transpile.js"
 import { constant, isObject, isUndefined, noop } from "lodash-es"
 import {
 	patchContextForEditor,
 	patchContextForPreview,
 	patchContextForTemplater,
 } from "./context.js"
-import { MarkdownTranspile } from "./transpile.js"
 import type { ModulesPlugin } from "../main.js"
 import { around } from "monkey-around"
 import { parse } from "acorn"
@@ -40,7 +40,10 @@ export const REQUIRE_TAG = Symbol("require tag")
 
 export function loadRequire(context: ModulesPlugin): void {
 	const { app: { workspace } } = context,
-		transpiles = [new MarkdownTranspile(context)],
+		transpiles = [
+			new MarkdownTranspile(context),
+			new TypeScriptTranspile(context),
+		],
 		resolve = new CompositeResolve([
 			new InternalModulesResolve(context),
 			new RelativePathResolve(context, transpiles),

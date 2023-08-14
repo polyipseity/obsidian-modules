@@ -48,10 +48,10 @@ export namespace Settings {
 		errorNoticeTimeout: NOTICE_NO_TIMEOUT,
 		exposeInternalModules: true,
 		language: "",
-		markdownCodeBlockLanguagesToLoad: ["JS", "JavaScript"],
+		markdownCodeBlockLanguagesToLoad: ["JS", "TS", "JavaScript", "TypeScript"],
 		noticeTimeout: 5,
 		openChangelogOnUpdate: true,
-		preloadingRules: ["+/\\.m?js(?:\\.md)?$/iu"],
+		preloadingRules: ["+/\\.m?[jt]s(?:\\.md)?$/iu"],
 		requireName: "require",
 	})
 

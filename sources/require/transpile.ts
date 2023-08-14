@@ -1,10 +1,18 @@
 import {
 	EventEmitterLite,
+	type Fixed,
+	cloneAsWritable,
+	deepFreeze,
+	fixTyped,
+	launderUnchecked,
+	markFixed,
 	splitLines,
 } from "@polyipseity/obsidian-plugin-library"
+import { createProject, createProjectSync, ts } from "@ts-morph/bootstrap"
 import type { AsyncOrSync } from "ts-essentials"
 import type { CacheIdentity } from "./resolve.js"
 import type { ModulesPlugin } from "../main.js"
+import type { TFile } from "obsidian"
 import { isUndefined } from "lodash-es"
 
 export interface Transpile {
@@ -16,6 +24,41 @@ export interface Transpile {
 		content: string,
 		identity?: CacheIdentity,
 	) => string | null
+}
+
+interface ContentHeader {
+	readonly language?: string | undefined
+	readonly compilerOptions?: object | undefined
+}
+namespace ContentHeader {
+	export const DEFAULT: ContentHeader = deepFreeze({})
+	export function fix(self0: unknown): Fixed<ContentHeader> {
+		const unc = launderUnchecked<ContentHeader>(self0)
+		return markFixed(unc, {
+			compilerOptions: fixTyped(
+				DEFAULT,
+				unc,
+				"compilerOptions",
+				["object", "undefined"],
+			),
+			language: fixTyped(
+				DEFAULT,
+				unc,
+				"language",
+				["string", "undefined"],
+			),
+		})
+	}
+	export function parse(content: string): ContentHeader {
+		const [, json] = (/^\/\/(?<json>.*)$/mu).exec(content.trimStart()) ?? []
+		let ret: unknown = null
+		try {
+			ret = JSON.parse(json ?? "{}")
+		} catch (error) {
+			self.console.debug(error)
+		}
+		return fix(ret).value
+	}
 }
 
 abstract class AbstractTranspile implements Transpile {
@@ -37,9 +80,102 @@ abstract class AbstractTranspile implements Transpile {
 	): string | null
 }
 
+export class TypeScriptTranspile
+	extends AbstractTranspile
+	implements Transpile {
+	protected readonly cache = new WeakMap<CacheIdentity, string>()
+	protected readonly acache =
+		new WeakMap<CacheIdentity, Promise<string | null>>()
+
+	public override transpile(
+		content: string,
+		identity?: CacheIdentity,
+		header?: ContentHeader,
+	): string | null {
+		const ret = identity && this.cache.get(identity)
+		if (!isUndefined(ret)) { return ret }
+		const header2 = cloneAsWritable(header ?? ContentHeader.parse(content))
+		if (isUndefined(header2.language) &&
+			(/.m?ts$/u).test(identity?.file.extension ?? "")) {
+			header2.language = "TypeScript"
+		}
+		if (header2.language !== "TypeScript") { return null }
+		const
+			project = createProjectSync({
+				compilerOptions: {
+					inlineSourceMap: true,
+					inlineSources: true,
+					module: ts.ModuleKind.CommonJS,
+					target: ts.ScriptTarget.ESNext,
+					...header2.compilerOptions,
+				},
+				useInMemoryFileSystem: true,
+			}),
+			source = project.createSourceFile("index.ts", content),
+			program = project.createProgram()
+		let ret2 = null
+		const { diagnostics } = program.emit(source, (filename, string) => {
+			if (filename.endsWith("index.js")) { ret2 = string }
+		})
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		if (ret2 === null) {
+			throw new Error(
+				project.formatDiagnosticsWithColorAndContext(diagnostics),
+			)
+		}
+		if (identity) { this.cache.set(identity, ret2) }
+		return ret2
+	}
+
+	public override atranspile(
+		content: string,
+		identity?: CacheIdentity,
+		header?: ContentHeader,
+	): AsyncOrSync<ReturnType<typeof this.transpile>> {
+		let ret = identity && this.acache.get(identity)
+		if (!isUndefined(ret)) { return ret }
+		ret = (async (): Promise<string | null> => {
+			const header2 = cloneAsWritable(header ?? ContentHeader.parse(content))
+			if (isUndefined(header2.language) &&
+				(/.m?ts$/u).test(identity?.file.extension ?? "")) {
+				header2.language = "TypeScript"
+			}
+			if (header2.language !== "TypeScript") { return null }
+			const
+				project = await createProject({
+					compilerOptions: {
+						inlineSourceMap: true,
+						inlineSources: true,
+						module: ts.ModuleKind.NodeNext,
+						target: ts.ScriptTarget.ESNext,
+						...header2.compilerOptions,
+					},
+					useInMemoryFileSystem: true,
+				}),
+				source = project.createSourceFile("index.ts", content),
+				program = project.createProgram()
+			let ret2 = null
+			const { diagnostics } = program.emit(source, (filename, string) => {
+				if (filename.endsWith("index.js")) { ret2 = string }
+			})
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+			if (ret2 === null) {
+				throw new Error(
+					project.formatDiagnosticsWithColorAndContext(diagnostics),
+				)
+			}
+			return ret2
+		})()
+		if (identity) { this.acache.set(identity, ret) }
+		return ret
+	}
+}
+
 export class MarkdownTranspile
 	extends AbstractTranspile
 	implements Transpile {
+	protected readonly tsTranspile = new TypeScriptTranspile(this.context)
+
 	public constructor(context: ModulesPlugin) {
 		super(context)
 		const { context: { settings } } = this
@@ -54,6 +190,41 @@ export class MarkdownTranspile
 		identity?: CacheIdentity,
 	): string | null {
 		if (identity?.file.extension !== "md") { return null }
+		const { tsTranspile } = this,
+			ret = this.transpileMarkdown(content)
+		return tsTranspile.transpile(
+			ret,
+			identity,
+			this.getHeader(identity.file),
+		) ?? ret
+	}
+
+	public override async atranspile(
+		content: string,
+		identity?: CacheIdentity,
+	): Promise<ReturnType<typeof this.transpile>> {
+		if (identity?.file.extension !== "md") { return null }
+		const { tsTranspile } = this,
+			ret = this.transpileMarkdown(content)
+		return await tsTranspile.atranspile(
+			ret,
+			identity,
+			this.getHeader(identity.file),
+		) ?? ret
+	}
+
+	protected getHeader(file: TFile): ContentHeader {
+		const { context: { app: { metadataCache } } } = this,
+			ret = ContentHeader
+				.fix(metadataCache.getFileCache(file)?.frontmatter?.["module"])
+				.value
+		if (isUndefined(ret.language) && (/.m?ts$/u).test(file.basename)) {
+			ret.language = "TypeScript"
+		}
+		return ret
+	}
+
+	protected transpileMarkdown(content: string): string {
 		const { context: { settings } } = this,
 			ret = []
 		let delimiter = "",
@@ -81,11 +252,5 @@ export class MarkdownTranspile
 			}
 		}
 		return ret.join("\n")
-	}
-
-	public override atranspile(
-		...args: Parameters<typeof this.transpile>
-	): AsyncOrSync<ReturnType<typeof this.transpile>> {
-		return this.transpile(...args)
 	}
 }

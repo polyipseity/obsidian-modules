@@ -7,6 +7,7 @@
 		"@codemirror/state": "^6.2.1",
 		"@codemirror/view": "^6.16.0",
 		"@polyipseity/obsidian-plugin-library": "^1.16.0",
+		"@ts-morph/bootstrap": "^0.20.0",
 		"acorn": "^8.10.0",
 		"i18next": "^23.4.4",
 		"lodash-es": "^4.17.21",
@@ -15,7 +16,7 @@
 		"semver": "^7.5.4",
 		"ts-essentials": "^9.3.2"
 	},
-	"description": "Reuse JavaScript code using \"require\".",
+	"description": "Reuse JavaScript and related languages like TypeScript code using \"require\".",
 	"devDependencies": {
 		"@changesets/cli": "^2.26.2",
 		"@polyipseity/obsidian": "^1.2.8",
