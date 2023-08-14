@@ -25,7 +25,7 @@ This file is automatically opened on first install. You can reopen it in setting
 
 ## Features
 
-- Reuse JavaScript and TypeScript code from anywhere in your vault.
+- Reuse JavaScript and TypeScript code from anywhere in your vault on all platforms.
 - No configuration needed.
 - Resolves relative paths, vault paths, Markdown links, and wikilinks.
 - Loads Markdown files as code.
