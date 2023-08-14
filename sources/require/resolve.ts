@@ -13,6 +13,11 @@ import type { ModulesPlugin } from "../main.js"
 import type { Transpile } from "./transpile.js"
 import { isUndefined } from "lodash-es"
 
+export interface CacheIdentity {
+	readonly file: TFile
+	readonly content?: string
+}
+
 abstract class AbstractResolve implements Resolve {
 	public constructor(
 		protected readonly context: ModulesPlugin,
@@ -30,12 +35,9 @@ abstract class AbstractFileResolve
 	public static readonly globalCache = new WeakSet()
 	protected readonly preloadRules
 	protected readonly transpiles
-
-	protected readonly cache0: Record<string, AbstractFileResolve
-		.CacheIdentity> = {}
-
+	protected readonly cache0: Record<string, CacheIdentity> = {}
 	protected readonly transpiled =
-		new WeakMap<Transpile, WeakSet<AbstractFileResolve.CacheIdentity>>()
+		new WeakMap<Transpile, WeakSet<CacheIdentity>>()
 
 	public constructor(
 		context: ModulesPlugin,
@@ -140,9 +142,7 @@ abstract class AbstractFileResolve
 		}
 	}
 
-	protected async cache(
-		file: TFile,
-	): Promise<AbstractFileResolve.CacheIdentity> {
+	protected async cache(file: TFile): Promise<CacheIdentity> {
 		const { cache0, context: { app: { vault } }, preloadRules } = this,
 			{ path } = file
 		this.uncache(path)
@@ -156,9 +156,7 @@ abstract class AbstractFileResolve
 		return ret
 	}
 
-	protected recache(
-		path: string,
-	): AbstractFileResolve.CacheIdentity | null {
+	protected recache(path: string): CacheIdentity | null {
 		const { cache0 } = this,
 			entry = this.uncache(path)
 		if (!entry) { return null }
@@ -167,7 +165,7 @@ abstract class AbstractFileResolve
 		return ret
 	}
 
-	protected uncache(path: string): AbstractFileResolve.CacheIdentity | null {
+	protected uncache(path: string): CacheIdentity | null {
 		const { cache0 } = this,
 			{ [path]: entry } = cache0
 		if (!entry) { return null }
@@ -177,9 +175,9 @@ abstract class AbstractFileResolve
 	}
 
 	protected checkDependencies(
-		identity: AbstractFileResolve.CacheIdentity,
+		identity: CacheIdentity,
 		context: Context,
-	): AbstractFileResolve.CacheIdentity {
+	): CacheIdentity {
 		if (![...context.dependencies.get(identity) ?? []]
 			.every(dep => AbstractFileResolve.globalCache.has(dep))) {
 			return this.recache(identity.file.path) ?? identity
@@ -187,13 +185,10 @@ abstract class AbstractFileResolve
 		return identity
 	}
 
-	protected transpile(
-		content: string,
-		identity?: AbstractFileResolve.CacheIdentity,
-	): string {
+	protected transpile(content: string, identity?: CacheIdentity): string {
 		const { transpiled, transpiles } = this
 		for (const trans of transpiles) {
-			const ret = trans.transpile(content, identity?.file)
+			const ret = trans.transpile(content, identity)
 			if (ret !== null) {
 				if (identity) {
 					let transed = transpiled.get(trans)
@@ -216,12 +211,6 @@ abstract class AbstractFileResolve
 	}
 
 	protected abstract resolvePath(id: string, context: Context): string | null
-}
-namespace AbstractFileResolve {
-	export interface CacheIdentity {
-		readonly file: TFile
-		readonly content?: string
-	}
 }
 
 export class CompositeResolve implements Resolve {

@@ -2,13 +2,16 @@ import {
 	EventEmitterLite,
 	splitLines,
 } from "@polyipseity/obsidian-plugin-library"
+import type { CacheIdentity } from "./resolve.js"
 import type { ModulesPlugin } from "../main.js"
-import type { TFile } from "obsidian"
 import { isUndefined } from "lodash-es"
 
 export interface Transpile {
 	readonly onInvalidate: EventEmitterLite<readonly []>
-	readonly transpile: (content: string, file?: TFile) => string | null
+	readonly transpile: (
+		content: string,
+		identity?: CacheIdentity,
+	) => string | null
 }
 
 abstract class AbstractTranspile implements Transpile {
@@ -18,7 +21,10 @@ abstract class AbstractTranspile implements Transpile {
 		protected readonly context: ModulesPlugin,
 	) { }
 
-	public abstract transpile(content: string, file?: TFile): string | null
+	public abstract transpile(
+		content: string,
+		identity?: CacheIdentity,
+	): string | null
 }
 
 export class MarkdownTranspile
@@ -35,9 +41,9 @@ export class MarkdownTranspile
 
 	public override transpile(
 		content: string,
-		file?: TFile | undefined,
+		identity?: CacheIdentity,
 	): string | null {
-		if (file?.extension !== "md") { return null }
+		if (identity?.file.extension !== "md") { return null }
 		const { context: { settings } } = this,
 			ret = []
 		let delimiter = "",
