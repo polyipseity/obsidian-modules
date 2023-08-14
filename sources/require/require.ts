@@ -58,6 +58,7 @@ export function loadRequire(context: ModulesPlugin): void {
 function createRequire(
 	self0: typeof globalThis,
 	resolve: Resolve,
+	sourceRoot = "",
 ): Require {
 	function resolve0(
 		self1: Require,
@@ -153,7 +154,8 @@ function createRequire(
 							column: idx,
 							line: 1,
 						})),
-						source: `modules/${id}`,
+						file: id,
+						sourceRoot: `${sourceRoot}${sourceRoot && "/"}${id}`,
 					},
 				))(
 					module,
@@ -221,7 +223,8 @@ function createRequire(
 											column: idx,
 											line: 1,
 										})),
-										source: `modules/${id}`,
+										file: id,
+										sourceRoot: `${sourceRoot}${sourceRoot && "/"}${id}`,
 									},
 								),
 							],
@@ -403,8 +406,8 @@ function createAndSetRequire(
 	name: string,
 	resolve: Resolve,
 ): () => void {
-	const { api: { requires } } = context,
-		req = createRequire(self0, resolve)
+	const { api: { requires }, manifest: { id } } = context,
+		req = createRequire(self0, resolve, `plugin:${id}`)
 	requires.set(self0, req)
 	if (name in self0 || name === "require") {
 		return around(self0, {
