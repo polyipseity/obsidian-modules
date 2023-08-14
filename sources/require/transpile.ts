@@ -3,14 +3,15 @@ import {
 	type Fixed,
 	cloneAsWritable,
 	deepFreeze,
+	dynamicRequireLazy,
 	fixTyped,
 	launderUnchecked,
 	markFixed,
 	splitLines,
 } from "@polyipseity/obsidian-plugin-library"
 import { type WorkerPool, pool } from "workerpool"
-import { createProjectSync, ts } from "@ts-morph/bootstrap"
 import type { AsyncOrSync } from "ts-essentials"
+import { BUNDLE } from "../import.js"
 import type { CacheIdentity } from "./resolve.js"
 import type { ModulesPlugin } from "../main.js"
 import PLazy from "p-lazy"
@@ -20,6 +21,10 @@ import type { run } from "./ts-transpile.worker.js"
 import { toObjectURL } from "@aidenlx/esbuild-plugin-inline-worker/utils"
 // eslint-disable-next-line import/no-unresolved
 import tsTranspileWorker from "worker:./ts-transpile.worker.js"
+
+const
+	tsMorphBootstrap = dynamicRequireLazy<typeof import("@ts-morph/bootstrap")
+	>(BUNDLE, "@ts-morph/bootstrap")
 
 export interface Transpile {
 	readonly onInvalidate: EventEmitterLite<readonly []>
@@ -122,7 +127,7 @@ export class TypeScriptTranspile
 			header2.language = "TypeScript"
 		}
 		if (header2.language !== "TypeScript") { return null }
-		const
+		const { createProjectSync, ts } = tsMorphBootstrap,
 			project = createProjectSync({
 				compilerOptions: {
 					inlineSourceMap: true,
