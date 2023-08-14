@@ -2,12 +2,16 @@ import {
 	EventEmitterLite,
 	splitLines,
 } from "@polyipseity/obsidian-plugin-library"
+import type { AsyncOrSync } from "ts-essentials"
 import type { CacheIdentity } from "./resolve.js"
 import type { ModulesPlugin } from "../main.js"
 import { isUndefined } from "lodash-es"
 
 export interface Transpile {
 	readonly onInvalidate: EventEmitterLite<readonly []>
+	readonly atranspile: (
+		...args: Parameters<Transpile["transpile"]>
+	) => AsyncOrSync<ReturnType<Transpile["transpile"]>>
 	readonly transpile: (
 		content: string,
 		identity?: CacheIdentity,
@@ -20,6 +24,12 @@ abstract class AbstractTranspile implements Transpile {
 	public constructor(
 		protected readonly context: ModulesPlugin,
 	) { }
+
+	public abstract atranspile(
+		// eslint-disable-next-line @typescript-eslint/no-invalid-this
+		...args: Parameters<typeof this.transpile>
+		// eslint-disable-next-line @typescript-eslint/no-invalid-this
+	): AsyncOrSync<ReturnType<typeof this.transpile>>
 
 	public abstract transpile(
 		content: string,
@@ -71,5 +81,11 @@ export class MarkdownTranspile
 			}
 		}
 		return ret.join("\n")
+	}
+
+	public override atranspile(
+		...args: Parameters<typeof this.transpile>
+	): AsyncOrSync<ReturnType<typeof this.transpile>> {
+		return this.transpile(...args)
 	}
 }

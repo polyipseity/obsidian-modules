@@ -41,6 +41,9 @@ abstract class AbstractFileResolve
 	protected readonly transpiled =
 		new WeakMap<Transpile, WeakSet<CacheIdentity>>()
 
+	protected readonly atranspiled =
+		new WeakMap<Transpile, WeakSet<CacheIdentity>>()
+
 	public constructor(
 		context: ModulesPlugin,
 		transpiles: readonly Transpile[],
@@ -123,7 +126,7 @@ abstract class AbstractFileResolve
 				identity = this.checkDependencies(identity, context)
 				const { file, content } = identity
 				return {
-					code: this.transpile(
+					code: await this.atranspile(
 						content ?? await vault.cachedRead(file),
 						identity,
 					),
@@ -133,7 +136,7 @@ abstract class AbstractFileResolve
 				}
 			}
 			return {
-				code: this.transpile(await adapter.read(id0)),
+				code: await this.atranspile(await adapter.read(id0)),
 				cwd: getWD(id0),
 				id: id0,
 				identity: {},
@@ -197,6 +200,29 @@ abstract class AbstractFileResolve
 					if (!transed) {
 						transed = new WeakSet()
 						transpiled.set(trans, transed)
+					}
+					transed.add(identity)
+				}
+				return ret
+			}
+		}
+		return content
+	}
+
+	protected async atranspile(
+		content: string,
+		identity?: CacheIdentity,
+	): Promise<string> {
+		const { atranspiled, transpiles } = this
+		for (const trans of transpiles) {
+			// eslint-disable-next-line no-await-in-loop
+			const ret = await trans.atranspile(content, identity)
+			if (ret !== null) {
+				if (identity) {
+					let transed = atranspiled.get(trans)
+					if (!transed) {
+						transed = new WeakSet()
+						atranspiled.set(trans, transed)
 					}
 					transed.add(identity)
 				}
