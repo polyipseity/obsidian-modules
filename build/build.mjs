@@ -52,6 +52,7 @@ const ARGV_PRODUCTION = 2,
 			}),
 			inlineWorkerPlugin({
 				buildOptions: constant({
+					banner: { js: "\"use strict\";function require(){};" },
 					bundle: true,
 					color: true,
 					define: { "globalThis.process": "undefined", process: "undefined" },
