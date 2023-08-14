@@ -22,11 +22,13 @@ abstract class AbstractResolve implements Resolve {
 	public constructor(
 		protected readonly context: ModulesPlugin,
 	) { }
-	public abstract resolve(id: string, context: Context): Resolved | null
+
 	public abstract aresolve(
-		id: string,
-		context: Context,
-	): PromiseLike<Resolved | null>
+		// eslint-disable-next-line @typescript-eslint/no-invalid-this
+		...args: Parameters<typeof this.resolve>
+		// eslint-disable-next-line @typescript-eslint/no-invalid-this
+	): AsyncOrSync<ReturnType<typeof this.resolve>>
+	public abstract resolve(id: string, context: Context): Resolved | null
 }
 
 abstract class AbstractFileResolve
@@ -204,12 +206,11 @@ abstract class AbstractFileResolve
 		return content
 	}
 
-	protected aresolvePath(
+	protected abstract aresolvePath(
+		// eslint-disable-next-line @typescript-eslint/no-invalid-this
 		...args: Parameters<typeof this.resolvePath>
-	): AsyncOrSync<ReturnType<typeof this.resolvePath>> {
-		return this.resolvePath(...args)
-	}
-
+		// eslint-disable-next-line @typescript-eslint/no-invalid-this
+	): AsyncOrSync<ReturnType<typeof this.resolvePath>>
 	protected abstract resolvePath(id: string, context: Context): string | null
 }
 
@@ -266,6 +267,8 @@ export class InternalModulesResolve
 		id: string,
 		_1: Context,
 	): Promise<Resolved | null> {
+		const { context: { settings } } = this
+		if (!settings.value.exposeInternalModules) { return null }
 		let value = null
 		try {
 			value = await dynamicRequire({}, id)
@@ -290,23 +293,35 @@ export class InternalModulesResolve
 export class VaultPathResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolvePath(id: string, _1: Context): string | null {
+	protected override resolvePath(id: string, _1: Context): string | null {
 		return parsePath(id)
+	}
+
+	protected override aresolvePath(
+		...args: Parameters<typeof this.resolvePath>
+	): AsyncOrSync<ReturnType<typeof this.resolvePath>> {
+		return this.resolvePath(...args)
 	}
 }
 
 export class RelativePathResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolvePath(id: string, context: Context): string | null {
+	protected override resolvePath(id: string, context: Context): string | null {
 		return parsePath(`${context.cwds.at(-1) ?? ""}/${id}`)
+	}
+
+	protected override aresolvePath(
+		...args: Parameters<typeof this.resolvePath>
+	): AsyncOrSync<ReturnType<typeof this.resolvePath>> {
+		return this.resolvePath(...args)
 	}
 }
 
 export class MarkdownLinkResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolvePath(id: string, context: Context): string | null {
+	protected override resolvePath(id: string, context: Context): string | null {
 		const { context: { app: { metadataCache } } } = this,
 			link = parseMarkdownLink(id)
 		if (!link) { return null }
@@ -335,7 +350,7 @@ export class MarkdownLinkResolve
 export class WikilinkResolve
 	extends AbstractFileResolve
 	implements Resolve {
-	public override resolvePath(id: string, context: Context): string | null {
+	protected override resolvePath(id: string, context: Context): string | null {
 		const { context: { app: { metadataCache } } } = this,
 			link = parseWikilink(id)
 		if (!link) { return null }

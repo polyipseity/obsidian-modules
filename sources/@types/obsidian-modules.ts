@@ -125,14 +125,12 @@ declare module "obsidian-modules" {
 		/**
 		 * Resolves a module specifier, supporting async resources.
 		 *
-		 * @param id module specifier
-		 * @param context resolve context
-		 * @returns the resolved module data or `null` if not found
+		 * @param args see {@link resolve}
+		 * @returns see {@link resolve}
 		 */
 		readonly aresolve: (
-			id: string,
-			context: Context,
-		) => PromiseLike<Resolved | null>
+			...args: Parameters<Resolve["resolve"]>
+		) => AsyncOrSync<ReturnType<Resolve["resolve"]>>
 	}
 
 	/**
@@ -189,3 +187,4 @@ declare module "obsidian-modules" {
 	}
 }
 import type { } from "obsidian-modules"
+import type { AsyncOrSync } from "ts-essentials"
