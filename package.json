@@ -4,6 +4,7 @@
 		"url": "https://github.com/polyipseity/obsidian-modules"
 	},
 	"dependencies": {
+		"@aidenlx/esbuild-plugin-inline-worker": "^1.0.1",
 		"@codemirror/state": "^6.2.1",
 		"@codemirror/view": "^6.16.0",
 		"@polyipseity/obsidian-plugin-library": "^1.16.0",
@@ -14,7 +15,8 @@
 		"monkey-around": "^2.3.0",
 		"obsidian": "^1.2.8",
 		"semver": "^7.5.4",
-		"ts-essentials": "^9.3.2"
+		"ts-essentials": "^9.3.2",
+		"workerpool": "^6.4.0"
 	},
 	"description": "Reuse JavaScript and related languages like TypeScript code using \"require\".",
 	"devDependencies": {
@@ -27,6 +29,7 @@
 		"@types/lodash-es": "^4.17.8",
 		"@types/node": "^20.5.0",
 		"@types/semver": "^7.5.0",
+		"@types/workerpool": "^6.4.0",
 		"@typescript-eslint/eslint-plugin": "^6.3.0",
 		"@typescript-eslint/parser": "^6.3.0",
 		"builtin-modules": "^3.3.0",
@@ -77,6 +80,7 @@
 		"name": "Modules"
 	},
 	"overrides": {
+		"esbuild": "$esbuild",
 		"tsconfig-paths": "^4.0.0"
 	},
 	"pnpm": {

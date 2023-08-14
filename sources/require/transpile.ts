@@ -8,12 +8,17 @@ import {
 	markFixed,
 	splitLines,
 } from "@polyipseity/obsidian-plugin-library"
-import { createProject, createProjectSync, ts } from "@ts-morph/bootstrap"
+import { createProjectSync, ts } from "@ts-morph/bootstrap"
 import type { AsyncOrSync } from "ts-essentials"
 import type { CacheIdentity } from "./resolve.js"
 import type { ModulesPlugin } from "../main.js"
 import type { TFile } from "obsidian"
 import { isUndefined } from "lodash-es"
+import { pool } from "workerpool"
+import type { run } from "./ts-transpile.worker.js"
+import { toObjectURL } from "@aidenlx/esbuild-plugin-inline-worker/utils"
+// eslint-disable-next-line import/no-unresolved
+import tsTranspileWorker from "worker:./ts-transpile.worker.js"
 
 export interface Transpile {
 	readonly onInvalidate: EventEmitterLite<readonly []>
@@ -83,9 +88,24 @@ abstract class AbstractTranspile implements Transpile {
 export class TypeScriptTranspile
 	extends AbstractTranspile
 	implements Transpile {
+	protected readonly workers = pool({})
 	protected readonly cache = new WeakMap<CacheIdentity, string>()
 	protected readonly acache =
 		new WeakMap<CacheIdentity, Promise<string | null>>()
+
+	public constructor(context: ModulesPlugin) {
+		super(context)
+		const url = toObjectURL(tsTranspileWorker)
+		try {
+			context.register(() => { URL.revokeObjectURL(url) })
+			const workers = pool(url, { workerType: "web" })
+			context.register(async () => workers.terminate(true))
+			this.workers = workers
+		} catch (error) {
+			URL.revokeObjectURL(url)
+			throw error
+		}
+	}
 
 	public override transpile(
 		content: string,
@@ -141,30 +161,12 @@ export class TypeScriptTranspile
 				header2.language = "TypeScript"
 			}
 			if (header2.language !== "TypeScript") { return null }
-			const
-				project = await createProject({
-					compilerOptions: {
-						inlineSourceMap: true,
-						inlineSources: true,
-						module: ts.ModuleKind.NodeNext,
-						target: ts.ScriptTarget.ESNext,
-						...header2.compilerOptions,
-					},
-					useInMemoryFileSystem: true,
-				}),
-				source = project.createSourceFile("index.ts", content),
-				program = project.createProgram()
-			let ret2 = null
-			const { diagnostics } = program.emit(source, (filename, string) => {
-				if (filename.endsWith("index.js")) { ret2 = string }
-			})
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-			if (ret2 === null) {
-				throw new Error(
-					project.formatDiagnosticsWithColorAndContext(diagnostics),
-				)
-			}
-			return ret2
+			return this.workers.exec<typeof run>("run", [
+				{
+					compilerOptions: header2.compilerOptions,
+					content,
+				},
+			])
 		})()
 		if (identity) { this.acache.set(identity, ret) }
 		return ret

@@ -1,11 +1,12 @@
 import { analyzeMetafile, context, formatMessages } from "esbuild"
-import { isEmpty, isUndefined } from "lodash-es"
+import { constant, isEmpty, isUndefined } from "lodash-es"
 import { PATHS } from "./util.mjs"
 import { argv } from "node:process"
 import builtinModules from "builtin-modules"
 import esbuildCompress from "esbuild-compress"
 import esbuildPluginGlobals from "esbuild-plugin-globals"
 import esbuildPluginTextReplace from "esbuild-plugin-text-replace"
+import { inlineWorkerPlugin } from "@aidenlx/esbuild-plugin-inline-worker"
 import { writeFile } from "node:fs/promises"
 
 const ARGV_PRODUCTION = 2,
@@ -48,6 +49,13 @@ const ARGV_PRODUCTION = 2,
 			}),
 			esbuildCompress({
 				lazy: true,
+			}),
+			inlineWorkerPlugin({
+				buildOptions: constant({
+					define: { "globalThis.process": "undefined", process: "undefined" },
+					format: "cjs",
+				}),
+				watch: DEV,
 			}),
 			esbuildPluginTextReplace({
 				include: /obsidian-plugin-library.*\.js$/u,
