@@ -13,6 +13,7 @@ import { createProjectSync, ts } from "@ts-morph/bootstrap"
 import type { AsyncOrSync } from "ts-essentials"
 import type { CacheIdentity } from "./resolve.js"
 import type { ModulesPlugin } from "../main.js"
+import PLazy from "p-lazy"
 import type { TFile } from "obsidian"
 import { isUndefined } from "lodash-es"
 import type { run } from "./ts-transpile.worker.js"
@@ -88,14 +89,14 @@ abstract class AbstractTranspile implements Transpile {
 export class TypeScriptTranspile
 	extends AbstractTranspile
 	implements Transpile {
-	protected readonly workers
+	protected readonly pool
 	protected readonly cache = new WeakMap<CacheIdentity, string>()
 	protected readonly acache =
 		new WeakMap<CacheIdentity, Promise<string | null>>()
 
 	public constructor(context: ModulesPlugin) {
 		super(context)
-		this.workers = (async (): Promise<WorkerPool> => {
+		this.pool = PLazy.from(async (): Promise<WorkerPool> => {
 			const url = toObjectURL(await tsTranspileWorker)
 			try {
 				const ret = pool(url, { workerType: "web" })
@@ -105,7 +106,7 @@ export class TypeScriptTranspile
 				URL.revokeObjectURL(url)
 				throw error
 			}
-		})()
+		})
 	}
 
 	public override transpile(
@@ -162,7 +163,7 @@ export class TypeScriptTranspile
 				header2.language = "TypeScript"
 			}
 			if (header2.language !== "TypeScript") { return null }
-			return (await this.workers).exec<typeof run>("run", [
+			return (await this.pool).exec<typeof run>("run", [
 				{
 					compilerOptions: header2.compilerOptions,
 					content,
