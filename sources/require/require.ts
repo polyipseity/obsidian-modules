@@ -103,13 +103,11 @@ function createRequire(
 		context: Context,
 	): void {
 		const { cwd, identity } = resolved,
-			{ parent } = context
+			{ cwds, parent } = context
 		cleanup.push(() => { assignExact(context, "parent", parent) })
 		context.parent = identity
-		if (!isUndefined(cwd)) {
-			context.cwds.push(cwd)
-			cleanup.push(() => { context.cwds.pop() })
-		}
+		cwds.push(cwd ?? "")
+		cleanup.push(() => { cwds.pop() })
 	}
 	const ret: Require = Object.assign((id0: string, opts?: RequireOptions) => {
 		const cleanup = new Functions({ async: false, settled: true })
