@@ -27,7 +27,7 @@ import type {
 	Resolved,
 } from "obsidian-modules"
 import { MarkdownTranspile, TypeScriptTranspile } from "./transpile.js"
-import { constant, isObject, isUndefined, noop } from "lodash-es"
+import { constant, isObject, noop } from "lodash-es"
 import {
 	patchContextForEditor,
 	patchContextForPreview,
@@ -117,7 +117,7 @@ function createRequire(
 		try {
 			const { context, context: { cwds }, resolve: resolve1 } = ret,
 				cwd = opts?.cwd
-			if (!isUndefined(cwd)) {
+			if (cwd !== void 0) {
 				cwds.push(cwd)
 				cleanup.push(() => cwds.pop())
 			}
@@ -187,7 +187,7 @@ function createRequire(
 			try {
 				const { context, context: { cwds }, resolve: resolve1 } = ret,
 					cwd = opts?.cwd
-				if (!isUndefined(cwd)) {
+				if (cwd !== void 0) {
 					cwds.push(cwd)
 					cleanup.push(() => { cwds.pop() })
 				}

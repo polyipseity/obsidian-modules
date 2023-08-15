@@ -22,7 +22,6 @@ import { BUNDLE } from "../import.js"
 import type { CallExpression } from "estree"
 import type { ModulesPlugin } from "../main.js"
 import { generate } from "astring"
-import { isUndefined } from "lodash-es"
 import { simple } from "acorn-walk"
 
 const
@@ -117,7 +116,7 @@ abstract class AbstractFileResolve
 		if (identity) {
 			identity = this.checkDependencies(identity, context)
 			const { content } = identity
-			if (!isUndefined(content)) {
+			if (content !== void 0) {
 				return {
 					code: this.transpile(content, identity),
 					cwd: getWD(id0),
@@ -506,7 +505,7 @@ function parseMarkdownLink(link: string): {
 	const pathParts = pathtext.split(/ +/u, 2),
 		[, title] =
 			(/^"(?<title>(?:\\"|[^"])*)"$/u).exec(pathParts[1] ?? "\"\"") ?? []
-	if (isUndefined(title)) { return null }
+	if (title === void 0) { return null }
 	return {
 		display,
 		path: self.decodeURI(pathParts[0] ?? ""),
@@ -521,7 +520,7 @@ function parseWikilink(
 	const match = (/^!?\[\[(?<path>[^|]+)\|?(?<display>.*?)\]\]/u).exec(link)
 	if (!match) { return null }
 	const [str, path, display] = match
-	if (str !== link || isUndefined(path) || isUndefined(display)) { return null }
+	if (str !== link || path === void 0 || display === void 0) { return null }
 	return { display: display || (str.includes("|") ? "" : path), path }
 }
 
@@ -570,7 +569,7 @@ export class ExternalResolve
 		if (href === null) { return [null, null] }
 		const { tsTranspile } = this
 		let { identities: { [href]: identity } } = this
-		if (isUndefined(identity)) {
+		if (identity === void 0) {
 			// eslint-disable-next-line no-multi-assign
 			this.identities[href] = identity = null
 			try {
@@ -648,7 +647,7 @@ export class ExternalResolve
 	protected normalizeURL(id: string, cwd?: string): string | null {
 		const { filter } = ExternalResolve
 		let href = null
-		if (!isUndefined(cwd)) {
+		if (cwd !== void 0) {
 			try {
 				({ href } = new URL(id, cwd))
 				if (!filter.test(href)) { href = null }

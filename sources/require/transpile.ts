@@ -16,7 +16,6 @@ import type { CacheIdentity } from "./resolve.js"
 import type { ModulesPlugin } from "../main.js"
 import PLazy from "p-lazy"
 import type { TFile } from "obsidian"
-import { isUndefined } from "lodash-es"
 import type { run } from "./ts-transpile.worker.js"
 import { toObjectURL } from "@aidenlx/esbuild-plugin-inline-worker/utils"
 // eslint-disable-next-line import/no-unresolved
@@ -120,9 +119,9 @@ export class TypeScriptTranspile
 		header?: ContentHeader,
 	): string | null {
 		const ret = identity && this.cache.get(identity)
-		if (!isUndefined(ret)) { return ret }
+		if (ret !== void 0) { return ret }
 		const header2 = cloneAsWritable(header ?? ContentHeader.parse(content))
-		if (isUndefined(header2.language) &&
+		if (header2.language === void 0 &&
 			(/.m?ts$/u).test(identity?.file?.extension ?? "")) {
 			header2.language = "TypeScript"
 		}
@@ -160,10 +159,10 @@ export class TypeScriptTranspile
 		header?: ContentHeader,
 	): AsyncOrSync<ReturnType<typeof this.transpile>> {
 		let ret = identity && this.acache.get(identity)
-		if (!isUndefined(ret)) { return ret }
+		if (ret !== void 0) { return ret }
 		ret = (async (): Promise<string | null> => {
 			const header2 = cloneAsWritable(header ?? ContentHeader.parse(content))
-			if (isUndefined(header2.language) &&
+			if (header2.language === void 0 &&
 				(/.m?ts$/u).test(identity?.file?.extension ?? "")) {
 				header2.language = "TypeScript"
 			}
@@ -228,7 +227,7 @@ export class MarkdownTranspile
 			ret = ContentHeader
 				.fix(metadataCache.getFileCache(file)?.frontmatter?.["module"])
 				.value
-		if (isUndefined(ret.language) && (/.m?ts$/u).test(file.basename)) {
+		if (ret.language === void 0 && (/.m?ts$/u).test(file.basename)) {
 			ret.language = "TypeScript"
 		}
 		return ret
@@ -254,7 +253,7 @@ export class MarkdownTranspile
 			const match = (/^(?<delimiter>[`~]{3,})(?<language>.*)$/mu).exec(line)
 			if (match) {
 				const [, delimiter2, language] = match
-				if (isUndefined(delimiter2) || isUndefined(language)) { continue }
+				if (delimiter2 === void 0 || language === void 0) { continue }
 				delimiter = delimiter2
 				if (settings.value.markdownCodeBlockLanguagesToLoad
 					.map(lang => lang.toLowerCase())

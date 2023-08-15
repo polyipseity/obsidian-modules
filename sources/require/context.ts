@@ -3,13 +3,13 @@ import {
 	MarkdownPreviewRenderer,
 	editorInfoField,
 } from "obsidian"
-import { isUndefined, noop } from "lodash-es"
 import { EditorView } from "@codemirror/view"
 import type { ModulesPlugin } from "../main.js"
 import type { StateField } from "@codemirror/state"
 import type { TemplaterPlugin } from "templater-obsidian"
 import { around } from "monkey-around"
 import { getWD } from "./resolve.js"
+import { noop } from "lodash-es"
 import { revealPrivate } from "@polyipseity/obsidian-plugin-library"
 
 export function patchContextForPreview(context: ModulesPlugin): void {
@@ -50,11 +50,11 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 						editorInfoField as StateField<MarkdownFileInfo>,
 						false,
 					)?.file?.path
-				if (!isUndefined(path)) { req?.context.cwds.push(getWD(path)) }
+				if (path !== void 0) { req?.context.cwds.push(getWD(path)) }
 				try {
 					proto.apply(this, args)
 				} finally {
-					if (!isUndefined(path)) {
+					if (path !== void 0) {
 						// Runs after all microtasks are done
 						self.setTimeout(() => { req?.context.cwds.pop() }, 0)
 					}
