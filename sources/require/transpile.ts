@@ -94,25 +94,21 @@ abstract class AbstractTranspile implements Transpile {
 export class TypeScriptTranspile
 	extends AbstractTranspile
 	implements Transpile {
-	protected readonly pool
 	protected readonly cache = new WeakMap<CacheIdentity, string>()
 	protected readonly acache =
 		new WeakMap<CacheIdentity, Promise<string | null>>()
 
-	public constructor(context: ModulesPlugin) {
-		super(context)
-		this.pool = PLazy.from(async (): Promise<WorkerPool> => {
-			const url = toObjectURL(await tsTranspileWorker)
-			try {
-				const ret = pool(url, { workerType: "web" })
-				context.register(async () => ret.terminate(true))
-				return ret
-			} catch (error) {
-				URL.revokeObjectURL(url)
-				throw error
-			}
-		})
-	}
+	protected readonly pool = PLazy.from(async (): Promise<WorkerPool> => {
+		const url = toObjectURL(await tsTranspileWorker)
+		try {
+			const ret = pool(url, { workerType: "web" })
+			this.context.register(async () => ret.terminate(true))
+			return ret
+		} catch (error) {
+			URL.revokeObjectURL(url)
+			throw error
+		}
+	})
 
 	public override transpile(
 		content: string,
