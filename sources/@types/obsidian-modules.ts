@@ -172,7 +172,7 @@ declare module "obsidian-modules" {
 		/**
 		 * Current working directory.
 		 */
-		readonly cwds: string[]
+		readonly cwds: (string | undefined)[]
 
 		/**
 		 * Identity of the parent module being loaded.

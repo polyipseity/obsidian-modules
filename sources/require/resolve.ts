@@ -512,6 +512,7 @@ function parseWikilink(
 export class ExternalResolve
 	extends AbstractResolve
 	implements Resolve {
+	public static readonly filter = /^https?:/u
 	protected readonly identities: Record<string, {
 		readonly code: string
 	} | null | undefined> = {}
@@ -520,18 +521,23 @@ export class ExternalResolve
 		super(context)
 	}
 
-	public override resolve(id: string, _1: Context): Resolved | null {
-		const href = this.normalizeURL(id)
+	public override resolve(id: string, context: Context): Resolved | null {
+		const href = this.normalizeURL(id, context)
 		if (href === null) { return null }
 		const { identities: { [href]: identity } } = this
-		return (identity && { code: identity.code, id: href, identity }) ?? null
+		return (identity && {
+			code: identity.code,
+			cwd: href,
+			id: href,
+			identity,
+		}) ?? null
 	}
 
 	public override async aresolve(
 		id: string,
-		_1: Context,
+		context: Context,
 	): Promise<Resolved | null> {
-		const href = this.normalizeURL(id)
+		const href = this.normalizeURL(id, context)
 		if (href === null) { return null }
 		let { identities: { [href]: identity } } = this
 		if (isUndefined(identity)) {
@@ -544,13 +550,23 @@ export class ExternalResolve
 			// eslint-disable-next-line no-multi-assign
 			this.identities[href] = identity = code === null ? null : { code }
 		}
-		return identity && { code: identity.code, id: href, identity }
+		return identity && { code: identity.code, cwd: href, id: href, identity }
 	}
 
-	protected normalizeURL(id: string): string | null {
+	protected normalizeURL(id: string, context: Context): string | null {
+		const { filter } = ExternalResolve,
+			cwd = context.cwds.at(-1)
+		if (!isUndefined(cwd)) {
+			try {
+				const { href } = new URL(id, cwd)
+				if (filter.test(href)) { return href }
+			} catch (error) {
+				self.console.debug(error)
+			}
+		}
 		try {
-			const { href, protocol } = new URL(id)
-			if ((/^https?:$/u).test(protocol)) { return href }
+			const { href } = new URL(id)
+			if (filter.test(href)) { return href }
 		} catch (error) {
 			self.console.debug(error)
 		}

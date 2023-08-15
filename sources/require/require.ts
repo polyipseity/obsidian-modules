@@ -108,7 +108,7 @@ function createRequire(
 			{ cwds, parent } = context
 		cleanup.push(() => { assignExact(context, "parent", parent) })
 		context.parent = identity
-		cwds.push(cwd ?? "")
+		cwds.push(cwd)
 		cleanup.push(() => { cwds.pop() })
 	}
 	const ret: Require = Object.assign((id0: string, opts?: RequireOptions) => {
