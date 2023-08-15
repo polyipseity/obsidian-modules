@@ -101,8 +101,10 @@ export class TypeScriptTranspile
 	protected readonly pool = PLazy.from(async (): Promise<WorkerPool> => {
 		const url = toObjectURL(await tsTranspileWorker)
 		try {
+			const { context } = this
+			context.register(() => { URL.revokeObjectURL(url) })
 			const ret = pool(url, { workerType: "web" })
-			this.context.register(async () => ret.terminate(true))
+			context.register(async () => ret.terminate(true))
 			return ret
 		} catch (error) {
 			URL.revokeObjectURL(url)
