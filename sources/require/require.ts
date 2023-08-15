@@ -10,6 +10,7 @@ import {
 } from "@polyipseity/obsidian-plugin-library"
 import {
 	CompositeResolve,
+	ExternalResolve,
 	InternalModulesResolve,
 	MarkdownLinkResolve,
 	RelativePathResolve,
@@ -50,6 +51,7 @@ export function loadRequire(context: ModulesPlugin): void {
 			new VaultPathResolve(context, transpiles),
 			new WikilinkResolve(context, transpiles),
 			new MarkdownLinkResolve(context, transpiles),
+			new ExternalResolve(context),
 		])
 	context.register(patchWindows(workspace, self0 =>
 		patchRequire(context, self0, resolve)))

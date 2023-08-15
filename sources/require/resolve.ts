@@ -7,7 +7,7 @@ import {
 	dynamicRequireSync,
 } from "@polyipseity/obsidian-plugin-library"
 import type { Context, Resolve, Resolved } from "obsidian-modules"
-import { TFile, getLinkpath, normalizePath } from "obsidian"
+import { TFile, getLinkpath, normalizePath, requestUrl } from "obsidian"
 import type { AsyncOrSync } from "ts-essentials"
 import type { ModulesPlugin } from "../main.js"
 import type { Transpile } from "./transpile.js"
@@ -507,4 +507,53 @@ function parseWikilink(
 	const [str, path, display] = match
 	if (str !== link || isUndefined(path) || isUndefined(display)) { return null }
 	return { display: display || (str.includes("|") ? "" : path), path }
+}
+
+export class ExternalResolve
+	extends AbstractResolve
+	implements Resolve {
+	protected readonly identities: Record<string, {
+		readonly code: string
+	} | null | undefined> = {}
+
+	public constructor(context: ModulesPlugin) {
+		super(context)
+	}
+
+	public override resolve(id: string, _1: Context): Resolved | null {
+		const href = this.normalizeURL(id)
+		if (href === null) { return null }
+		const { identities: { [href]: identity } } = this
+		return (identity && { code: identity.code, id: href, identity }) ?? null
+	}
+
+	public override async aresolve(
+		id: string,
+		_1: Context,
+	): Promise<Resolved | null> {
+		const href = this.normalizeURL(id)
+		if (href === null) { return null }
+		let { identities: { [href]: identity } } = this
+		if (isUndefined(identity)) {
+			let code = null
+			try {
+				({ text: code } = await requestUrl(href))
+			} catch (error) {
+				self.console.debug(error)
+			}
+			// eslint-disable-next-line no-multi-assign
+			this.identities[href] = identity = code === null ? null : { code }
+		}
+		return identity && { code: identity.code, id: href, identity }
+	}
+
+	protected normalizeURL(id: string): string | null {
+		try {
+			const { href, protocol } = new URL(id)
+			if ((/^https?:$/u).test(protocol)) { return href }
+		} catch (error) {
+			self.console.debug(error)
+		}
+		return null
+	}
 }

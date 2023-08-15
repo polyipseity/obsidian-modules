@@ -27,7 +27,7 @@ This file is automatically opened on first install. You can reopen it in setting
 
 - Reuse JavaScript and TypeScript code from anywhere in your vault on all platforms.
 - No configuration needed.
-- Resolves relative paths, vault paths, Markdown links, and wikilinks.
+- Resolves relative paths, vault paths, Markdown links, wikilinks, and external links.
 - Loads Markdown files as code.
 - Supports using other modules inside modules.
 - Loads CommonJS (`module.exports`) and ES modules (`export`).
