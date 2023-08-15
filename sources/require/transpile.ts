@@ -8,13 +8,13 @@ import {
 	markFixed,
 	splitLines,
 } from "@polyipseity/obsidian-plugin-library"
+import { type WorkerPool, pool } from "workerpool"
 import { createProjectSync, ts } from "@ts-morph/bootstrap"
 import type { AsyncOrSync } from "ts-essentials"
 import type { CacheIdentity } from "./resolve.js"
 import type { ModulesPlugin } from "../main.js"
 import type { TFile } from "obsidian"
 import { isUndefined } from "lodash-es"
-import { pool } from "workerpool"
 import type { run } from "./ts-transpile.worker.js"
 import { toObjectURL } from "@aidenlx/esbuild-plugin-inline-worker/utils"
 // eslint-disable-next-line import/no-unresolved
@@ -88,23 +88,24 @@ abstract class AbstractTranspile implements Transpile {
 export class TypeScriptTranspile
 	extends AbstractTranspile
 	implements Transpile {
-	protected readonly workers = pool({})
+	protected readonly workers
 	protected readonly cache = new WeakMap<CacheIdentity, string>()
 	protected readonly acache =
 		new WeakMap<CacheIdentity, Promise<string | null>>()
 
 	public constructor(context: ModulesPlugin) {
 		super(context)
-		const url = toObjectURL(tsTranspileWorker)
-		try {
-			context.register(() => { URL.revokeObjectURL(url) })
-			const workers = pool(url, { workerType: "web" })
-			context.register(async () => workers.terminate(true))
-			this.workers = workers
-		} catch (error) {
-			URL.revokeObjectURL(url)
-			throw error
-		}
+		this.workers = (async (): Promise<WorkerPool> => {
+			const url = toObjectURL(await tsTranspileWorker)
+			try {
+				const ret = pool(url, { workerType: "web" })
+				context.register(async () => ret.terminate(true))
+				return ret
+			} catch (error) {
+				URL.revokeObjectURL(url)
+				throw error
+			}
+		})()
 	}
 
 	public override transpile(
@@ -161,7 +162,7 @@ export class TypeScriptTranspile
 				header2.language = "TypeScript"
 			}
 			if (header2.language !== "TypeScript") { return null }
-			return this.workers.exec<typeof run>("run", [
+			return (await this.workers).exec<typeof run>("run", [
 				{
 					compilerOptions: header2.compilerOptions,
 					content,

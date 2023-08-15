@@ -44,19 +44,6 @@ const ARGV_PRODUCTION = 2,
 				// Cannot use `i18next` because it is too outdated to have formatters
 				moment: "moment",
 			}),
-			esbuildCompress({
-				compressors: [
-					{
-						filter: /\.json$/u,
-						loader: "json",
-					},
-					{
-						filter: /\.md$/u,
-						lazy: true,
-						loader: "text",
-					},
-				],
-			}),
 			inlineWorkerPlugin({
 				buildOptions: constant({
 					banner: { js: "\"use strict\";function require(){};" },
@@ -77,12 +64,39 @@ const ARGV_PRODUCTION = 2,
 					logLimit: 0,
 					minify: !DEV,
 					platform: "browser",
+					plugins: [
+						esbuildCompress({
+							compressors: [
+								{
+									filter: /(?:)/u,
+									lazy: true,
+									loader: "text",
+									onEnd: true,
+								},
+							],
+						}),
+					],
 					sourcemap: DEV && "inline",
 					sourcesContent: true,
 					target: "ES2018",
 					treeShaking: true,
+					write: false,
 				}),
+				codeLoader: "js",
 				watch: DEV,
+			}),
+			esbuildCompress({
+				compressors: [
+					{
+						filter: /\.json$/u,
+						loader: "json",
+					},
+					{
+						filter: /\.md$/u,
+						lazy: true,
+						loader: "text",
+					},
+				],
 			}),
 			esbuildPluginTextReplace({
 				include: /obsidian-plugin-library.*\.js$/u,

@@ -3,6 +3,6 @@ declare module "*.md" {
 	export default value
 }
 declare module "worker:*" {
-	const value: string
+	const value: PromiseLike<string>
 	export default value
 }
