@@ -181,9 +181,10 @@ export class TypeScriptTranspile
 export class MarkdownTranspile
 	extends AbstractTranspile
 	implements Transpile {
-	protected readonly tsTranspile = new TypeScriptTranspile(this.context)
-
-	public constructor(context: ModulesPlugin) {
+	public constructor(
+		context: ModulesPlugin,
+		protected readonly tsTranspile: TypeScriptTranspile,
+	) {
 		super(context)
 		const { context: { settings } } = this
 		context.register(settings.onMutate(
