@@ -26,6 +26,8 @@ const
 	tsMorphBootstrap = dynamicRequireLazy<typeof import("@ts-morph/bootstrap")
 	>(BUNDLE, "@ts-morph/bootstrap")
 
+export type WeakCacheIdentity = Partial<CacheIdentity>
+
 export interface Transpile {
 	readonly onInvalidate: EventEmitterLite<readonly []>
 	readonly atranspile: (
@@ -33,7 +35,7 @@ export interface Transpile {
 	) => AsyncOrSync<ReturnType<Transpile["transpile"]>>
 	readonly transpile: (
 		content: string,
-		identity?: CacheIdentity,
+		identity?: WeakCacheIdentity,
 	) => string | null
 }
 
@@ -87,16 +89,16 @@ abstract class AbstractTranspile implements Transpile {
 
 	public abstract transpile(
 		content: string,
-		identity?: CacheIdentity,
+		identity?: WeakCacheIdentity,
 	): string | null
 }
 
 export class TypeScriptTranspile
 	extends AbstractTranspile
 	implements Transpile {
-	protected readonly cache = new WeakMap<CacheIdentity, string>()
+	protected readonly cache = new WeakMap<WeakCacheIdentity, string>()
 	protected readonly acache =
-		new WeakMap<CacheIdentity, Promise<string | null>>()
+		new WeakMap<WeakCacheIdentity, Promise<string | null>>()
 
 	protected readonly pool = PLazy.from(async (): Promise<WorkerPool> => {
 		const url = toObjectURL(await tsTranspileWorker)
@@ -114,14 +116,14 @@ export class TypeScriptTranspile
 
 	public override transpile(
 		content: string,
-		identity?: CacheIdentity,
+		identity?: WeakCacheIdentity,
 		header?: ContentHeader,
 	): string | null {
 		const ret = identity && this.cache.get(identity)
 		if (!isUndefined(ret)) { return ret }
 		const header2 = cloneAsWritable(header ?? ContentHeader.parse(content))
 		if (isUndefined(header2.language) &&
-			(/.m?ts$/u).test(identity?.file.extension ?? "")) {
+			(/.m?ts$/u).test(identity?.file?.extension ?? "")) {
 			header2.language = "TypeScript"
 		}
 		if (header2.language !== "TypeScript") { return null }
@@ -154,7 +156,7 @@ export class TypeScriptTranspile
 
 	public override atranspile(
 		content: string,
-		identity?: CacheIdentity,
+		identity?: WeakCacheIdentity,
 		header?: ContentHeader,
 	): AsyncOrSync<ReturnType<typeof this.transpile>> {
 		let ret = identity && this.acache.get(identity)
@@ -162,7 +164,7 @@ export class TypeScriptTranspile
 		ret = (async (): Promise<string | null> => {
 			const header2 = cloneAsWritable(header ?? ContentHeader.parse(content))
 			if (isUndefined(header2.language) &&
-				(/.m?ts$/u).test(identity?.file.extension ?? "")) {
+				(/.m?ts$/u).test(identity?.file?.extension ?? "")) {
 				header2.language = "TypeScript"
 			}
 			if (header2.language !== "TypeScript") { return null }
@@ -195,9 +197,9 @@ export class MarkdownTranspile
 
 	public override transpile(
 		content: string,
-		identity?: CacheIdentity,
+		identity?: WeakCacheIdentity,
 	): string | null {
-		if (identity?.file.extension !== "md") { return null }
+		if (identity?.file?.extension !== "md") { return null }
 		const { tsTranspile } = this,
 			ret = this.transpileMarkdown(content)
 		return tsTranspile.transpile(
@@ -209,9 +211,9 @@ export class MarkdownTranspile
 
 	public override async atranspile(
 		content: string,
-		identity?: CacheIdentity,
+		identity?: WeakCacheIdentity,
 	): Promise<ReturnType<typeof this.transpile>> {
-		if (identity?.file.extension !== "md") { return null }
+		if (identity?.file?.extension !== "md") { return null }
 		const { tsTranspile } = this,
 			ret = this.transpileMarkdown(content)
 		return await tsTranspile.atranspile(

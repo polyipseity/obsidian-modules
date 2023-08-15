@@ -1,17 +1,33 @@
+import type { AsyncOrSync, Writable } from "ts-essentials"
 import {
 	type CodePoint,
 	Rules,
 	SettingRules,
 	codePoint,
 	dynamicRequire,
+	dynamicRequireLazy,
 	dynamicRequireSync,
+	escapeJavaScriptString,
+	importable,
 } from "@polyipseity/obsidian-plugin-library"
 import type { Context, Resolve, Resolved } from "obsidian-modules"
+import { type Options, parse, parseExpressionAt } from "acorn"
 import { TFile, getLinkpath, normalizePath, requestUrl } from "obsidian"
-import type { AsyncOrSync } from "ts-essentials"
+import type {
+	Transpile,
+	TypeScriptTranspile,
+	WeakCacheIdentity,
+} from "./transpile.js"
+import { BUNDLE } from "../import.js"
+import type { CallExpression } from "estree"
 import type { ModulesPlugin } from "../main.js"
-import type { Transpile } from "./transpile.js"
+import { generate } from "astring"
 import { isUndefined } from "lodash-es"
+import { simple } from "acorn-walk"
+
+const
+	tsMorphBootstrap = dynamicRequireLazy<typeof import("@ts-morph/bootstrap")
+	>(BUNDLE, "@ts-morph/bootstrap")
 
 export interface CacheIdentity {
 	readonly file: TFile
@@ -513,16 +529,20 @@ export class ExternalResolve
 	extends AbstractResolve
 	implements Resolve {
 	public static readonly filter = /^https?:/u
+	protected readonly redirects: Record<string, string> = {}
 	protected readonly identities: Record<string, {
 		readonly code: string
 	} | null | undefined> = {}
 
-	public constructor(context: ModulesPlugin) {
+	public constructor(
+		context: ModulesPlugin,
+		protected readonly tsTranspile: TypeScriptTranspile,
+	) {
 		super(context)
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
-		const href = this.normalizeURL(id, context)
+		const href = this.normalizeURL(id, context.cwds.at(-1))
 		if (href === null) { return null }
 		const { identities: { [href]: identity } } = this
 		return (identity && {
@@ -537,39 +557,137 @@ export class ExternalResolve
 		id: string,
 		context: Context,
 	): Promise<Resolved | null> {
-		const href = this.normalizeURL(id, context)
+		const [href, identity] = await this.aresolve0(id, context.cwds.at(-1))
 		if (href === null) { return null }
-		let { identities: { [href]: identity } } = this
-		if (isUndefined(identity)) {
-			let code = null
-			try {
-				({ text: code } = await requestUrl(href))
-			} catch (error) {
-				self.console.debug(error)
-			}
-			// eslint-disable-next-line no-multi-assign
-			this.identities[href] = identity = code === null ? null : { code }
-		}
 		return identity && { code: identity.code, cwd: href, id: href, identity }
 	}
 
-	protected normalizeURL(id: string, context: Context): string | null {
-		const { filter } = ExternalResolve,
-			cwd = context.cwds.at(-1)
+	protected async aresolve0(
+		id: string,
+		cwd?: string,
+	): Promise<readonly [string | null, ExternalResolve.Identity | null]> {
+		const href = await this.anormalizeURL(id, cwd)
+		if (href === null) { return [null, null] }
+		const { tsTranspile } = this
+		let { identities: { [href]: identity } } = this
+		if (isUndefined(identity)) {
+			// eslint-disable-next-line no-multi-assign
+			this.identities[href] = identity = null
+			try {
+				const identity2: WeakCacheIdentity & Writable<ExternalResolve.Identity
+				> = { code: (await requestUrl(href)).text }
+				identity = identity2
+				try {
+					const { ts } = tsMorphBootstrap,
+						code = await tsTranspile.atranspile(identity2.code, identity2, {
+							compilerOptions: {
+								module: ts.ModuleKind.CommonJS,
+							},
+							language: "TypeScript",
+						})
+					if (code !== null) { identity2.code = code }
+				} catch (error) {
+					self.console.debug(error)
+				}
+				const reqs: string[] = [],
+					opts: Options = {
+						allowAwaitOutsideFunction: true,
+						allowHashBang: true,
+						allowImportExportEverywhere: false,
+						allowReserved: true,
+						allowReturnOutsideFunction: false,
+						allowSuperOutsideMethod: false,
+						ecmaVersion: "latest",
+						locations: false,
+						preserveParens: false,
+						ranges: false,
+						sourceType: "module",
+					},
+					tree = parse(identity2.code, opts)
+				simple(tree, {
+					// eslint-disable-next-line @typescript-eslint/naming-convention
+					CallExpression: node => {
+						const node2 = node as CallExpression & typeof node,
+							{ callee } = node2
+						if (callee.type !== "Identifier" || callee.name !== "require") {
+							return
+						}
+						const [arg0] = node2.arguments
+						if (arg0?.type !== "Literal" || typeof arg0.value !== "string") {
+							return
+						}
+						const { value } = arg0
+						if (importable({}, value)) { return }
+						let prefix = ""
+						if (!(/^\.{0,2}\//u).test(value)) {
+							try {
+								// eslint-disable-next-line no-new
+								new URL(value)
+							} catch (error) {
+								self.console.debug(error)
+								prefix = "/"
+							}
+						}
+						const value2 = this.normalizeURL(`${prefix}${value}`, href)
+						if (value2 === null) { return }
+						node2.callee = parseExpressionAt("self.require", 0, opts)
+						arg0.raw = escapeJavaScriptString(value2)
+						reqs.push(arg0.value = value2)
+					},
+				})
+				identity2.code = generate(tree, { comments: true, indent: "" })
+				await Promise.all(reqs.map(async req => this.aresolve0(req)))
+			} catch (error) {
+				self.console.debug(error)
+			}
+			this.identities[href] = identity
+		}
+		return [href, identity]
+	}
+
+	protected normalizeURL(id: string, cwd?: string): string | null {
+		const { filter } = ExternalResolve
+		let href = null
 		if (!isUndefined(cwd)) {
 			try {
-				const { href } = new URL(id, cwd)
-				if (filter.test(href)) { return href }
+				({ href } = new URL(id, cwd))
+				if (!filter.test(href)) { href = null }
 			} catch (error) {
 				self.console.debug(error)
 			}
 		}
-		try {
-			const { href } = new URL(id)
-			if (filter.test(href)) { return href }
-		} catch (error) {
-			self.console.debug(error)
+		if (href === null) {
+			try {
+				({ href } = new URL(id))
+				if (!filter.test(href)) { href = null }
+			} catch (error) {
+				self.console.debug(error)
+			}
 		}
-		return null
+		return href === null ? null : this.redirects[href] ?? href
+	}
+
+	protected async anormalizeURL(
+		...args: Parameters<typeof this.normalizeURL>
+	): Promise<ReturnType<typeof this.normalizeURL>> {
+		const href = this.normalizeURL(...args)
+		if (href !== null) {
+			try {
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-return-assign
+				return this.redirects[href] ??= (await fetch(href, {
+					mode: "cors",
+					redirect: "follow",
+					referrerPolicy: "no-referrer",
+				})).url
+			} catch (error) {
+				self.console.debug(error)
+			}
+		}
+		return href
+	}
+}
+export namespace ExternalResolve {
+	export interface Identity {
+		readonly code: string
 	}
 }

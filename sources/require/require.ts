@@ -52,7 +52,7 @@ export function loadRequire(context: ModulesPlugin): void {
 			new VaultPathResolve(context, transpiles),
 			new WikilinkResolve(context, transpiles),
 			new MarkdownLinkResolve(context, transpiles),
-			new ExternalResolve(context),
+			new ExternalResolve(context, tsTranspile),
 		])
 	context.register(patchWindows(workspace, self0 =>
 		patchRequire(context, self0, resolve)))
@@ -145,7 +145,7 @@ function createRequire(
 					allowSuperOutsideMethod: false,
 					ecmaVersion: "latest",
 					locations: false,
-					preserveParens: true,
+					preserveParens: false,
 					ranges: false,
 					sourceType: "script",
 				})
