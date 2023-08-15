@@ -21,7 +21,7 @@
 		"ts-essentials": "^9.3.2",
 		"workerpool": "^6.4.0"
 	},
-	"description": "Reuse JavaScript and related languages like TypeScript code using \"require\".",
+	"description": "Load JavaScript and related languages like TypeScript modules from the vault and the Internet.",
 	"devDependencies": {
 		"@changesets/cli": "^2.26.2",
 		"@polyipseity/obsidian": "^1.2.8",

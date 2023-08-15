@@ -11,7 +11,7 @@
 [repository]: https://github.com/polyipseity/obsidian-modules
 [trailer]: https://raw.githubusercontent.com/polyipseity/obsidian-modules/main/assets/trailer.png
 
-Reuse JavaScript and related languages like TypeScript code using "require".
+Load JavaScript and related languages like TypeScript modules from the vault and the Internet.
 
 [![Buy Me a Coffee/embed]][Buy Me a Coffee]
 
@@ -25,7 +25,7 @@ This file is automatically opened on first install. You can reopen it in setting
 
 ## Features
 
-- Reuse JavaScript and TypeScript code from anywhere in your vault on all platforms.
+- Load JavaScript and TypeScript modules from the vault and the Internet on all platforms.
 - No configuration needed.
 - Resolves relative paths, vault paths, Markdown links, wikilinks, and external links.
 - Loads Markdown files as code.
