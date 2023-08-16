@@ -148,9 +148,16 @@ export class TypeScriptTranspile
 				header2.language = "TypeScript"
 			}
 			if (header2.language !== "TypeScript") { return null }
+			const { ts } = tsMorphBootstrap
 			return (await this.context.workerPool).exec<typeof tsc>("tsc", [
 				{
-					compilerOptions: header2.compilerOptions,
+					compilerOptions: {
+						inlineSourceMap: true,
+						inlineSources: true,
+						module: ts.ModuleKind.NodeNext,
+						target: ts.ScriptTarget.ESNext,
+						...header2.compilerOptions,
+					},
 					content,
 				},
 			])

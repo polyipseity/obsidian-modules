@@ -1,4 +1,4 @@
-import { createProject, ts } from "@ts-morph/bootstrap"
+import { createProject, type ts } from "@ts-morph/bootstrap"
 import { worker } from "workerpool"
 
 worker({ tsc }, {})
@@ -6,13 +6,7 @@ worker({ tsc }, {})
 export async function tsc(input: tsc.Input): Promise<tsc.Output> {
 	const { content, compilerOptions } = input,
 		project = await createProject({
-			compilerOptions: {
-				inlineSourceMap: true,
-				inlineSources: true,
-				module: ts.ModuleKind.NodeNext,
-				target: ts.ScriptTarget.ESNext,
-				...compilerOptions,
-			},
+			compilerOptions: compilerOptions ?? {},
 			useInMemoryFileSystem: true,
 		}),
 		source = project.createSourceFile("index.ts", content),
@@ -32,7 +26,7 @@ export async function tsc(input: tsc.Input): Promise<tsc.Output> {
 export namespace tsc {
 	export interface Input {
 		readonly content: string
-		readonly compilerOptions?: object | undefined
+		readonly compilerOptions?: ts.CompilerOptions | undefined
 	}
 	export type Output = string
 }
