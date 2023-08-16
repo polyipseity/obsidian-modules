@@ -66,6 +66,7 @@ await self.require.import("vault/path/to/a module.md") // vault path
 await self.require.import("../relative/path/to/a module.js") // relative path
 await self.require.import("[omitted or whatever](markdown/link/to/a%20module.js.md)") // Markdown link
 await self.require.import("[[wikilink/to/a module|ommited or whatever]]") // wikilink
+// The following one requires enabling external links in settings.
 await self.require.import("https://esm.sh/scratchblocks") // external link
 // You can workaround the inability to infer the current directory.
 await self.require.import("../relative/path/to/a module.js", { cwd: context.currentDirectory })
@@ -78,6 +79,7 @@ self.require("../relative/path/to/a module.js")
 // The following three may not work in startup scripts.
 self.require("[ommited or whatever](markdown/link/to/a%20module.js.md)")
 self.require("[[wikilink/to/a module|omitted or whatever]]")
+// The following one requires enabling external links and adding the link to preloaded external links in settings.
 self.require("https://esm.sh/scratchblocks") // external link
 // You can workaround the inability to infer the current directory.
 self.require("../relative/path/to/a module.js", { cwd: context.currentDirectory })
