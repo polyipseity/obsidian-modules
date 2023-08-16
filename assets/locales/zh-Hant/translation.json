@@ -13,6 +13,7 @@
 			"readme": "自述文件"
 		},
 		"donate": "贊助",
+		"external-link": "外部鏈接",
 		"name": "名稱"
 	},
 	"name": "模塊",
@@ -27,11 +28,12 @@
 			"donate": "$t(generic.documentations.donate)",
 			"readme": "$t(generic.documentations.readme)"
 		},
+		"enable-external-link": "啟用$t(generic.external-link)",
 		"expose-internal-modules": "公開內部模塊",
 		"expose-internal-modules-description-HTML": "<code>obsidian</code>、<code>@codemirror/*</code>、<code>@lezer/*</code>……",
 		"interface": "界面",
 		"open-changelog-on-update": "更新時$t(generic.open)$t(generic.documentations.changelog)",
-		"preloaded-external-links": "預加載的外部鏈接",
+		"preloaded-external-links": "預加載的$t(generic.external-link)",
 		"preloaded-external-links-description-HTML": "$t(settings.preloading-rules-description-HTML)",
 		"preloaded-external-links-edit": "$t(generic.edit)",
 		"preloading-rules": "預加載$t(generic.rule)",

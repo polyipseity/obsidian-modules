@@ -13,6 +13,9 @@
 			"readme": "readme"
 		},
 		"donate": "donate",
+		"external-link": "$t(generic.external-link_one)",
+		"external-link_one": "external link",
+		"external-link_other": "external links",
 		"name": "name"
 	},
 	"name": "Modules",
@@ -27,11 +30,12 @@
 			"donate": "$t(generic.documentations.donate, capitalize)",
 			"readme": "$t(generic.documentations.readme, capitalize)"
 		},
+		"enable-external-links": "Enable $t(generic.external-link_other)",
 		"expose-internal-modules": "Expose internal modules",
 		"expose-internal-modules-description-HTML": "<code>obsidian</code>, <code>@codemirror/*</code>, <code>@lezer/*</code>…",
 		"interface": "Interface",
 		"open-changelog-on-update": "$t(generic.open, capitalize) $t(generic.documentations.changelog) on update",
-		"preloaded-external-links": "Preloaded external links",
+		"preloaded-external-links": "Preloaded $t(generic.external-link_other)",
 		"preloaded-external-links-description-HTML": "$t(settings.preloading-rules-description-HTML)",
 		"preloaded-external-links-edit": "$t(generic.edit, capitalize)",
 		"preloading-rules": "Preloading $t(generic.rule_other)",

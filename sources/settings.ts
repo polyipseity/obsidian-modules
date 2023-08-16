@@ -137,6 +137,26 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 					))
 			})
 			.newSetting(containerEl, setting => {
+				setting
+					.setName(i18n.t("settings.enable-external-links"))
+					.addToggle(linkSetting(
+						() => settings.value.enableExternalLinks,
+						async value => settings.mutate(settingsM => {
+							settingsM.enableExternalLinks = value
+						}),
+						() => { this.postMutate() },
+					))
+					.addExtraButton(resetButton(
+						i18n.t("asset:settings.enable-external-links-icon"),
+						i18n.t("settings.reset"),
+						async () => settings.mutate(settingsM => {
+							settingsM.enableExternalLinks =
+								Settings.DEFAULT.enableExternalLinks
+						}),
+						() => { this.postMutate() },
+					))
+			})
+			.newSetting(containerEl, setting => {
 				const { settingEl } = setting
 				setting
 					.setName(i18n.t("settings.preloading-rules"))

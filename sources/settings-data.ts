@@ -21,6 +21,7 @@ export interface Settings extends PluginContext.Settings {
 	readonly language: Settings.DefaultableLanguage
 	readonly requireName: string
 	readonly exposeInternalModules: boolean
+	readonly enableExternalLinks: boolean
 	readonly preloadingRules: readonly string[]
 	readonly preloadedExternalLinks: readonly string[]
 	readonly markdownCodeBlockLanguagesToLoad: readonly string[]
@@ -46,6 +47,7 @@ export namespace Settings {
 	}
 
 	export const DEFAULT: Persistent = deepFreeze({
+		enableExternalLinks: false,
 		errorNoticeTimeout: NOTICE_NO_TIMEOUT,
 		exposeInternalModules: true,
 		language: "",
@@ -64,6 +66,12 @@ export namespace Settings {
 	export function fix(self0: unknown): Fixed<Settings> {
 		const unc = launderUnchecked<Settings>(self0)
 		return markFixed(self0, {
+			enableExternalLinks: fixTyped(
+				DEFAULT,
+				unc,
+				"enableExternalLinks",
+				["boolean"],
+			),
 			errorNoticeTimeout: fixTyped(
 				DEFAULT,
 				unc,

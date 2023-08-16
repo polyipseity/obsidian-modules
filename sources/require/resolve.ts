@@ -563,6 +563,10 @@ export class ExternalLinkResolve
 			}
 		}, { passive: true })
 		context.register(settings.onMutate(
+			set => set.enableExternalLinks,
+			() => { this.invalidateAll() },
+		))
+		context.register(settings.onMutate(
 			set => set.preloadedExternalLinks,
 			async (cur, prev) => {
 				const prev2 = new Set(prev)
@@ -574,11 +578,14 @@ export class ExternalLinkResolve
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
-		const href = this.normalizeURL(id, context.cwds.at(-1))
+		const cwd = context.cwds.at(-1),
+			href = this.normalizeURL(id, cwd)
 		if (href === null) { return null }
+		this.validate(href, context)
+		if (!this.context.settings.value.enableExternalLinks) { return null }
+
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-multi-assign
 		const identity = this.identities[href] ??= "await"
-		this.validate(href, context)
 		return isObject(identity)
 			? { code: identity.code, cwd: href, id: href }
 			: null
@@ -588,7 +595,13 @@ export class ExternalLinkResolve
 		id: string,
 		context: Context,
 	): Promise<Resolved | null> {
-		const [href, identity] = await this.aresolve0(id, context.cwds.at(-1))
+		const cwd = context.cwds.at(-1),
+			href0 = this.normalizeURL(id, cwd)
+		if (href0 === null) { return null }
+		this.validate(href0, context)
+		if (!this.context.settings.value.enableExternalLinks) { return null }
+
+		const [href, identity] = await this.aresolve0(id, cwd)
 		if (href === null) { return null }
 		this.validate(href, context)
 		return isObject(identity)

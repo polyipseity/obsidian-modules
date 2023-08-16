@@ -20,6 +20,7 @@
 			"donate-icon": "$t(asset:generic.documentations.donate-icon)",
 			"readme-icon": "$t(asset:generic.documentations.readme-icon)"
 		},
+		"enable-external-links-icon": "$t(asset:generic.external-link)",
 		"expose-internal-modules-icon": "puzzle",
 		"open-changelog-on-update-icon": "$t(asset:generic.documentations.changelog-icon)",
 		"preloaded-external-links-edit-icon": "$t(asset:generic.edit-list-icon)",
