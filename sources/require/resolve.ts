@@ -646,7 +646,7 @@ export class ExternalLinkResolve
 				}
 				const reqs: string[] = [],
 					opts: Options = {
-						allowAwaitOutsideFunction: true,
+						allowAwaitOutsideFunction: false,
 						allowHashBang: true,
 						allowImportExportEverywhere: false,
 						allowReserved: true,
@@ -656,7 +656,7 @@ export class ExternalLinkResolve
 						locations: false,
 						preserveParens: false,
 						ranges: false,
-						sourceType: "module",
+						sourceType: "script",
 					},
 					tree = parse(identity2.code, opts)
 				simple(tree, {
