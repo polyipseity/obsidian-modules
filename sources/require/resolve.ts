@@ -552,6 +552,7 @@ export class ExternalLinkResolve
 	public constructor(
 		context: ModulesPlugin,
 		protected readonly tsTranspile: TypeScriptTranspile,
+		protected readonly fetchPool = context.fetchPool,
 	) {
 		super(context)
 		const { context: { settings } } = this,
@@ -690,7 +691,14 @@ export class ExternalLinkResolve
 					},
 				})
 				identity2.code = generate(tree, { comments: true, indent: "" })
-				await Promise.all(reqs.map(async req => this.aresolve0(req)))
+				await this.fetchPool.addBatchTask({
+					batchSize(elements, freeSlots) {
+						return Math.min(elements, freeSlots)
+					},
+					data: reqs,
+					generator: async values =>
+						Promise.all(values.map(async val => this.aresolve0(val))),
+				}).promise()
 			} catch (error) {
 				self.console.debug(error)
 			}
@@ -730,11 +738,17 @@ export class ExternalLinkResolve
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-return-assign
 				return this.redirects[href] ??= (
 					this.invalidate(href),
-					await fetch(href, {
-						mode: "cors",
-						redirect: "follow",
-						referrerPolicy: "no-referrer",
-					})).url
+					(await this.fetchPool.addSingleTask({
+						data: href,
+						async generator(data) {
+							return fetch(data, {
+								mode: "cors",
+								redirect: "follow",
+								referrerPolicy: "no-referrer",
+							})
+						},
+					}).promise()).url
+				)
 			} catch (error) {
 				self.console.debug(error)
 			}

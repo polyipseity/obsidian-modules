@@ -10,6 +10,7 @@ import {
 import type { API } from "obsidian-modules"
 import { PLUGIN_UNLOAD_DELAY } from "./magic.js"
 import { PluginLocales } from "../assets/locales.js"
+import { PromisePoolExecutor } from "promise-pool-executor"
 import { Settings } from "./settings-data.js"
 import { isNil } from "lodash-es"
 import { loadDocumentations } from "./documentations.js"
@@ -22,9 +23,8 @@ export class ModulesPlugin
 	public readonly version
 	public readonly language: LanguageManager
 	public readonly settings: SettingsManager<Settings>
-	public readonly api: API = Object.freeze({
-		requires: new WeakMap(),
-	})
+	public readonly api: API = Object.freeze({ requires: new WeakMap() })
+	public readonly fetchPool = new PromisePoolExecutor({ concurrencyLimit: 4 })
 
 	public constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest)
