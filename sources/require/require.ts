@@ -72,10 +72,18 @@ function createRequire(
 		resolved: Resolved | null,
 	): readonly [Resolved, ModuleCache] {
 		if (!resolved) { throw new Error(id) }
-		const { identity } = resolved
-		let cache = self1.cache.get(identity)
-		if (!cache) { self1.cache.set(identity, cache = {}) }
-		return [resolved, cache]
+		const { id: id2 } = resolved,
+			{ aliased, aliased: { [id]: oldID }, aliases, cache } = self1
+		aliased[id] = id2;
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		(aliases[id2] ??= new Set([id2])).add(id)
+		if (oldID !== void 0 && id2 !== oldID) {
+			aliases[oldID]?.delete(id)
+			self1.invalidate(id)
+		}
+		if (!(resolved.cache ?? true)) { cache[id2] = {} }
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-return-assign
+		return [resolved, cache[id2] ??= {}]
 	}
 	function cache0<T>(
 		cache: ModuleCache,
@@ -88,27 +96,24 @@ function createRequire(
 			get,
 		})
 	}
-	function depends(resolved: Resolved, context: Context): void {
-		const { identity } = resolved,
-			{ parent, dependencies } = context
-		if (parent) {
-			let dep = dependencies.get(parent)
-			if (!dep) {
-				dep = new Set()
-				dependencies.set(parent, dep)
-			}
-			dep.add(identity)
-		}
+	function depends(self1: Require, id: string, context: Context): void {
+		const { dependencies, dependants } = self1,
+			{ parent } = context
+		if (parent === void 0) { return }
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		(dependencies[parent] ??= new Set()).add(id);
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		(dependants[id] ??= new Set()).add(parent)
 	}
 	function preload(
 		cleanup: Functions,
 		resolved: Resolved,
 		context: Context,
 	): void {
-		const { cwd, identity } = resolved,
+		const { cwd, id } = resolved,
 			{ cwds, parent } = context
 		cleanup.push(() => { assignExact(context, "parent", parent) })
-		context.parent = identity
+		context.parent = id
 		cwds.push(cwd)
 		cleanup.push(() => { cwds.pop() })
 	}
@@ -121,9 +126,9 @@ function createRequire(
 				cwds.push(cwd)
 				cleanup.push(() => cwds.pop())
 			}
+			depends(ret, id0, context)
 			const [rd, cache] = resolve0(ret, id0, resolve1.resolve(id0, context)),
 				{ code, id, value } = rd
-			depends(rd, context)
 			if ("commonJS" in cache) { return cache.commonJS }
 			if ("value" in rd) {
 				cache0(cache, "commonJS", constant(value))
@@ -177,11 +182,16 @@ function createRequire(
 		}
 	}, {
 		[REQUIRE_TAG]: true,
-		cache: new WeakMap(),
+		aliased: {},
+		aliases: {},
+		cache: {},
 		context: {
 			cwds: [],
 			dependencies: new WeakMap(),
+			invalidate(id: string) { ret.invalidate(id) },
 		},
+		dependants: {},
+		dependencies: {},
 		async import(id0: string, opts?: ImportOptions) {
 			const cleanup = new Functions({ async: false, settled: true })
 			try {
@@ -191,6 +201,7 @@ function createRequire(
 					cwds.push(cwd)
 					cleanup.push(() => { cwds.pop() })
 				}
+				depends(ret, id0, context)
 				const
 					[rd, cache] = resolve0(
 						ret,
@@ -201,7 +212,6 @@ function createRequire(
 					key = `esModule${opts?.commonJSInterop ?? true
 						? "WithCommonJS"
 						: ""}` as const
-				depends(rd, context)
 				if (key in cache) { return cache[key] }
 				if ("value" in rd) {
 					cache0(cache, key, constant(value))
@@ -371,6 +381,25 @@ function createRequire(
 				}
 			} finally {
 				cleanup.call()
+			}
+		},
+		invalidate(id: string) {
+			const { aliased, aliases, cache, dependants, dependencies } = ret,
+				id2 = aliased[id] ?? id,
+				seen = new Set(),
+				ing = [...aliases[id2] ?? [id2]]
+			for (let cur = ing.shift(); cur !== void 0; cur = ing.shift()) {
+				if (seen.has(cur)) { continue }
+				seen.add(cur)
+				cache[cur] = {}
+				const dependencies2 = dependencies[cur]
+				for (const dep of dependencies2 ?? []) {
+					dependants[dep]?.delete(cur)
+				}
+				dependencies2?.clear()
+				for (const dep of dependants[cur] ?? []) {
+					ing.push(...aliases[dep] ?? [dep])
+				}
 			}
 		},
 		resolve,

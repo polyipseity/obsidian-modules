@@ -40,6 +40,13 @@ declare module "obsidian-modules" {
 		readonly import: (id: string, opts?: ImportOptions) => unknown
 
 		/**
+		 * Invalidate the cache of a module or an alias.
+		 *
+		 * @param id module specifier
+		 */
+		readonly invalidate: (id: string) => void
+
+		/**
 		 * Object for resolving module specifiers.
 		 */
 		readonly resolve: Resolve
@@ -47,12 +54,32 @@ declare module "obsidian-modules" {
 		/**
 		 * Cache for loaded modules.
 		 */
-		readonly cache: WeakMap<Resolved["identity"], ModuleCache>
+		readonly cache: Record<string, ModuleCache>
+
+		/**
+		 * Aliased modules.
+		 */
+		readonly aliased: Record<string, string>
+
+		/**
+		 * Module aliases.
+		 */
+		readonly aliases: Record<string, Set<string>>
 
 		/**
 		 * Context for loading modules.
 		 */
 		readonly context: Context
+
+		/**
+		 * Module dependants.
+		 */
+		readonly dependants: Record<string, Set<string>>
+
+		/**
+		 * Module dependencies.
+		 */
+		readonly dependencies: Record<string, Set<string>>
 	}
 
 	/**
@@ -139,11 +166,6 @@ declare module "obsidian-modules" {
 	interface Resolved {
 
 		/**
-		 * Identity of the resolved module.
-		 */
-		readonly identity: object
-
-		/**
 		 * Module specifier of the resolved module.
 		 */
 		readonly id: string
@@ -152,6 +174,13 @@ declare module "obsidian-modules" {
 		 * Code of the resolved module.
 		 */
 		readonly code: string
+
+		/**
+		 * Whether to use cache.
+		 *
+		 * @default true
+		 */
+		readonly cache?: boolean
 
 		/**
 		 * Exports of the resolved module.
@@ -177,13 +206,12 @@ declare module "obsidian-modules" {
 		/**
 		 * Identity of the parent module being loaded.
 		 */
-		parent?: Resolved["identity"]
+		parent?: string
 
 		/**
-		 * Module dependencies.
+		 * Invalidator.
 		 */
-		readonly dependencies: WeakMap<Resolved["identity"
-		], Set<Resolved["identity"]>>
+		invalidate: Require["invalidate"]
 	}
 }
 import type { } from "obsidian-modules"

@@ -34,9 +34,32 @@ export interface CacheIdentity {
 }
 
 abstract class AbstractResolve implements Resolve {
+	readonly #invalidators: Record<string, Set<Context["invalidate"]
+	>> = {}
+
 	public constructor(
 		protected readonly context: ModulesPlugin,
 	) { }
+
+	protected validate(...args: Parameters<typeof this.resolve>): void {
+		const [id, context] = args;
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		(this.#invalidators[id] ??= new Set()).add(context.invalidate)
+	}
+
+	protected invalidate(id: string): void {
+		const invs = this.#invalidators[id]
+		for (const inv of invs ?? []) {
+			inv(id)
+		}
+		invs?.clear()
+	}
+
+	protected invalidateAll(): void {
+		for (const key of Object.keys(this.#invalidators)) {
+			this.invalidate(key)
+		}
+	}
 
 	public abstract aresolve(
 		// eslint-disable-next-line @typescript-eslint/no-invalid-this
@@ -49,10 +72,10 @@ abstract class AbstractResolve implements Resolve {
 abstract class AbstractFileResolve
 	extends AbstractResolve
 	implements Resolve {
-	public static readonly globalCache = new WeakSet()
 	protected readonly preloadRules
 	protected readonly transpiles
 	protected readonly cache0: Record<string, CacheIdentity> = {}
+
 	protected readonly transpiled =
 		new WeakMap<Transpile, WeakSet<CacheIdentity>>()
 
@@ -111,17 +134,17 @@ abstract class AbstractFileResolve
 	public override resolve(id: string, context: Context): Resolved | null {
 		const { cache0 } = this,
 			id0 = this.resolvePath(id, context)
+		this.validate(id, context)
 		if (id0 === null) { return null }
-		let identity = cache0[id0]
+		const identity = cache0[id0]
 		if (identity) {
-			identity = this.checkDependencies(identity, context)
 			const { content } = identity
 			if (content !== void 0) {
+				this.validate(id0, context)
 				return {
 					code: this.transpile(content, identity),
 					cwd: getWD(id0),
 					id: id0,
-					identity,
 				}
 			}
 		}
@@ -134,12 +157,13 @@ abstract class AbstractFileResolve
 	): Promise<Resolved | null> {
 		const { cache0, context: { app: { vault, vault: { adapter } } } } = this,
 			id0 = await this.aresolvePath(id, context)
+		this.validate(id, context)
 		if (id0 === null) { return null }
-		let identity = cache0[id0]
+		const identity = cache0[id0]
 		try {
 			if (identity) {
-				identity = this.checkDependencies(identity, context)
 				const { file, content } = identity
+				this.validate(id0, context)
 				return {
 					code: await this.atranspile(
 						content ?? await vault.cachedRead(file),
@@ -147,14 +171,13 @@ abstract class AbstractFileResolve
 					),
 					cwd: getWD(id0),
 					id: id0,
-					identity,
 				}
 			}
 			return {
+				cache: false,
 				code: await this.atranspile(await adapter.read(id0)),
 				cwd: getWD(id0),
 				id: id0,
-				identity: {},
 			}
 		} catch (error) {
 			self.console.debug(error)
@@ -172,7 +195,8 @@ abstract class AbstractFileResolve
 				? { content: await vault.cachedRead(file) }
 				: {},
 		}
-		AbstractFileResolve.globalCache.add(cache0[path] = ret)
+		cache0[path] = ret
+		this.invalidate(path)
 		return ret
 	}
 
@@ -181,7 +205,8 @@ abstract class AbstractFileResolve
 			entry = this.uncache(path)
 		if (!entry) { return null }
 		const ret = { ...entry }
-		AbstractFileResolve.globalCache.add(cache0[path] = ret)
+		cache0[path] = ret
+		this.invalidate(path)
 		return ret
 	}
 
@@ -189,20 +214,9 @@ abstract class AbstractFileResolve
 		const { cache0 } = this,
 			{ [path]: entry } = cache0
 		if (!entry) { return null }
-		AbstractFileResolve.globalCache.delete(entry)
 		Reflect.deleteProperty(cache0, path)
+		this.invalidate(path)
 		return entry
-	}
-
-	protected checkDependencies(
-		identity: CacheIdentity,
-		context: Context,
-	): CacheIdentity {
-		if (![...context.dependencies.get(identity) ?? []]
-			.every(dep => AbstractFileResolve.globalCache.has(dep))) {
-			return this.recache(identity.file.path) ?? identity
-		}
-		return identity
 	}
 
 	protected transpile(content: string, identity?: CacheIdentity): string {
@@ -291,8 +305,18 @@ export class InternalModulesResolve
 	implements Resolve {
 	protected readonly identities: Record<string, object | undefined> = {}
 
-	public override resolve(id: string, _1: Context): Resolved | null {
+	public constructor(context: ModulesPlugin) {
+		super(context)
 		const { context: { settings } } = this
+		context.register(settings.onMutate(
+			set => set.exposeInternalModules,
+			() => { this.invalidateAll() },
+		))
+	}
+
+	public override resolve(id: string, context: Context): Resolved | null {
+		const { context: { settings } } = this
+		this.validate(id, context)
 		if (!settings.value.exposeInternalModules) { return null }
 		let value = null
 		try {
@@ -301,14 +325,15 @@ export class InternalModulesResolve
 			self.console.debug(error)
 			return null
 		}
-		return this.resolve0(id, value)
+		return { code: "", id, value }
 	}
 
 	public override async aresolve(
 		id: string,
-		_1: Context,
+		context: Context,
 	): Promise<Resolved | null> {
 		const { context: { settings } } = this
+		this.validate(id, context)
 		if (!settings.value.exposeInternalModules) { return null }
 		let value = null
 		try {
@@ -317,17 +342,7 @@ export class InternalModulesResolve
 			self.console.debug(error)
 			return null
 		}
-		return this.resolve0(id, value)
-	}
-
-	protected resolve0(id: string, value: unknown): Resolved {
-		return {
-			code: "",
-			id,
-			// eslint-disable-next-line @typescript-eslint/no-extra-parens
-			identity: (this.identities[id] ??= {}),
-			value,
-		}
+		return { code: "", id, value }
 	}
 }
 
@@ -548,7 +563,6 @@ export class ExternalResolve
 			code: identity.code,
 			cwd: href,
 			id: href,
-			identity,
 		}) ?? null
 	}
 
@@ -558,7 +572,7 @@ export class ExternalResolve
 	): Promise<Resolved | null> {
 		const [href, identity] = await this.aresolve0(id, context.cwds.at(-1))
 		if (href === null) { return null }
-		return identity && { code: identity.code, cwd: href, id: href, identity }
+		return identity && { code: identity.code, cwd: href, id: href }
 	}
 
 	protected async aresolve0(
