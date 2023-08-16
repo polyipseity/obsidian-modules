@@ -107,6 +107,15 @@ const ARGV_PRODUCTION = 2,
 					],
 				],
 			}),
+			esbuildPluginTextReplace({
+				include: /promise-batcher.*\.js$/u,
+				pattern: [
+					[
+						".debuglog(\"promise-batcher\")",
+						"?.[Symbol()]??(()=>{})",
+					],
+				],
+			}),
 		],
 		sourcemap: DEV && "inline",
 		sourcesContent: true,
