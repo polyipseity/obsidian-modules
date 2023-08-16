@@ -692,9 +692,7 @@ export class ExternalLinkResolve
 				})
 				identity2.code = generate(tree, { comments: true, indent: "" })
 				await this.fetchPool.addBatchTask({
-					batchSize(elements, freeSlots) {
-						return Math.min(elements, freeSlots)
-					},
+					batchSize: Math.min,
 					data: reqs,
 					generator: async values =>
 						Promise.all(values.map(async val => this.aresolve0(val))),
