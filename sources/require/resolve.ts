@@ -22,6 +22,7 @@ import { BUNDLE } from "../import.js"
 import type { CallExpression } from "estree"
 import type { ModulesPlugin } from "../main.js"
 import { generate } from "astring"
+import { isObject } from "lodash-es"
 import { simple } from "acorn-walk"
 
 const
@@ -544,48 +545,55 @@ export class ExternalResolve
 	implements Resolve {
 	public static readonly filter = /^https?:/u
 	protected readonly redirects: Record<string, string> = {}
-	protected readonly identities: Record<string, {
+	protected readonly identities: Record<string, "await" | "fail" | {
 		readonly code: string
-	} | null | undefined> = {}
+	}> = {}
 
 	public constructor(
 		context: ModulesPlugin,
 		protected readonly tsTranspile: TypeScriptTranspile,
 	) {
 		super(context)
+		context.registerDomEvent(self, "online", () => {
+			for (const [key, value] of Object.entries(this.identities)) {
+				if (value === "fail") { this.identities[key] = "await" }
+			}
+		}, { passive: true })
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
 		const href = this.normalizeURL(id, context.cwds.at(-1))
 		if (href === null) { return null }
-		const { identities: { [href]: identity } } = this
-		return (identity && {
-			code: identity.code,
-			cwd: href,
-			id: href,
-		}) ?? null
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-multi-assign
+		const identity = this.identities[href] ??= "await"
+		this.validate(href, context)
+		return isObject(identity)
+			? { code: identity.code, cwd: href, id: href }
+			: null
 	}
 
 	public override async aresolve(
 		id: string,
 		context: Context,
 	): Promise<Resolved | null> {
-		const [href, identity] = await this.aresolve0(id, context.cwds.at(-1))
+		const href = await this.anormalizeURL(id, context.cwds.at(-1))
 		if (href === null) { return null }
-		return identity && { code: identity.code, cwd: href, id: href }
+		const identity = await this.aresolve0(href)
+		this.validate(href, context)
+		return isObject(identity)
+			? { code: identity.code, cwd: href, id: href }
+			: null
 	}
 
 	protected async aresolve0(
-		id: string,
-		cwd?: string,
-	): Promise<readonly [string | null, ExternalResolve.Identity | null]> {
-		const href = await this.anormalizeURL(id, cwd)
-		if (href === null) { return [null, null] }
+		href: string,
+	): Promise<ExternalResolve.Identity | "fail"> {
 		const { tsTranspile } = this
 		let { identities: { [href]: identity } } = this
-		if (identity === void 0) {
+		if (identity === void 0 || identity === "await") {
+			if (identity === "await") { this.invalidate(href) }
 			// eslint-disable-next-line no-multi-assign
-			this.identities[href] = identity = null
+			this.identities[href] = identity = "fail"
 			try {
 				const identity2: WeakCacheIdentity & Writable<ExternalResolve.Identity
 				> = { code: (await requestUrl(href)).text }
@@ -655,7 +663,7 @@ export class ExternalResolve
 			}
 			this.identities[href] = identity
 		}
-		return [href, identity]
+		return identity
 	}
 
 	protected normalizeURL(id: string, cwd?: string): string | null {
@@ -687,11 +695,13 @@ export class ExternalResolve
 		if (href !== null) {
 			try {
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-return-assign
-				return this.redirects[href] ??= (await fetch(href, {
-					mode: "cors",
-					redirect: "follow",
-					referrerPolicy: "no-referrer",
-				})).url
+				return this.redirects[href] ??= (
+					this.invalidate(href),
+					await fetch(href, {
+						mode: "cors",
+						redirect: "follow",
+						referrerPolicy: "no-referrer",
+					})).url
 			} catch (error) {
 				self.console.debug(error)
 			}
