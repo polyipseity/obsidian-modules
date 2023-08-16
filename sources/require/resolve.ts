@@ -630,7 +630,14 @@ export class ExternalLinkResolve
 			this.identities[href] = identity = "fail"
 			try {
 				const identity2: WeakCacheIdentity & Writable<ExternalLinkResolve
-					.Identity> = { code: (await requestUrl(href)).text }
+					.Identity> = {
+					code: (await this.fetchPool.addSingleTask({
+						data: href,
+						async generator(data) {
+							return requestUrl(data)
+						},
+					}).promise()).text,
+				}
 				identity = identity2
 				try {
 					const { ts } = tsMorphBootstrap,
@@ -691,12 +698,7 @@ export class ExternalLinkResolve
 					},
 				})
 				identity2.code = generate(tree, { comments: true, indent: "" })
-				await this.fetchPool.addBatchTask({
-					batchSize: Math.min,
-					data: reqs,
-					generator: async values =>
-						Promise.all(values.map(async val => this.aresolve0(val))),
-				}).promise()
+				await Promise.all(reqs.map(async req => this.aresolve0(req)))
 			} catch (error) {
 				self.console.debug(error)
 			}
