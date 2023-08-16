@@ -132,9 +132,9 @@ abstract class AbstractFileResolve
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
+		this.validate(id, context)
 		const { cache0 } = this,
 			id0 = this.resolvePath(id, context)
-		this.validate(id, context)
 		if (id0 === null) { return null }
 		const identity = cache0[id0]
 		if (identity) {
@@ -155,9 +155,9 @@ abstract class AbstractFileResolve
 		id: string,
 		context: Context,
 	): Promise<Resolved | null> {
+		this.validate(id, context)
 		const { cache0, context: { app: { vault, vault: { adapter } } } } = this,
 			id0 = await this.aresolvePath(id, context)
-		this.validate(id, context)
 		if (id0 === null) { return null }
 		const identity = cache0[id0]
 		try {
@@ -315,8 +315,8 @@ export class InternalModulesResolve
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
-		const { context: { settings } } = this
 		this.validate(id, context)
+		const { context: { settings } } = this
 		if (!settings.value.exposeInternalModules) { return null }
 		let value = null
 		try {
@@ -332,8 +332,8 @@ export class InternalModulesResolve
 		id: string,
 		context: Context,
 	): Promise<Resolved | null> {
-		const { context: { settings } } = this
 		this.validate(id, context)
+		const { context: { settings } } = this
 		if (!settings.value.exposeInternalModules) { return null }
 		let value = null
 		try {

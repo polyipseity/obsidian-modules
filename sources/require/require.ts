@@ -81,7 +81,10 @@ function createRequire(
 			aliases[oldID]?.delete(id)
 			self1.invalidate(id)
 		}
-		if (!(resolved.cache ?? true)) { cache[id2] = {} }
+		if (!(resolved.cache ?? true)) {
+			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+			delete cache[id2]
+		}
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-return-assign
 		return [resolved, cache[id2] ??= {}]
 	}
@@ -391,7 +394,8 @@ function createRequire(
 			for (let cur = ing.shift(); cur !== void 0; cur = ing.shift()) {
 				if (seen.has(cur)) { continue }
 				seen.add(cur)
-				cache[cur] = {}
+				// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+				delete cache[cur]
 				const dependencies2 = dependencies[cur]
 				for (const dep of dependencies2 ?? []) {
 					dependants[dep]?.delete(cur)
