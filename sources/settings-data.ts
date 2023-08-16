@@ -22,6 +22,7 @@ export interface Settings extends PluginContext.Settings {
 	readonly requireName: string
 	readonly exposeInternalModules: boolean
 	readonly preloadingRules: readonly string[]
+	readonly preloadedExternalLinks: readonly string[]
 	readonly markdownCodeBlockLanguagesToLoad: readonly string[]
 
 	readonly openChangelogOnUpdate: boolean
@@ -51,6 +52,7 @@ export namespace Settings {
 		markdownCodeBlockLanguagesToLoad: ["JS", "TS", "JavaScript", "TypeScript"],
 		noticeTimeout: 5,
 		openChangelogOnUpdate: true,
+		preloadedExternalLinks: [],
 		preloadingRules: ["+/\\.m?[jt]s(?:\\.md)?$/iu"],
 		requireName: "require",
 	})
@@ -102,6 +104,12 @@ export namespace Settings {
 				unc,
 				"openChangelogOnUpdate",
 				["boolean"],
+			),
+			preloadedExternalLinks: fixArray(
+				DEFAULT,
+				unc,
+				"preloadedExternalLinks",
+				["string"],
 			),
 			preloadingRules: fixArray(
 				DEFAULT,

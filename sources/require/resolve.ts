@@ -101,7 +101,7 @@ abstract class AbstractFileResolve
 				transpiled,
 				preloadRules,
 			} = this,
-			preloadFiles = async (): Promise<unknown> =>
+			preload = async (): Promise<unknown> =>
 				Promise.all(vault.getFiles().map(async file => this.cache(file)))
 		context.registerEvent(vault.on("create", async file => {
 			if (!(file instanceof TFile)) { return }
@@ -128,8 +128,8 @@ abstract class AbstractFileResolve
 				}
 			})
 		}
-		context.register(preloadRules.onChanged.listen(preloadFiles))
-		preloadFiles().catch(error => { self.console.error(error) })
+		context.register(preloadRules.onChanged.listen(preload))
+		preload().catch(error => { self.console.error(error) })
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
@@ -540,7 +540,7 @@ function parseWikilink(
 	return { display: display || (str.includes("|") ? "" : path), path }
 }
 
-export class ExternalResolve
+export class ExternalLinkResolve
 	extends AbstractResolve
 	implements Resolve {
 	public static readonly filter = /^https?:/u
@@ -554,11 +554,23 @@ export class ExternalResolve
 		protected readonly tsTranspile: TypeScriptTranspile,
 	) {
 		super(context)
+		const { context: { settings } } = this,
+			preload = async (hrefs: readonly string[]): Promise<unknown> =>
+				Promise.all(hrefs.map(async href => this.aresolve0(href)))
 		context.registerDomEvent(self, "online", () => {
 			for (const [key, value] of Object.entries(this.identities)) {
 				if (value === "fail") { this.identities[key] = "await" }
 			}
 		}, { passive: true })
+		context.register(settings.onMutate(
+			set => set.preloadedExternalLinks,
+			async (cur, prev) => {
+				const prev2 = new Set(prev)
+				await preload(cur.filter(cur2 => !prev2.has(cur2)))
+			},
+		))
+		preload(settings.value.preloadedExternalLinks)
+			.catch(error => { self.console.error(error) })
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
@@ -576,9 +588,8 @@ export class ExternalResolve
 		id: string,
 		context: Context,
 	): Promise<Resolved | null> {
-		const href = await this.anormalizeURL(id, context.cwds.at(-1))
+		const [href, identity] = await this.aresolve0(id, context.cwds.at(-1))
 		if (href === null) { return null }
-		const identity = await this.aresolve0(href)
 		this.validate(href, context)
 		return isObject(identity)
 			? { code: identity.code, cwd: href, id: href }
@@ -586,8 +597,12 @@ export class ExternalResolve
 	}
 
 	protected async aresolve0(
-		href: string,
-	): Promise<ExternalResolve.Identity | "fail"> {
+		id: string,
+		cwd?: string,
+	): Promise<readonly [null, null] |
+		readonly [string, ExternalLinkResolve.Identity | "fail"]> {
+		const href = await this.anormalizeURL(id, cwd)
+		if (href === null) { return [null, null] }
 		const { tsTranspile } = this
 		let { identities: { [href]: identity } } = this
 		if (identity === void 0 || identity === "await") {
@@ -595,8 +610,8 @@ export class ExternalResolve
 			// eslint-disable-next-line no-multi-assign
 			this.identities[href] = identity = "fail"
 			try {
-				const identity2: WeakCacheIdentity & Writable<ExternalResolve.Identity
-				> = { code: (await requestUrl(href)).text }
+				const identity2: WeakCacheIdentity & Writable<ExternalLinkResolve
+					.Identity> = { code: (await requestUrl(href)).text }
 				identity = identity2
 				try {
 					const { ts } = tsMorphBootstrap,
@@ -663,11 +678,11 @@ export class ExternalResolve
 			}
 			this.identities[href] = identity
 		}
-		return identity
+		return [href, identity]
 	}
 
 	protected normalizeURL(id: string, cwd?: string): string | null {
-		const { filter } = ExternalResolve
+		const { filter } = ExternalLinkResolve
 		let href = null
 		if (cwd !== void 0) {
 			try {
@@ -709,7 +724,7 @@ export class ExternalResolve
 		return href
 	}
 }
-export namespace ExternalResolve {
+export namespace ExternalLinkResolve {
 	export interface Identity {
 		readonly code: string
 	}

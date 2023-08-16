@@ -9,7 +9,8 @@
 			"changelog-icon": "file-text",
 			"donate-icon": "heart",
 			"readme-icon": "file-question"
-		}
+		},
+		"external-link": "external-link"
 	},
 	"settings": {
 		"Markdown-code-block-languages-to-load-edit-icon": "$t(asset:generic.edit-list-icon)",
@@ -21,6 +22,8 @@
 		},
 		"expose-internal-modules-icon": "puzzle",
 		"open-changelog-on-update-icon": "$t(asset:generic.documentations.changelog-icon)",
+		"preloaded-external-links-edit-icon": "$t(asset:generic.edit-list-icon)",
+		"preloaded-external-links-icon": "$t(asset:generic.external-link)",
 		"preloading-rules-edit-icon": "$t(asset:generic.edit-list-icon)",
 		"preloading-rules-icon": "$t(asset:generic.rule-icon)",
 		"require-name-icon": "key"

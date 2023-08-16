@@ -180,7 +180,56 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 					))
 			})
 			.newSetting(containerEl, setting => {
-				const pf = "settings.Markdown-code-block-languages-to-load" as const
+				const { settingEl } = setting,
+					pf = "settings.preloaded-external-links"
+				setting
+					.setName(i18n.t(pf))
+					.setDesc(createDocumentFragment(settingEl.ownerDocument, frag => {
+						createChildElement(frag, "span", ele => {
+							ele.innerHTML =
+								i18n.t(`${pf}-description-HTML`, {
+									count: settings.value.preloadedExternalLinks.length,
+									interpolation: { escapeValue: false },
+								})
+						})
+					}))
+					.addButton(button => {
+						button
+							.setIcon(i18n.t(`asset:${pf}-edit-icon`))
+							.setTooltip(i18n.t(`${pf}-edit`))
+							.onClick(() => {
+								new ListModal(
+									context,
+									ListModal.stringInputter<string>({
+										back: identity,
+										forth: identity,
+									}),
+									constant(""),
+									settings.value.preloadedExternalLinks,
+									{
+										callback: async (value): Promise<void> => {
+											await settings.mutate(settingsM => {
+												settingsM.preloadedExternalLinks = value
+											})
+											this.postMutate()
+										},
+										title: () => i18n.t(pf),
+									},
+								).open()
+							})
+					})
+					.addExtraButton(resetButton(
+						i18n.t(`asset:${pf}-icon`),
+						i18n.t("settings.reset"),
+						async () => settings.mutate(settingsM => {
+							settingsM.preloadedExternalLinks =
+								cloneAsWritable(Settings.DEFAULT.preloadedExternalLinks)
+						}),
+						() => { this.postMutate() },
+					))
+			})
+			.newSetting(containerEl, setting => {
+				const pf = "settings.Markdown-code-block-languages-to-load"
 				setting
 					.setName(i18n.t(pf))
 					.setDesc(i18n.t(`${pf}-description`, {
