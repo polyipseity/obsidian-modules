@@ -4,6 +4,8 @@ import { PATHS } from "./util.mjs"
 import { argv } from "node:process"
 import builtinModules from "builtin-modules"
 import esbuildCompress from "esbuild-compress"
+import esbuildObsidianCompress from
+	"@polyipseity/obsidian-plugin-library/esbuild-compress"
 import esbuildPluginGlobals from "esbuild-plugin-globals"
 import esbuildPluginTextReplace from "esbuild-plugin-text-replace"
 import { inlineWorkerPlugin } from "@aidenlx/esbuild-plugin-inline-worker"
@@ -115,6 +117,9 @@ const ARGV_PRODUCTION = 2,
 						"?.[Symbol()]??(()=>{})",
 					],
 				],
+			}),
+			esbuildObsidianCompress({
+				enable: false,
 			}),
 		],
 		sourcemap: DEV && "inline",
