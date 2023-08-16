@@ -9,17 +9,12 @@ import {
 	markFixed,
 	splitLines,
 } from "@polyipseity/obsidian-plugin-library"
-import { type WorkerPool, pool } from "workerpool"
 import type { AsyncOrSync } from "ts-essentials"
 import { BUNDLE } from "../import.js"
 import type { CacheIdentity } from "./resolve.js"
 import type { ModulesPlugin } from "../main.js"
-import PLazy from "p-lazy"
 import type { TFile } from "obsidian"
-import type { run } from "./ts-transpile.worker.js"
-import { toObjectURL } from "@aidenlx/esbuild-plugin-inline-worker/utils"
-// eslint-disable-next-line import/no-unresolved
-import tsTranspileWorker from "worker:./ts-transpile.worker.js"
+import type { tsc } from "../worker.js"
 
 const
 	tsMorphBootstrap = dynamicRequireLazy<typeof import("@ts-morph/bootstrap")
@@ -99,20 +94,6 @@ export class TypeScriptTranspile
 	protected readonly acache =
 		new WeakMap<WeakCacheIdentity, Promise<string | null>>()
 
-	protected readonly pool = PLazy.from(async (): Promise<WorkerPool> => {
-		const url = toObjectURL(await tsTranspileWorker)
-		try {
-			const { context } = this
-			context.register(() => { URL.revokeObjectURL(url) })
-			const ret = pool(url, { workerType: "web" })
-			context.register(async () => ret.terminate(true))
-			return ret
-		} catch (error) {
-			URL.revokeObjectURL(url)
-			throw error
-		}
-	})
-
 	public override transpile(
 		content: string,
 		identity?: WeakCacheIdentity,
@@ -167,7 +148,7 @@ export class TypeScriptTranspile
 				header2.language = "TypeScript"
 			}
 			if (header2.language !== "TypeScript") { return null }
-			return (await this.pool).exec<typeof run>("run", [
+			return (await this.context.workerPool).exec<typeof tsc>("tsc", [
 				{
 					compilerOptions: header2.compilerOptions,
 					content,

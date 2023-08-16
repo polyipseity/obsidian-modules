@@ -1,14 +1,9 @@
 import { createProject, ts } from "@ts-morph/bootstrap"
 import { worker } from "workerpool"
 
-worker({ run }, {})
-export interface WorkerInput {
-	readonly content: string
-	readonly compilerOptions?: object | undefined
-}
-export type WorkerOutput = string
+worker({ tsc }, {})
 
-export async function run(input: WorkerInput): Promise<WorkerOutput> {
+export async function tsc(input: tsc.Input): Promise<tsc.Output> {
 	const { content, compilerOptions } = input,
 		project = await createProject({
 			compilerOptions: {
@@ -33,4 +28,11 @@ export async function run(input: WorkerInput): Promise<WorkerOutput> {
 		)
 	}
 	return result
+}
+export namespace tsc {
+	export interface Input {
+		readonly content: string
+		readonly compilerOptions?: object | undefined
+	}
+	export type Output = string
 }
