@@ -28,7 +28,7 @@
 			"donate": "$t(generic.documentations.donate)",
 			"readme": "$t(generic.documentations.readme)"
 		},
-		"enable-external-link": "啟用$t(generic.external-link)",
+		"enable-external-links": "啟用$t(generic.external-link)",
 		"expose-internal-modules": "公開內部模塊",
 		"expose-internal-modules-description-HTML": "<code>obsidian</code>、<code>@codemirror/*</code>、<code>@lezer/*</code>……",
 		"interface": "界面",
