@@ -212,9 +212,9 @@ function createRequire(
 						await resolve1.aresolve(id0, context),
 					),
 					{ code, id, value } = rd,
-					key = `esModule${opts?.commonJSInterop ?? true
-						? "WithCommonJS"
-						: ""}` as const
+					key = opts?.commonJSInterop ?? true
+						? "esModuleWithCommonJS"
+						: "esModule"
 				if (key in cache) { return cache[key] }
 				if ("value" in rd) {
 					cache0(cache, key, constant(value))
