@@ -555,8 +555,10 @@ export class ExternalLinkResolve
 	) {
 		super(context)
 		const { context: { settings } } = this,
-			preload = async (hrefs: readonly string[]): Promise<unknown> =>
-				Promise.all(hrefs.map(async href => this.aresolve0(href)))
+			preload = async (hrefs: readonly string[]): Promise<void> => {
+				if (!settings.value.enableExternalLinks) { return }
+				await Promise.all(hrefs.map(async href => this.aresolve0(href)))
+			}
 		context.registerDomEvent(self, "online", () => {
 			for (const [key, value] of Object.entries(this.identities)) {
 				if (value === "fail") { this.identities[key] = "await" }
@@ -564,7 +566,10 @@ export class ExternalLinkResolve
 		}, { passive: true })
 		context.register(settings.onMutate(
 			set => set.enableExternalLinks,
-			() => { this.invalidateAll() },
+			async (_0, _1, set) => {
+				this.invalidateAll()
+				await preload(set.preloadedExternalLinks)
+			},
 		))
 		context.register(settings.onMutate(
 			set => set.preloadedExternalLinks,
