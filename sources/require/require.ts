@@ -147,19 +147,21 @@ function createRequire(
 			}
 			cache0(cache, "commonJS", () => module.exports)
 			try {
-				parse(code, {
-					allowAwaitOutsideFunction: false,
-					allowHashBang: true,
-					allowImportExportEverywhere: false,
-					allowReserved: true,
-					allowReturnOutsideFunction: false,
-					allowSuperOutsideMethod: false,
-					ecmaVersion: "latest",
-					locations: false,
-					preserveParens: false,
-					ranges: false,
-					sourceType: "script",
-				})
+				if (compiledSyncCode !== void 0) {
+					parse(code, {
+						allowAwaitOutsideFunction: false,
+						allowHashBang: true,
+						allowImportExportEverywhere: false,
+						allowReserved: true,
+						allowReturnOutsideFunction: false,
+						allowSuperOutsideMethod: false,
+						ecmaVersion: "latest",
+						locations: false,
+						preserveParens: false,
+						ranges: false,
+						sourceType: "script",
+					})
+				}
 				preload(cleanup, rd, context)
 				new self0.Function("module", "exports", compiledSyncCode ??
 					attachFunctionSourceMap(
