@@ -94,6 +94,11 @@ export class TypeScriptTranspile
 	protected readonly acache =
 		new WeakMap<WeakCacheIdentity, Promise<string | null>>()
 
+	public constructor(
+		context: ModulesPlugin,
+		protected readonly workerPool = context.workerPool,
+	) { super(context) }
+
 	public override transpile(
 		content: string,
 		identity?: WeakCacheIdentity,
@@ -149,7 +154,7 @@ export class TypeScriptTranspile
 			}
 			if (header2.language !== "TypeScript") { return null }
 			const { ts } = tsMorphBootstrap
-			return (await this.context.workerPool).exec<typeof tsc>("tsc", [
+			return (await this.workerPool).exec<typeof tsc>("tsc", [
 				{
 					compilerOptions: {
 						inlineSourceMap: true,

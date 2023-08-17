@@ -1,5 +1,6 @@
 export const
-	PLUGIN_UNLOAD_DELAY = 10
+	PLUGIN_UNLOAD_DELAY = 10,
+	PRECOMPILE_SYNC_PREFIX = "\"use strict\";"
 
 export namespace DOMClasses2 {
 	export const

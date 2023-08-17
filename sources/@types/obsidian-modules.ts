@@ -92,7 +92,7 @@ declare module "obsidian-modules" {
 		 *
 		 * @default string automatically inferred if possible
 		 */
-		readonly cwd?: string
+		readonly cwd?: string | undefined
 	}
 
 	/**
@@ -111,7 +111,7 @@ declare module "obsidian-modules" {
 		 *
 		 * @default false|true depending on settings
 		 */
-		readonly commonJSInterop?: boolean
+		readonly commonJSInterop?: boolean | undefined
 	}
 
 	/**
@@ -176,21 +176,28 @@ declare module "obsidian-modules" {
 		readonly code: string
 
 		/**
+		 * Compiled code of the resolved module.
+		 *
+		 * Only used by {@link Require} but not {@link Require.import}.
+		 */
+		readonly compiledSyncCode?: string | undefined
+
+		/**
 		 * Whether to use cache.
 		 *
 		 * @default true
 		 */
-		readonly cache?: boolean
+		readonly cache?: boolean | undefined
+
+		/**
+		 * Working directory of the resolved module.
+		 */
+		readonly cwd?: string | undefined
 
 		/**
 		 * Exports of the resolved module.
 		 */
 		readonly value?: unknown
-
-		/**
-		 * Working directory of the resolved module.
-		 */
-		readonly cwd?: string
 	}
 
 	/**
@@ -206,12 +213,12 @@ declare module "obsidian-modules" {
 		/**
 		 * Identity of the parent module being loaded.
 		 */
-		parent?: string
+		parent?: string | undefined
 
 		/**
-		 * Invalidator.
+		 * Current {@link Require}.
 		 */
-		invalidate: Require["invalidate"]
+		readonly require: Require
 	}
 }
 import type { } from "obsidian-modules"

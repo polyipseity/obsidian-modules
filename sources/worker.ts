@@ -23,32 +23,32 @@ require = function fn(
 } as NodeRequire
 const library = import("@polyipseity/obsidian-plugin-library")
 
-worker({ parseAndRewriteRequire, tsc }, {})
+worker({ attachSourceMap, parseAndRewriteRequire, tsc }, {})
 
-export async function tsc(input: tsc.Input): Promise<tsc.Output> {
-	const { content, compilerOptions } = input,
-		project = await createProject({
-			compilerOptions: compilerOptions ?? {},
-			useInMemoryFileSystem: true,
-		}),
-		source = project.createSourceFile("index.ts", content),
-		program = project.createProgram()
-	let result = null
-	const { diagnostics } = program.emit(source, (filename, string) => {
-		if (filename.endsWith("index.js")) { result = string }
-	})
-	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-	if (result === null) {
-		throw new Error(
-			project.formatDiagnosticsWithColorAndContext(diagnostics),
-		)
-	}
-	return result
+export async function attachSourceMap(
+	input: attachSourceMap.Input,
+): Promise<attachSourceMap.Output> {
+	const { attachSourceMap: asm, attachFunctionSourceMap: afsm } = await library,
+		{ code, prefix, id, sourceRoot, type } = input
+	return { module: asm, script: afsm.bind(null, self.Function) }[type](
+		`${prefix}${code}`,
+		{
+			deletions: [...prefix].map((_0, idx) => ({
+				column: idx,
+				line: 1,
+			})),
+			file: id,
+			sourceRoot: `${sourceRoot}${sourceRoot && "/"}${id}`,
+		},
+	)
 }
-export namespace tsc {
+export namespace attachSourceMap {
 	export interface Input {
-		readonly content: string
-		readonly compilerOptions?: ts.CompilerOptions | undefined
+		readonly type: "module" | "script"
+		readonly code: string
+		readonly prefix: string
+		readonly id: string
+		readonly sourceRoot: string
 	}
 	export type Output = string
 }
@@ -117,4 +117,32 @@ export namespace parseAndRewriteRequire {
 		readonly code: string
 		readonly requires: readonly string[]
 	}
+}
+
+export async function tsc(input: tsc.Input): Promise<tsc.Output> {
+	const { content, compilerOptions } = input,
+		project = await createProject({
+			compilerOptions: compilerOptions ?? {},
+			useInMemoryFileSystem: true,
+		}),
+		source = project.createSourceFile("index.ts", content),
+		program = project.createProgram()
+	let result = null
+	const { diagnostics } = program.emit(source, (filename, string) => {
+		if (filename.endsWith("index.js")) { result = string }
+	})
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+	if (result === null) {
+		throw new Error(
+			project.formatDiagnosticsWithColorAndContext(diagnostics),
+		)
+	}
+	return result
+}
+export namespace tsc {
+	export interface Input {
+		readonly content: string
+		readonly compilerOptions?: ts.CompilerOptions | undefined
+	}
+	export type Output = string
 }

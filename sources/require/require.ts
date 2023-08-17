@@ -2,9 +2,7 @@ import {
 	type AnyObject,
 	Functions,
 	aroundIdentityFactory,
-	assignExact,
 	attachFunctionSourceMap,
-	attachSourceMap,
 	launderUnchecked,
 	patchWindows,
 } from "@polyipseity/obsidian-plugin-library"
@@ -33,14 +31,18 @@ import {
 	patchContextForPreview,
 	patchContextForTemplater,
 } from "./context.js"
+import type { AsyncOrSync } from "ts-essentials"
 import type { ModulesPlugin } from "../main.js"
+import { PRECOMPILE_SYNC_PREFIX } from "../magic.js"
+import type { WorkerPool } from "workerpool"
 import { around } from "monkey-around"
+import type { attachSourceMap } from "../worker.js"
 import { parse } from "acorn"
 
 export const REQUIRE_TAG = Symbol("require tag")
 
 export function loadRequire(context: ModulesPlugin): void {
-	const { app: { workspace } } = context,
+	const { app: { workspace }, manifest: { id } } = context,
 		tsTranspile = new TypeScriptTranspile(context),
 		transpiles = [
 			new MarkdownTranspile(context, tsTranspile),
@@ -52,7 +54,7 @@ export function loadRequire(context: ModulesPlugin): void {
 			new VaultPathResolve(context, transpiles),
 			new WikilinkResolve(context, transpiles),
 			new MarkdownLinkResolve(context, transpiles),
-			new ExternalLinkResolve(context, tsTranspile),
+			new ExternalLinkResolve(context, tsTranspile, `plugin:${id}`),
 		])
 	context.register(patchWindows(workspace, self0 =>
 		patchRequire(context, self0, resolve)))
@@ -64,6 +66,7 @@ export function loadRequire(context: ModulesPlugin): void {
 function createRequire(
 	self0: typeof globalThis,
 	resolve: Resolve,
+	workerPool: AsyncOrSync<WorkerPool>,
 	sourceRoot = "",
 ): Require {
 	function resolve0(
@@ -81,7 +84,7 @@ function createRequire(
 			aliases[oldID]?.delete(id)
 			self1.invalidate(id)
 		}
-		if (!(resolved.cache ?? true)) {
+		if (resolved.cache === false) {
 			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
 			delete cache[id2]
 		}
@@ -115,7 +118,7 @@ function createRequire(
 	): void {
 		const { cwd, id } = resolved,
 			{ cwds, parent } = context
-		cleanup.push(() => { assignExact(context, "parent", parent) })
+		cleanup.push(() => { context.parent = parent })
 		context.parent = id
 		cwds.push(cwd)
 		cleanup.push(() => { cwds.pop() })
@@ -131,7 +134,7 @@ function createRequire(
 			}
 			depends(ret, id0, context)
 			const [rd, cache] = resolve0(ret, id0, resolve1.resolve(id0, context)),
-				{ code, id, value } = rd
+				{ code, compiledSyncCode, id, value } = rd
 			if ("commonJS" in cache) { return cache.commonJS }
 			if ("value" in rd) {
 				cache0(cache, "commonJS", constant(value))
@@ -158,21 +161,19 @@ function createRequire(
 					sourceType: "script",
 				})
 				preload(cleanup, rd, context)
-				new self0.Function("module", "exports", attachFunctionSourceMap(
-					self0.Function,
-					`"use strict";${code}`,
-					{
-						deletions: [..."\"use strict\";"].map((_0, idx) => ({
-							column: idx,
-							line: 1,
-						})),
-						file: id,
-						sourceRoot: `${sourceRoot}${sourceRoot && "/"}${id}`,
-					},
-				))(
-					module,
-					module.exports,
-				)
+				new self0.Function("module", "exports", compiledSyncCode ??
+					attachFunctionSourceMap(
+						self0.Function,
+						`${PRECOMPILE_SYNC_PREFIX}${code}`,
+						{
+							deletions: [...PRECOMPILE_SYNC_PREFIX].map((_0, idx) => ({
+								column: idx,
+								line: 1,
+							})),
+							file: id,
+							sourceRoot: `${sourceRoot}${sourceRoot && "/"}${id}`,
+						},
+					))(module, module.exports)
 				const { exports } = module
 				exports[Symbol.toStringTag] = "Module"
 				return exports
@@ -191,7 +192,7 @@ function createRequire(
 		context: {
 			cwds: [],
 			dependencies: new WeakMap(),
-			invalidate(id: string) { ret.invalidate(id) },
+			get require() { return ret },
 		},
 		dependants: {},
 		dependencies: {},
@@ -233,16 +234,17 @@ function createRequire(
 							: "",
 						url = URL.createObjectURL(new Blob(
 							[
-								attachSourceMap(
-									`${prefix}${code}`,
-									{
-										deletions: [...prefix].map((_0, idx) => ({
-											column: idx,
-											line: 1,
-										})),
-										file: id,
-										sourceRoot: `${sourceRoot}${sourceRoot && "/"}${id}`,
-									},
+								await (await workerPool).exec<typeof attachSourceMap>(
+									"attachSourceMap",
+									[
+										{
+											code,
+											id,
+											prefix,
+											sourceRoot,
+											type: "module",
+										},
+									],
 								),
 							],
 							{ type: "text/javascript" },
@@ -443,8 +445,8 @@ function createAndSetRequire(
 	name: string,
 	resolve: Resolve,
 ): () => void {
-	const { api: { requires }, manifest: { id } } = context,
-		req = createRequire(self0, resolve, `plugin:${id}`)
+	const { api: { requires }, manifest: { id }, workerPool } = context,
+		req = createRequire(self0, resolve, workerPool, `plugin:${id}`)
 	requires.set(self0, req)
 	if (name in self0 || name === "require") {
 		return around(self0, {
