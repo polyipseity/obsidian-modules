@@ -229,7 +229,7 @@ function createRequire(
 				const aloader = promisePromise<unknown>()
 				cache0(cache, key, async () => (await aloader).promise)
 				const loader = await aloader
-				loader.resolve(async () => {
+				loader.resolve((async (): Promise<unknown> => {
 					preload(cleanup, rd, context)
 					const prefix =
 						key === "esModuleWithCommonJS"
@@ -398,7 +398,7 @@ function createRequire(
 						>, "apply" | "construct">>)
 					}
 					return ret2
-				})
+				})())
 				return await loader.promise
 			} finally {
 				cleanup.call()
