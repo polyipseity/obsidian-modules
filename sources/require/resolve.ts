@@ -3,6 +3,7 @@ import {
 	type CodePoint,
 	Rules,
 	SettingRules,
+	anyToError,
 	codePoint,
 	dynamicRequire,
 	dynamicRequireLazy,
@@ -542,7 +543,7 @@ export class ExternalLinkResolve
 	implements Resolve {
 	protected readonly redirects: Record<string, string> = {}
 	protected readonly identities: Record<string, AsyncOrSync<ExternalLinkResolve
-		.Identity | "fail"> | "await"> = {}
+		.Identity> | Error | "await"> = {}
 
 	public constructor(
 		context: ModulesPlugin,
@@ -559,7 +560,7 @@ export class ExternalLinkResolve
 			}
 		context.registerDomEvent(self, "online", () => {
 			for (const [key, value] of Object.entries(this.identities)) {
-				if (value === "fail") { this.identities[key] = "await" }
+				if (value instanceof Error) { this.identities[key] = "await" }
 			}
 		}, { passive: true })
 		context.register(settings.onMutate(
@@ -589,6 +590,7 @@ export class ExternalLinkResolve
 
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-multi-assign
 		const identity = this.identities[href] ??= "await"
+		if (identity instanceof Error) { throw identity }
 		return isObject(identity) && ExternalLinkResolve.Identity in identity
 			? { ...identity, cwd: href, id: href }
 			: null
@@ -607,16 +609,14 @@ export class ExternalLinkResolve
 		const [href, identity] = await this.aresolve0(id, cwd)
 		if (href === null) { return null }
 		this.validate(href, context)
-		return isObject(identity)
-			? { ...identity, cwd: href, id: href }
-			: null
+		return { ...identity, cwd: href, id: href }
 	}
 
 	protected async aresolve0(
 		id: string,
 		cwd?: string,
 	): Promise<readonly [null, null] |
-		readonly [string, ExternalLinkResolve.Identity | "fail"]> {
+		readonly [string, ExternalLinkResolve.Identity]> {
 		const href = await this.anormalizeURL(id, cwd)
 		if (href === null) { return [null, null] }
 		const { tsTranspile } = this
@@ -625,23 +625,16 @@ export class ExternalLinkResolve
 			if (identity === "await") { this.invalidate(href) }
 			// eslint-disable-next-line no-multi-assign
 			this.identities[href] = identity = (async (): Promise<ExternalLinkResolve
-				.Identity | "fail"> => {
-				let text = null
-				try {
-					({ text } = await this.fetchPool.addSingleTask({
+				.Identity> => {
+				const ret: WeakCacheIdentity & Writable<ExternalLinkResolve
+					.Identity> = {
+					[ExternalLinkResolve.Identity]: true,
+					code: (await this.fetchPool.addSingleTask({
 						data: href,
 						async generator(data) {
 							return requestUrl(data)
 						},
-					}).promise())
-				} catch (error) {
-					self.console.debug(error)
-					return "fail"
-				}
-				const ret: WeakCacheIdentity & Writable<ExternalLinkResolve
-					.Identity> = {
-					[ExternalLinkResolve.Identity]: true,
-					code: text,
+					}).promise()).text,
 				}
 				let compile = (): unknown => null
 				try {
@@ -688,9 +681,15 @@ export class ExternalLinkResolve
 				try { await compile() } catch (error) { self.console.debug(error) }
 				return ret
 			})()
-			// eslint-disable-next-line no-multi-assign
-			this.identities[href] = identity = await identity
+			try {
+				// eslint-disable-next-line no-multi-assign
+				this.identities[href] = identity = await identity
+			} catch (error) {
+				// eslint-disable-next-line no-multi-assign
+				this.identities[href] = identity = anyToError(error)
+			}
 		}
+		if (identity instanceof Error) { throw identity }
 		return [href, await identity]
 	}
 
