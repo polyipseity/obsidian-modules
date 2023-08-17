@@ -244,7 +244,8 @@ function createRequire(
 					const prefix =
 						key === "esModuleWithCommonJS"
 							? [
-								"export let module={exports:{[Symbol.toStringTag]:\"Module\"}}",
+								// eslint-disable-next-line max-len
+								"export let module={exports:Object.defineProperty({},Symbol.toStringTag,{configurable:!0,enumerable:!1,value:\"Module\",writable:!0})}",
 								"let{exports}=module",
 								"let{process}=self;process??={env:{NODE_DEV:\"production\"}}",
 								"",
@@ -282,14 +283,19 @@ function createRequire(
 					])
 					if (key === "esModuleWithCommonJS") {
 						const mod = isObject(ret2) ? ret2 : { ...ret2 ?? {} },
-							exports0 = launderUnchecked<AnyObject>(
+							{ exports: exports0 } = launderUnchecked<AnyObject>(
 								launderUnchecked<AnyObject>(mod)["module"],
-							)["exports"],
-							exports: {
-								[Symbol.toStringTag]?: "Module"
-							} = isObject(exports0) ? exports0 : {},
+							),
+							exports = isObject(exports0) ? exports0 : { ...exports0 ?? {} },
 							functions = new Map()
-						exports[Symbol.toStringTag] = "Module"
+						if (isObject(exports)) {
+							Reflect.defineProperty(exports, Symbol.toStringTag, {
+								configurable: false,
+								enumerable: false,
+								value: "Module",
+								writable: false,
+							})
+						}
 						ret2 = new Proxy(exports, {
 							defineProperty(target, property, attributes): boolean {
 								if (!(attributes.configurable ?? true) &&
