@@ -30,7 +30,7 @@ export class ModulesPlugin
 	public readonly settings: SettingsManager<Settings>
 
 	public readonly api: API = Object.freeze({ requires: new WeakMap() })
-	public readonly fetchPool = new PromisePoolExecutor({ concurrencyLimit: 4 })
+	public readonly fetchPool = new PromisePoolExecutor({ concurrencyLimit: 6 })
 	public readonly workerPool = PLazy.from(async (): Promise<WorkerPool> => {
 		const url = toObjectURL(await worker)
 		try {
