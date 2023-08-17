@@ -541,8 +541,8 @@ export class ExternalLinkResolve
 	extends AbstractResolve
 	implements Resolve {
 	protected readonly redirects: Record<string, string> = {}
-	protected readonly identities: Record<string, ExternalLinkResolve
-		.Identity | "await" | "fail"> = {}
+	protected readonly identities: Record<string, AsyncOrSync<ExternalLinkResolve
+		.Identity | "fail"> | "await"> = {}
 
 	public constructor(
 		context: ModulesPlugin,
@@ -589,7 +589,7 @@ export class ExternalLinkResolve
 
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-multi-assign
 		const identity = this.identities[href] ??= "await"
-		return isObject(identity)
+		return isObject(identity) && ExternalLinkResolve.Identity in identity
 			? { ...identity, cwd: href, id: href }
 			: null
 	}
@@ -624,63 +624,74 @@ export class ExternalLinkResolve
 		if (identity === void 0 || identity === "await") {
 			if (identity === "await") { this.invalidate(href) }
 			// eslint-disable-next-line no-multi-assign
-			this.identities[href] = identity = "fail"
-			let compile = (): unknown => null
-			try {
-				const identity2: WeakCacheIdentity & Writable<ExternalLinkResolve
-					.Identity> = {
-					code: (await this.fetchPool.addSingleTask({
+			this.identities[href] = identity = (async (): Promise<ExternalLinkResolve
+				.Identity | "fail"> => {
+				let text = null
+				try {
+					({ text } = await this.fetchPool.addSingleTask({
 						data: href,
 						async generator(data) {
 							return requestUrl(data)
 						},
-					}).promise()).text,
-				}
-				identity = identity2
-				compile = async (): Promise<void> => {
-					// eslint-disable-next-line require-atomic-updates
-					identity2.compiledSyncCode =
-						await (await this.workerPool).exec<typeof attachSourceMap>(
-							"attachSourceMap",
-							[
-								{
-									code: identity2.code,
-									id: href,
-									prefix: PRECOMPILE_SYNC_PREFIX,
-									sourceRoot: this.sourceRoot,
-									type: "script",
-								},
-							],
-						)
-				}
-				try {
-					const { ts } = tsMorphBootstrap,
-						code = await tsTranspile.atranspile(identity2.code, identity2, {
-							compilerOptions: {
-								module: ts.ModuleKind.CommonJS,
-							},
-							language: "TypeScript",
-						})
-					if (code !== null) {
-						// eslint-disable-next-line require-atomic-updates
-						identity2.code = code
-					}
+					}).promise())
 				} catch (error) {
 					self.console.debug(error)
+					return "fail"
 				}
-				const { code, requires } =
-					await (await this.workerPool).exec<typeof parseAndRewriteRequire>(
-						"parseAndRewriteRequire",
-						[{ code: identity2.code, href }],
-					)
-				// eslint-disable-next-line require-atomic-updates
-				identity2.code = code
-				await Promise.all(requires.map(async req => this.aresolve0(req)))
-			} catch (error) { self.console.debug(error) }
-			try { await compile() } catch (error) { self.console.debug(error) }
-			this.identities[href] = identity
+				const ret: WeakCacheIdentity & Writable<ExternalLinkResolve
+					.Identity> = {
+					[ExternalLinkResolve.Identity]: true,
+					code: text,
+				}
+				let compile = (): unknown => null
+				try {
+					compile = async (): Promise<void> => {
+						// eslint-disable-next-line require-atomic-updates
+						ret.compiledSyncCode =
+							await (await this.workerPool).exec<typeof attachSourceMap>(
+								"attachSourceMap",
+								[
+									{
+										code: ret.code,
+										id: href,
+										prefix: PRECOMPILE_SYNC_PREFIX,
+										sourceRoot: this.sourceRoot,
+										type: "script",
+									},
+								],
+							)
+					}
+					try {
+						const { ts } = tsMorphBootstrap,
+							code = await tsTranspile.atranspile(ret.code, ret, {
+								compilerOptions: {
+									module: ts.ModuleKind.CommonJS,
+								},
+								language: "TypeScript",
+							})
+						if (code !== null) {
+							// eslint-disable-next-line require-atomic-updates
+							ret.code = code
+						}
+					} catch (error) {
+						self.console.debug(error)
+					}
+					const { code, requires } =
+						await (await this.workerPool).exec<typeof parseAndRewriteRequire>(
+							"parseAndRewriteRequire",
+							[{ code: ret.code, href }],
+						)
+					// eslint-disable-next-line require-atomic-updates
+					ret.code = code
+					await Promise.all(requires.map(async req => this.aresolve0(req)))
+				} catch (error) { self.console.debug(error) }
+				try { await compile() } catch (error) { self.console.debug(error) }
+				return ret
+			})()
+			// eslint-disable-next-line no-multi-assign
+			this.identities[href] = identity = await identity
 		}
-		return [href, identity]
+		return [href, await identity]
 	}
 
 	protected normalizeURL(
@@ -718,7 +729,10 @@ export class ExternalLinkResolve
 	}
 }
 export namespace ExternalLinkResolve {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	export const Identity = Symbol("Identity")
 	export interface Identity {
+		readonly [Identity]: true
 		readonly code: string
 		readonly compiledSyncCode?: string | undefined
 	}

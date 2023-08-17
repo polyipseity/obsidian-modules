@@ -39,7 +39,7 @@ import { around } from "monkey-around"
 import type { attachSourceMap } from "../worker.js"
 import { parse } from "acorn"
 
-export const REQUIRE_TAG = Symbol("require tag")
+export const REQUIRE_TAG = Symbol("require")
 
 export function loadRequire(context: ModulesPlugin): void {
 	const { app: { workspace }, manifest: { id } } = context,
