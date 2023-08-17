@@ -147,7 +147,7 @@ function createRequire(
 			}
 			cache0(cache, "commonJS", () => module.exports)
 			try {
-				if (compiledSyncCode !== void 0) {
+				if (compiledSyncCode === void 0) {
 					parse(code, {
 						allowAwaitOutsideFunction: false,
 						allowHashBang: true,
