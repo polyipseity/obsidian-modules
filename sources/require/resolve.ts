@@ -707,19 +707,22 @@ export class ExternalLinkResolve
 		if (href !== null) {
 			try {
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-return-assign
-				return this.redirects[href] ??= (
-					this.invalidate(href),
-					(await this.fetchPool.addSingleTask({
-						data: href,
-						async generator(data) {
-							return fetch(data, {
-								mode: "cors",
-								redirect: "follow",
-								referrerPolicy: "no-referrer",
-							})
-						},
-					}).promise()).url
-				)
+				return this.redirects[href] ??= (await this.fetchPool.addSingleTask({
+					data: href,
+					async generator(data) {
+						return fetch(data, {
+							mode: "cors",
+							redirect: "follow",
+							referrerPolicy: "no-referrer",
+						})
+					},
+				}).promise()
+					.then(val => {
+						try {
+							this.invalidate(href)
+						} catch (error) { self.console.debug(error) }
+						return val
+					})).url
 			} catch (error) {
 				self.console.debug(error)
 			}
