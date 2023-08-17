@@ -140,11 +140,14 @@ function createRequire(
 				cache0(cache, "commonJS", constant(value))
 				return value
 			}
-			const module = {
-				exports: {
-					[Symbol.toStringTag]: "Module",
-				},
-			}
+			const module = { exports: {} },
+				tstP = {
+					configurable: false,
+					enumerable: false,
+					value: "Module",
+					writable: false,
+				}
+			Object.defineProperty(module.exports, Symbol.toStringTag, tstP)
 			cache0(cache, "commonJS", () => module.exports)
 			try {
 				if (compiledSyncCode === void 0) {
@@ -179,9 +182,7 @@ function createRequire(
 					))(module, module.exports, self0.process ??
 						// eslint-disable-next-line @typescript-eslint/naming-convention
 						{ env: { NODE_DEV: "production" } })
-				const { exports } = module
-				exports[Symbol.toStringTag] = "Module"
-				return exports
+				return Object.defineProperty(module.exports, Symbol.toStringTag, tstP)
 			} catch (error) {
 				cache0(cache, "commonJS", () => { throw error })
 				throw error
