@@ -7,11 +7,8 @@ import {
 	dynamicRequire,
 	dynamicRequireLazy,
 	dynamicRequireSync,
-	escapeJavaScriptString,
-	importable,
 } from "@polyipseity/obsidian-plugin-library"
 import type { Context, Resolve, Resolved } from "obsidian-modules"
-import { type Options, parse, parseExpressionAt } from "acorn"
 import { TFile, getLinkpath, normalizePath, requestUrl } from "obsidian"
 import type {
 	Transpile,
@@ -19,11 +16,10 @@ import type {
 	WeakCacheIdentity,
 } from "./transpile.js"
 import { BUNDLE } from "../import.js"
-import type { CallExpression } from "estree"
 import type { ModulesPlugin } from "../main.js"
-import { generate } from "astring"
 import { isObject } from "lodash-es"
-import { simple } from "acorn-walk"
+import { normalizeURL } from "../util.js"
+import type { parseAndRewriteRequire as parr } from "../worker.js"
 
 const
 	tsMorphBootstrap = dynamicRequireLazy<typeof import("@ts-morph/bootstrap")
@@ -543,7 +539,6 @@ function parseWikilink(
 export class ExternalLinkResolve
 	extends AbstractResolve
 	implements Resolve {
-	public static readonly filter = /^https?:/u
 	protected readonly redirects: Record<string, string> = {}
 	protected readonly identities: Record<string, "await" | "fail" | {
 		readonly code: string
@@ -651,54 +646,13 @@ export class ExternalLinkResolve
 				} catch (error) {
 					self.console.debug(error)
 				}
-				const reqs: string[] = [],
-					opts: Options = {
-						allowAwaitOutsideFunction: false,
-						allowHashBang: true,
-						allowImportExportEverywhere: false,
-						allowReserved: true,
-						allowReturnOutsideFunction: false,
-						allowSuperOutsideMethod: false,
-						ecmaVersion: "latest",
-						locations: false,
-						preserveParens: false,
-						ranges: false,
-						sourceType: "script",
-					},
-					tree = parse(identity2.code, opts)
-				simple(tree, {
-					// eslint-disable-next-line @typescript-eslint/naming-convention
-					CallExpression: node => {
-						const node2 = node as CallExpression & typeof node,
-							{ callee } = node2
-						if (callee.type !== "Identifier" || callee.name !== "require") {
-							return
-						}
-						const [arg0] = node2.arguments
-						if (arg0?.type !== "Literal" || typeof arg0.value !== "string") {
-							return
-						}
-						const { value } = arg0
-						if (importable({}, value)) { return }
-						let prefix = ""
-						if (!(/^\.{0,2}\//u).test(value)) {
-							try {
-								// eslint-disable-next-line no-new
-								new URL(value)
-							} catch (error) {
-								self.console.debug(error)
-								prefix = "/"
-							}
-						}
-						const value2 = this.normalizeURL(`${prefix}${value}`, href)
-						if (value2 === null) { return }
-						node2.callee = parseExpressionAt("self.require", 0, opts)
-						arg0.raw = escapeJavaScriptString(value2)
-						reqs.push(arg0.value = value2)
-					},
-				})
-				identity2.code = generate(tree, { comments: true, indent: "" })
-				await Promise.all(reqs.map(async req => this.aresolve0(req)))
+				const { code, requires } =
+					await (await this.context.workerPool).exec<typeof parr>(
+						"parseAndRewriteRequire",
+						[{ code: identity2.code, href }],
+					)
+				identity2.code = code
+				await Promise.all(requires.map(async req => this.aresolve0(req)))
 			} catch (error) {
 				self.console.debug(error)
 			}
@@ -707,25 +661,10 @@ export class ExternalLinkResolve
 		return [href, identity]
 	}
 
-	protected normalizeURL(id: string, cwd?: string): string | null {
-		const { filter } = ExternalLinkResolve
-		let href = null
-		if (cwd !== void 0) {
-			try {
-				({ href } = new URL(id, cwd))
-				if (!filter.test(href)) { href = null }
-			} catch (error) {
-				self.console.debug(error)
-			}
-		}
-		if (href === null) {
-			try {
-				({ href } = new URL(id))
-				if (!filter.test(href)) { href = null }
-			} catch (error) {
-				self.console.debug(error)
-			}
-		}
+	protected normalizeURL(
+		...args: Parameters<typeof normalizeURL>
+	): ReturnType<typeof normalizeURL> {
+		const href = normalizeURL(...args)
 		return href === null ? null : this.redirects[href] ?? href
 	}
 
