@@ -7,9 +7,9 @@ import {
 	createI18n,
 	semVerString,
 } from "@polyipseity/obsidian-plugin-library"
+import { MAX_FETCH_CONCURRENCY, PLUGIN_UNLOAD_DELAY } from "./magic.js"
 import { type WorkerPool, pool } from "workerpool"
 import type { API } from "obsidian-modules"
-import { PLUGIN_UNLOAD_DELAY } from "./magic.js"
 import PLazy from "p-lazy"
 import { PluginLocales } from "../assets/locales.js"
 import { PromisePoolExecutor } from "promise-pool-executor"
@@ -30,7 +30,10 @@ export class ModulesPlugin
 	public readonly settings: SettingsManager<Settings>
 
 	public readonly api: API = Object.freeze({ requires: new WeakMap() })
-	public readonly fetchPool = new PromisePoolExecutor({ concurrencyLimit: 6 })
+	public readonly fetchPool = new PromisePoolExecutor({
+		concurrencyLimit: MAX_FETCH_CONCURRENCY,
+	})
+
 	public readonly workerPool = PLazy.from(async (): Promise<WorkerPool> => {
 		const url = toObjectURL(await worker)
 		try {

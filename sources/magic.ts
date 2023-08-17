@@ -1,4 +1,5 @@
 export const
+	MAX_FETCH_CONCURRENCY = 6,
 	PLUGIN_UNLOAD_DELAY = 10,
 	PRECOMPILE_SYNC_PREFIX = "\"use strict\";"
 
