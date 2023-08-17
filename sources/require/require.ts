@@ -140,16 +140,14 @@ function createRequire(
 				cache0(cache, "commonJS", constant(value))
 				return value
 			}
-			const
-				tstProp = {
-					configurable: false,
+			const module = {
+				exports: Object.defineProperty({}, Symbol.toStringTag, {
+					configurable: true,
 					enumerable: false,
 					value: "Module",
-					writable: false,
-				},
-				module = {
-					exports: Object.defineProperty({}, Symbol.toStringTag, tstProp),
-				}
+					writable: true,
+				}),
+			}
 			cache0(cache, "commonJS", () => module.exports)
 			try {
 				if (compiledSyncCode === void 0) {
@@ -186,7 +184,12 @@ function createRequire(
 						{ env: { NODE_DEV: "production" } })
 				const { exports } = module
 				if (isObject(exports)) {
-					Reflect.defineProperty(exports, Symbol.toStringTag, tstProp)
+					Reflect.defineProperty(exports, Symbol.toStringTag, {
+						configurable: false,
+						enumerable: false,
+						value: "Module",
+						writable: false,
+					})
 				}
 				return exports
 			} catch (error) {
