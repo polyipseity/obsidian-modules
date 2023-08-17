@@ -5,6 +5,7 @@ import {
 	attachFunctionSourceMap,
 	launderUnchecked,
 	patchWindows,
+	promisePromise,
 } from "@polyipseity/obsidian-plugin-library"
 import {
 	CompositeResolve,
@@ -223,8 +224,10 @@ function createRequire(
 					cache0(cache, key, constant(value))
 					return value
 				}
-				cache0(cache, key, () => { throw new Error(id) })
-				try {
+				const aloader = promisePromise<unknown>()
+				cache0(cache, key, async () => (await aloader).promise)
+				const loader = await aloader
+				loader.resolve(async () => {
 					preload(cleanup, rd, context)
 					const prefix =
 						key === "esModuleWithCommonJS"
@@ -380,12 +383,9 @@ function createRequire(
 						} satisfies Required<Omit<ProxyHandler<typeof exports
 						>, "apply" | "construct">>)
 					}
-					cache0(cache, key, constant(ret2))
 					return ret2
-				} catch (error) {
-					cache0(cache, key, () => { throw error })
-					throw error
-				}
+				})
+				return await loader.promise
 			} finally {
 				cleanup.call()
 			}
