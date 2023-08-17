@@ -25,6 +25,7 @@ export interface Settings extends PluginContext.Settings {
 	readonly preloadingRules: readonly string[]
 	readonly preloadedExternalLinks: readonly string[]
 	readonly markdownCodeBlockLanguagesToLoad: readonly string[]
+	readonly importTimeout: number
 
 	readonly openChangelogOnUpdate: boolean
 
@@ -50,6 +51,7 @@ export namespace Settings {
 		enableExternalLinks: false,
 		errorNoticeTimeout: NOTICE_NO_TIMEOUT,
 		exposeInternalModules: true,
+		importTimeout: 10,
 		language: "",
 		markdownCodeBlockLanguagesToLoad: ["JS", "TS", "JavaScript", "TypeScript"],
 		noticeTimeout: 5,
@@ -83,6 +85,12 @@ export namespace Settings {
 				unc,
 				"exposeInternalModules",
 				["boolean"],
+			),
+			importTimeout: fixTyped(
+				DEFAULT,
+				unc,
+				"importTimeout",
+				["number"],
 			),
 			language: fixInSet(
 				DEFAULT,

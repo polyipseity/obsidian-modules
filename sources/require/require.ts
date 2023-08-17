@@ -6,6 +6,7 @@ import {
 	launderUnchecked,
 	patchWindows,
 	promisePromise,
+	sleep2,
 } from "@polyipseity/obsidian-plugin-library"
 import {
 	CompositeResolve,
@@ -32,10 +33,8 @@ import {
 	patchContextForPreview,
 	patchContextForTemplater,
 } from "./context.js"
-import type { AsyncOrSync } from "ts-essentials"
 import type { ModulesPlugin } from "../main.js"
 import { PRECOMPILE_SYNC_PREFIX } from "../magic.js"
-import type { WorkerPool } from "workerpool"
 import { around } from "monkey-around"
 import type { attachSourceMap } from "../worker.js"
 import { parse } from "acorn"
@@ -65,9 +64,9 @@ export function loadRequire(context: ModulesPlugin): void {
 }
 
 function createRequire(
+	ctx: ModulesPlugin,
 	self0: typeof globalThis,
 	resolve: Resolve,
-	workerPool: AsyncOrSync<WorkerPool>,
 	sourceRoot = "",
 ): Require {
 	function resolve0(
@@ -239,7 +238,7 @@ function createRequire(
 							: "",
 						url = URL.createObjectURL(new Blob(
 							[
-								await (await workerPool).exec<typeof attachSourceMap>(
+								await (await ctx.workerPool).exec<typeof attachSourceMap>(
 									"attachSourceMap",
 									[
 										{
@@ -255,9 +254,20 @@ function createRequire(
 							{ type: "text/javascript" },
 						))
 					cleanup.push(() => { URL.revokeObjectURL(url) })
-					let ret2 = await import(url) as object
+					const { importTimeout } = ctx.settings.value
+					let ret2: unknown = await Promise.race([
+						import(url),
+						...importTimeout === 0
+							? []
+							: [
+								(async (): Promise<never> => {
+									await sleep2(self, importTimeout)
+									throw new Error(id)
+								})(),
+							],
+					])
 					if (key === "esModuleWithCommonJS") {
-						const mod = ret2,
+						const mod = isObject(ret2) ? ret2 : { ...ret2 ?? {} },
 							exports0 = launderUnchecked<AnyObject>(
 								launderUnchecked<AnyObject>(mod)["module"],
 							)["exports"],
@@ -447,8 +457,8 @@ function createAndSetRequire(
 	name: string,
 	resolve: Resolve,
 ): () => void {
-	const { api: { requires }, manifest: { id }, workerPool } = context,
-		req = createRequire(self0, resolve, workerPool, `plugin:${id}`)
+	const { api: { requires }, manifest: { id } } = context,
+		req = createRequire(context, self0, resolve, `plugin:${id}`)
 	requires.set(self0, req)
 	if (name in self0 || name === "require") {
 		return around(self0, {

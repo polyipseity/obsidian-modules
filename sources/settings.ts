@@ -12,6 +12,7 @@ import {
 	registerSettingsCommands,
 	resetButton,
 	rulesList,
+	setTextToNumber,
 } from "@polyipseity/obsidian-plugin-library"
 import { constant, identity, isObject } from "lodash-es"
 import type { ModulesPlugin } from "./main.js"
@@ -290,6 +291,36 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 								cloneAsWritable(
 									Settings.DEFAULT.markdownCodeBlockLanguagesToLoad,
 								)
+						}),
+						() => { this.postMutate() },
+					))
+			})
+			.newSetting(containerEl, setting => {
+				const { settingEl } = setting,
+					pf = "settings.import-timeout"
+				setting
+					.setName(createDocumentFragment(settingEl.ownerDocument, frag => {
+						createChildElement(frag, "span", ele => {
+							ele.innerHTML = i18n.t(`${pf}-HTML`)
+						})
+					}))
+					.setDesc(createDocumentFragment(settingEl.ownerDocument, frag => {
+						createChildElement(frag, "span", ele => {
+							ele.innerHTML = i18n.t(`${pf}-description-HTML`)
+						})
+					}))
+					.addText(linkSetting(
+						() => settings.value.importTimeout.toString(),
+						setTextToNumber(async value => settings.mutate(settingsM => {
+							settingsM.importTimeout = value
+						})),
+						() => { this.postMutate() },
+					))
+					.addExtraButton(resetButton(
+						i18n.t(`asset:${pf}-icon`),
+						i18n.t("settings.reset"),
+						async () => settings.mutate(settingsM => {
+							settingsM.importTimeout = Settings.DEFAULT.importTimeout
 						}),
 						() => { this.postMutate() },
 					))

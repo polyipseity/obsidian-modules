@@ -33,6 +33,8 @@
 		"enable-external-links": "Enable $t(generic.external-link_other)",
 		"expose-internal-modules": "Expose internal modules",
 		"expose-internal-modules-description-HTML": "<code>obsidian</code>, <code>@codemirror/*</code>, <code>@lezer/*</code>…",
+		"import-timeout-HTML": "<code>import</code> $t(generic.timeout) (s)",
+		"import-timeout-description-HTML": "For avoiding <code>import</code> deadlocks. Set to 0 s for no $t(generic.timeout).",
 		"interface": "Interface",
 		"open-changelog-on-update": "$t(generic.open, capitalize) $t(generic.documentations.changelog) on update",
 		"preloaded-external-links": "Preloaded $t(generic.external-link_other)",

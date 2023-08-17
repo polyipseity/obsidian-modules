@@ -22,6 +22,7 @@
 		},
 		"enable-external-links-icon": "$t(asset:generic.external-link)",
 		"expose-internal-modules-icon": "puzzle",
+		"import-timeout-icon": "timer",
 		"open-changelog-on-update-icon": "$t(asset:generic.documentations.changelog-icon)",
 		"preloaded-external-links-edit-icon": "$t(asset:generic.edit-list-icon)",
 		"preloaded-external-links-icon": "$t(asset:generic.external-link)",

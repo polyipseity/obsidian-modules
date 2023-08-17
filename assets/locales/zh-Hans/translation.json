@@ -31,6 +31,8 @@
 		"enable-external-links": "启用$t(generic.external-link)",
 		"expose-internal-modules": "公开内部模块",
 		"expose-internal-modules-description-HTML": "<code>obsidian</code>、<code>@codemirror/*</code>、<code>@lezer/*</code>……",
+		"import-timeout-HTML": "<code>import</code>$t(generic.timeout)（s）",
+		"import-timeout-description-HTML": "用于避免<code>import</code>死锁。设为0 s是无$t(generic.timeout)。",
 		"interface": "界面",
 		"open-changelog-on-update": "更新时$t(generic.open)$t(generic.documentations.changelog)",
 		"preloaded-external-links": "预加载的$t(generic.external-link)",
