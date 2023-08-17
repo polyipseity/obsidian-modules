@@ -2,35 +2,28 @@ import { type Options, parse, parseExpressionAt } from "acorn"
 import { createProject, type ts } from "@ts-morph/bootstrap"
 import type { CallExpression } from "estree"
 import { generate } from "astring"
-import { isNil } from "lodash-es"
 import { normalizeURL } from "./util.js"
 import { simple } from "acorn-walk"
 import { worker } from "workerpool"
 
+const obsidian = new Proxy<Record<keyof any, unknown>>({}, {
+	get(target, property, _receiver): unknown {
+		// eslint-disable-next-line @typescript-eslint/no-extraneous-class, no-return-assign
+		return target[property] ??= class { }
+	},
+})
+// eslint-disable-next-line no-global-assign
+require = function fn(
+	this: typeof self,
+	...args: Parameters<NodeRequire>
+): ReturnType<typeof require> {
+	const [id] = args
+	if (id === "obsidian") { return obsidian }
+	return null
+} as NodeRequire
+const library = import("@polyipseity/obsidian-plugin-library")
+
 worker({ parseAndRewriteRequire, tsc }, {})
-
-function escapeJavaScriptString(value: string): string {
-	return `\`${value.replace(/(?<char>`|\\|\$)/ug, "\\$<char>")}\``
-}
-
-function dynamicRequireSync<T>(module: string): T {
-	// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
-	const ret: unknown = require(module)
-	if (isNil(ret)) { throw new Error(module) }
-	return ret as T
-}
-
-function importable(
-	...args: Parameters<typeof dynamicRequireSync>
-): boolean {
-	try {
-		dynamicRequireSync(...args)
-		return true
-	} catch (error) {
-		self.console.debug(error)
-		return false
-	}
-}
 
 export async function tsc(input: tsc.Input): Promise<tsc.Output> {
 	const { content, compilerOptions } = input,
@@ -60,10 +53,11 @@ export namespace tsc {
 	export type Output = string
 }
 
-export function parseAndRewriteRequire(
+export async function parseAndRewriteRequire(
 	input: parseAndRewriteRequire.Input,
-): parseAndRewriteRequire.Output {
-	const requires: string[] = [],
+): Promise<parseAndRewriteRequire.Output> {
+	const { importable, escapeJavaScriptString } = await library,
+		requires: string[] = [],
 		opts: Options = {
 			allowAwaitOutsideFunction: false,
 			allowHashBang: true,
@@ -91,7 +85,7 @@ export function parseAndRewriteRequire(
 				return
 			}
 			const { value } = arg0
-			if (importable(value)) { return }
+			if (importable({}, value)) { return }
 			let prefix = ""
 			if (!(/^\.{0,2}\//u).test(value)) {
 				try {
