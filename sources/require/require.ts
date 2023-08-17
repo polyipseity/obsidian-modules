@@ -163,7 +163,7 @@ function createRequire(
 					})
 				}
 				preload(cleanup, rd, context)
-				new self0.Function("module", "exports", compiledSyncCode ??
+				new self0.Function("module", "exports", "process", compiledSyncCode ??
 					attachFunctionSourceMap(
 						self0.Function,
 						`${PRECOMPILE_SYNC_PREFIX}${code}`,
@@ -175,7 +175,10 @@ function createRequire(
 							file: id,
 							sourceRoot: `${sourceRoot}${sourceRoot && "/"}${id}`,
 						},
-					))(module, module.exports)
+						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+					))(module, module.exports, self0.process ??
+						// eslint-disable-next-line @typescript-eslint/naming-convention
+						{ env: { NODE_DEV: "production" } })
 				const { exports } = module
 				exports[Symbol.toStringTag] = "Module"
 				return exports
@@ -233,6 +236,7 @@ function createRequire(
 							? [
 								"export let module={exports:{[Symbol.toStringTag]:\"Module\"}}",
 								"let{exports}=module",
+								"let{process}=self;process??={env:{NODE_DEV:\"production\"}}",
 								"",
 							].join(";")
 							: "",
@@ -261,7 +265,7 @@ function createRequire(
 							? []
 							: [
 								(async (): Promise<never> => {
-									await sleep2(self, importTimeout)
+									await sleep2(self0, importTimeout)
 									throw new Error(id)
 								})(),
 							],
