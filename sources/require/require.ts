@@ -1,4 +1,14 @@
 import {
+	AbstractFileResolve,
+	CompositeResolve,
+	ExternalLinkResolve,
+	InternalModulesResolve,
+	MarkdownLinkResolve,
+	RelativePathResolve,
+	VaultPathResolve,
+	WikilinkResolve,
+} from "./resolve.js"
+import {
 	type AnyObject,
 	Functions,
 	aroundIdentityFactory,
@@ -8,15 +18,6 @@ import {
 	promisePromise,
 	sleep2,
 } from "@polyipseity/obsidian-plugin-library"
-import {
-	CompositeResolve,
-	ExternalLinkResolve,
-	InternalModulesResolve,
-	MarkdownLinkResolve,
-	RelativePathResolve,
-	VaultPathResolve,
-	WikilinkResolve,
-} from "./resolve.js"
 import type {
 	Context,
 	ImportOptions,
@@ -48,12 +49,13 @@ export function loadRequire(context: ModulesPlugin): void {
 			new MarkdownTranspile(context, tsTranspile),
 			tsTranspile,
 		],
+		cache = new AbstractFileResolve.Cache(context),
 		resolve = new CompositeResolve([
 			new InternalModulesResolve(context),
-			new RelativePathResolve(context, transpiles),
-			new VaultPathResolve(context, transpiles),
-			new WikilinkResolve(context, transpiles),
-			new MarkdownLinkResolve(context, transpiles),
+			new RelativePathResolve(context, transpiles, cache),
+			new VaultPathResolve(context, transpiles, cache),
+			new WikilinkResolve(context, transpiles, cache),
+			new MarkdownLinkResolve(context, transpiles, cache),
 			new ExternalLinkResolve(context, tsTranspile, `plugin:${id}`),
 		])
 	context.register(patchWindows(workspace, self0 =>

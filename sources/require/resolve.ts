@@ -1,6 +1,7 @@
 import type { AsyncOrSync, Writable } from "ts-essentials"
 import {
 	type CodePoint,
+	EventEmitterLite,
 	Rules,
 	SettingRules,
 	anyToError,
@@ -67,13 +68,10 @@ abstract class AbstractResolve implements Resolve {
 	public abstract resolve(id: string, context: Context): Resolved | null
 }
 
-abstract class AbstractFileResolve
+export abstract class AbstractFileResolve
 	extends AbstractResolve
 	implements Resolve {
-	protected readonly preloadRules
 	protected readonly transpiles
-	protected readonly cache0: Record<string, CacheIdentity> = {}
-
 	protected readonly transpiled =
 		new WeakMap<Transpile, WeakSet<CacheIdentity>>()
 
@@ -83,58 +81,29 @@ abstract class AbstractFileResolve
 	public constructor(
 		context: ModulesPlugin,
 		transpiles: readonly Transpile[],
+		protected readonly cache = new AbstractFileResolve.Cache(context),
 	) {
 		super(context)
-		this.preloadRules = new SettingRules(
-			context,
-			set => set.preloadingRules,
-			Rules.pathInterpreter,
-		)
 		this.transpiles = Object.freeze([...transpiles])
-		const
-			{
-				cache0,
-				context: { app: { vault } },
-				transpiled,
-				preloadRules,
-			} = this,
-			preload = async (): Promise<unknown> =>
-				Promise.all(vault.getFiles().map(async file => this.cache(file)))
-		context.registerEvent(vault.on("create", async file => {
-			if (!(file instanceof TFile)) { return }
-			await this.cache(file)
-		}))
-		context.registerEvent(vault.on("rename", async (file, oldPath) => {
-			this.uncache(oldPath)
-			if (!(file instanceof TFile)) { return }
-			await this.cache(file)
-		}))
-		context.registerEvent(vault.on("modify", async file => {
-			if (!(file instanceof TFile)) { return }
-			await this.cache(file)
-		}))
-		context.registerEvent(vault.on("delete", file => {
-			this.uncache(file.path)
-		}))
+		const { transpiled } = this
+		cache.onInvalidate.listen(path => { this.invalidate(path) })
 		for (const trans of transpiles) {
 			trans.onInvalidate.listen(() => {
 				const transed = transpiled.get(trans)
 				if (!transed) { return }
-				for (const [path, id] of Object.entries(cache0)) {
-					if (transed.has(id)) { this.recache(path) }
+				for (const [path, id] of cache) {
+					if (transed.has(id)) { this.invalidate(path) }
 				}
 			})
 		}
-		context.register(preloadRules.onChanged.listen(preload))
-		preload().catch(error => { self.console.error(error) })
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
 		this.validate(id, context)
-		const { cache0 } = this,
+		const { cache } = this,
 			id0 = this.resolvePath(id, context)
 		if (id0 === null) { return null }
-		const identity = cache0[id0]
+		const identity = cache.get(id0)
 		if (identity) {
 			const { content } = identity
 			if (content !== void 0) {
@@ -154,10 +123,10 @@ abstract class AbstractFileResolve
 		context: Context,
 	): Promise<Resolved | null> {
 		this.validate(id, context)
-		const { cache0, context: { app: { vault, vault: { adapter } } } } = this,
+		const { cache, context: { app: { vault, vault: { adapter } } } } = this,
 			id0 = await this.aresolvePath(id, context)
 		if (id0 === null) { return null }
-		const identity = cache0[id0]
+		const identity = cache.get(id0)
 		try {
 			if (identity) {
 				const { file, content } = identity
@@ -181,40 +150,6 @@ abstract class AbstractFileResolve
 			self.console.debug(error)
 			return null
 		}
-	}
-
-	protected async cache(file: TFile): Promise<CacheIdentity> {
-		const { cache0, context: { app: { vault } }, preloadRules } = this,
-			{ path } = file
-		this.uncache(path)
-		const ret = {
-			file,
-			...preloadRules.test(path)
-				? { content: await vault.cachedRead(file) }
-				: {},
-		}
-		cache0[path] = ret
-		this.invalidate(path)
-		return ret
-	}
-
-	protected recache(path: string): CacheIdentity | null {
-		const { cache0 } = this,
-			entry = this.uncache(path)
-		if (!entry) { return null }
-		const ret = { ...entry }
-		cache0[path] = ret
-		this.invalidate(path)
-		return ret
-	}
-
-	protected uncache(path: string): CacheIdentity | null {
-		const { cache0 } = this,
-			{ [path]: entry } = cache0
-		if (!entry) { return null }
-		Reflect.deleteProperty(cache0, path)
-		this.invalidate(path)
-		return entry
 	}
 
 	protected transpile(content: string, identity?: CacheIdentity): string {
@@ -265,6 +200,81 @@ abstract class AbstractFileResolve
 		// eslint-disable-next-line @typescript-eslint/no-invalid-this
 	): AsyncOrSync<ReturnType<typeof this.resolvePath>>
 	protected abstract resolvePath(id: string, context: Context): string | null
+}
+export namespace AbstractFileResolve {
+	export class Cache {
+		public readonly onInvalidate = new EventEmitterLite<readonly [
+			path: string,
+			cache: CacheIdentity | null,
+		]>()
+
+		protected readonly data: Record<string, CacheIdentity> = {}
+		protected readonly preloadRules = new SettingRules(
+			this.context,
+			set => set.preloadingRules,
+			Rules.pathInterpreter,
+		)
+
+		public constructor(
+			protected readonly context: ModulesPlugin,
+		) {
+			const { context: { app: { vault } }, preloadRules } = this,
+				preload = async (): Promise<unknown> =>
+					Promise.all(vault.getFiles().map(async file => this.cache(file)))
+			context.registerEvent(vault.on("create", async file => {
+				if (!(file instanceof TFile)) { return }
+				await this.cache(file)
+			}))
+			context.registerEvent(vault.on("rename", async (file, oldPath) => {
+				await this.uncache(oldPath)
+				if (!(file instanceof TFile)) { return }
+				await this.cache(file)
+			}))
+			context.registerEvent(vault.on("modify", async file => {
+				if (!(file instanceof TFile)) { return }
+				await this.cache(file)
+			}))
+			context.registerEvent(vault.on("delete", async file => {
+				await this.uncache(file.path)
+			}))
+			context.register(preloadRules.onChanged.listen(preload))
+			preload().catch(error => { self.console.error(error) })
+		}
+
+		public get(path: string): CacheIdentity | undefined {
+			return this.data[path]
+		}
+
+		public [Symbol.iterator](): IterableIterator<readonly [
+			string,
+			CacheIdentity,
+		]> {
+			return Object.entries(this.data)[Symbol.iterator]()
+		}
+
+		protected async cache(file: TFile): Promise<CacheIdentity> {
+			const { data, context: { app: { vault } }, preloadRules } = this,
+				{ path } = file,
+				ret = {
+					file,
+					...preloadRules.test(path)
+						? { content: await vault.cachedRead(file) }
+						: {},
+				}
+			await this.onInvalidate.emit(path, data[path] = ret)
+			return ret
+		}
+
+		protected async uncache(path: string): Promise<CacheIdentity | null> {
+			const { data } = this,
+				{ [path]: ret } = data
+			if (!ret) { return null }
+			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+			delete data[path]
+			await this.onInvalidate.emit(path, null)
+			return ret
+		}
+	}
 }
 
 export class CompositeResolve implements Resolve {
