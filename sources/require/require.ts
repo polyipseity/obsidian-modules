@@ -259,7 +259,6 @@ function createRequire(
 				cache0(cache, key, async () => (await aloader).promise)
 				const loader = await aloader
 				loader.resolve((async (): Promise<unknown> => {
-					preload(cleanup, rd, context)
 					const prefix =
 						key === "esModuleWithCommonJS"
 							? [
@@ -289,6 +288,7 @@ function createRequire(
 						))
 					cleanup.push(() => { URL.revokeObjectURL(url) })
 					const { importTimeout } = ctx.settings.value
+					preload(cleanup, rd, context)
 					let ret2: unknown = await Promise.race([
 						import(url),
 						...importTimeout === 0
