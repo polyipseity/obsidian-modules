@@ -1,5 +1,42 @@
 # obsidian-modules
 
+## 2.0.0
+
+### Major Changes
+
+- 0c567c9: Add TypeScript support.
+
+### Minor Changes
+
+- 97eca08: Add setting "Require name".
+- 24ed484: Move more work to workers and improve code.
+- 459125e: Add setting "Markdown code block languages to load".
+- a0bea02: Add support for importing external modules via HTTP and HTTPS.
+- 4d79665: Add setting "Preloading rules".
+- ccfbf35: Add setting "Preloaded external links".
+- f36db52: Use workers to transpile TypeScript if async import is used.
+- 26155df: Add setting "Expose internal modules". Cherry-picked from `d22f7bf6182272e3e0058c328ed42ec3039de184`, which is from `obsidian-terminal`.
+- fd1f08c: Add setting `Expose internal modules`.
+- 47c5f65: Allow importing a loading module multiple times. (Deadlocks may result though.)
+- 9b43345: Implement source mapping. Sources are placed under `modules/`.
+- c944a54: Rewrite dependency handling.
+- a85b3b7: Add setting "Enable external links".
+- fbcf7d2: Add relative path support for Templater.
+- 0d9ed0f: Make importing from external CDNs work.
+- d0adec9: Add setting "`import` timeout".
+
+### Patch Changes
+
+- b5f2d98: Assign `Symbol.toStringTag` to modules.
+- 24cbb1c: Respect existing source maps when source mapping.
+- a286c55: Define `process` so that React can load on mobile.
+- c3a689e: Limit the number of concurrent requests to 6.
+- fa98881: Compress the worker to reduce bundle size.
+- 108639c: Fix plugin potentially failing to load. This may happen if `Community plugins > Debug startup time` is disabled. When it is disabled, Obsidian removes source maps, which erraneously removes JavaScript strings intentionally containinig source map-like content.
+- e06bcf1: Add async `Transpile.atranspile`.
+- b12e8ec: Move parsing to workers.
+- 74c7da3: Prefix source map location with plugin ID.
+
 ## 1.1.0
 
 ### Minor Changes
