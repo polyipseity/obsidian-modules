@@ -5,17 +5,15 @@ import {
 	Rules,
 	SettingRules,
 	anyToError,
+	clearProperties,
 	codePoint,
 	dynamicRequire,
 	dynamicRequireSync,
+	isNonNil,
 } from "@polyipseity/obsidian-plugin-library"
-import type { Context, Require, Resolve, Resolved } from "obsidian-modules"
+import type { Context, Resolve, Resolved } from "obsidian-modules"
 import { TFile, getLinkpath, normalizePath, requestUrl } from "obsidian"
-import type {
-	Transpile,
-	TypeScriptTranspile,
-	WeakCacheIdentity,
-} from "./transpile.js"
+import type { Transpile, TypeScriptTranspile } from "./transpile.js"
 import type { attachSourceMap, parseAndRewriteRequire } from "../worker.js"
 import { BUNDLE } from "../import.js"
 import type { ModulesPlugin } from "../main.js"
@@ -27,37 +25,35 @@ const
 	tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")
 	>(BUNDLE, "@ts-morph/bootstrap")
 
-export interface CacheIdentity {
-	readonly file: TFile
-	readonly content?: string
-}
-
 abstract class AbstractResolve implements Resolve {
-	readonly #invalidators: Record<string, Set<Require["invalidate"]
-	>> = {}
+	public readonly onInvalidate = new EventEmitterLite<readonly [id: string]>()
+	protected readonly ids = new Set<string>()
 
 	public constructor(
 		protected readonly context: ModulesPlugin,
 	) { }
 
-	protected validate(...args: Parameters<typeof this.resolve>): void {
-		const [id, context] = args;
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		(this.#invalidators[id] ??= new Set()).add(context.require.invalidate)
+	public async invalidate(id: string): Promise<void> {
+		return this.invalidate0(id, false)
 	}
 
-	protected invalidate(id: string): void {
-		const invs = this.#invalidators[id]
-		for (const inv of invs ?? []) {
-			inv(id)
-		}
-		invs?.clear()
+	public async invalidateAll(): Promise<void> {
+		return this.invalidateAll0(false)
 	}
 
-	protected invalidateAll(): void {
-		for (const key of Object.keys(this.#invalidators)) {
-			this.invalidate(key)
-		}
+	protected validate0(...args: Parameters<typeof this.resolve>): void {
+		const [id] = args
+		this.ids.add(id)
+	}
+
+	protected async invalidate0(id: string, emit = true): Promise<void> {
+		if (!this.ids.delete(id)) { return }
+		if (emit) { await this.onInvalidate.emit(id) }
+	}
+
+	protected async invalidateAll0(emit = true): Promise<void> {
+		await Promise.all([...this.ids]
+			.map(async id => this.invalidate0(id, emit)))
 	}
 
 	public abstract aresolve(
@@ -73,10 +69,7 @@ export abstract class AbstractFileResolve
 	implements Resolve {
 	protected readonly transpiles
 	protected readonly transpiled =
-		new WeakMap<Transpile, WeakSet<CacheIdentity>>()
-
-	protected readonly atranspiled =
-		new WeakMap<Transpile, WeakSet<CacheIdentity>>()
+		new WeakMap<Transpile, WeakSet<AbstractFileResolve.Cache.Identity>>()
 
 	public constructor(
 		context: ModulesPlugin,
@@ -86,20 +79,42 @@ export abstract class AbstractFileResolve
 		super(context)
 		this.transpiles = Object.freeze([...transpiles])
 		const { transpiled } = this
-		cache.onInvalidate.listen(path => { this.invalidate(path) })
+		cache.onInvalidate.listen(async path => this.invalidate0(path))
 		for (const trans of transpiles) {
-			trans.onInvalidate.listen(() => {
+			trans.onInvalidate.listen(async () => {
 				const transed = transpiled.get(trans)
 				if (!transed) { return }
-				for (const [path, id] of cache) {
-					if (transed.has(id)) { this.invalidate(path) }
-				}
+				await Promise.all([...cache]
+					.filter(([, id]) => transed.has(id))
+					.map(async ([path]) => this.invalidate0(path)))
 			})
 		}
 	}
 
+	public override async invalidate(id: string): Promise<void> {
+		const { cache, transpiled } = this,
+			id2 = cache.get(id)
+		await super.invalidate(id)
+		if (!id2) { return }
+		await Promise.all(this.transpiles
+			.map(async tr => {
+				transpiled.get(tr)?.delete(id2)
+				return tr.invalidate(id2)
+			}))
+	}
+
+	public override async invalidateAll(): Promise<void> {
+		const { cache, ids, transpiled } = this,
+			ids2 = [...ids].map(id => cache.get(id)).filter(isNonNil)
+		await super.invalidateAll()
+		await Promise.all(this.transpiles.map(async tr => {
+			transpiled.delete(tr)
+			return Promise.all(ids2.map(async id => tr.invalidate(id)))
+		}))
+	}
+
 	public override resolve(id: string, context: Context): Resolved | null {
-		this.validate(id, context)
+		this.validate0(id, context)
 		const { cache } = this,
 			id0 = this.resolvePath(id, context)
 		if (id0 === null) { return null }
@@ -107,7 +122,7 @@ export abstract class AbstractFileResolve
 		if (identity) {
 			const { content } = identity
 			if (content !== void 0) {
-				this.validate(id0, context)
+				this.validate0(id0, context)
 				return {
 					code: this.transpile(content, identity),
 					cwd: getWD(id0),
@@ -122,7 +137,7 @@ export abstract class AbstractFileResolve
 		id: string,
 		context: Context,
 	): Promise<Resolved | null> {
-		this.validate(id, context)
+		this.validate0(id, context)
 		const { cache, context: { app: { vault, vault: { adapter } } } } = this,
 			id0 = await this.aresolvePath(id, context)
 		if (id0 === null) { return null }
@@ -130,7 +145,7 @@ export abstract class AbstractFileResolve
 		try {
 			if (identity) {
 				const { file, content } = identity
-				this.validate(id0, context)
+				this.validate0(id0, context)
 				return {
 					code: await this.atranspile(
 						content ?? await vault.cachedRead(file),
@@ -152,18 +167,21 @@ export abstract class AbstractFileResolve
 		}
 	}
 
-	protected transpile(content: string, identity?: CacheIdentity): string {
+	protected transpile(
+		content: string,
+		id?: AbstractFileResolve.Cache.Identity,
+	): string {
 		const { transpiled, transpiles } = this
 		for (const trans of transpiles) {
-			const ret = trans.transpile(content, identity)
+			const ret = trans.transpile(id ?? {}, content, id?.file)
 			if (ret !== null) {
-				if (identity) {
+				if (id) {
 					let transed = transpiled.get(trans)
 					if (!transed) {
 						transed = new WeakSet()
 						transpiled.set(trans, transed)
 					}
-					transed.add(identity)
+					transed.add(id)
 				}
 				return ret
 			}
@@ -173,20 +191,20 @@ export abstract class AbstractFileResolve
 
 	protected async atranspile(
 		content: string,
-		identity?: CacheIdentity,
+		id?: AbstractFileResolve.Cache.Identity,
 	): Promise<string> {
-		const { atranspiled, transpiles } = this
+		const { transpiled, transpiles } = this
 		for (const trans of transpiles) {
 			// eslint-disable-next-line no-await-in-loop
-			const ret = await trans.atranspile(content, identity)
+			const ret = await trans.atranspile(id ?? {}, content, id?.file)
 			if (ret !== null) {
-				if (identity) {
-					let transed = atranspiled.get(trans)
+				if (id) {
+					let transed = transpiled.get(trans)
 					if (!transed) {
 						transed = new WeakSet()
-						atranspiled.set(trans, transed)
+						transpiled.set(trans, transed)
 					}
-					transed.add(identity)
+					transed.add(id)
 				}
 				return ret
 			}
@@ -205,10 +223,10 @@ export namespace AbstractFileResolve {
 	export class Cache {
 		public readonly onInvalidate = new EventEmitterLite<readonly [
 			path: string,
-			cache: CacheIdentity | null,
+			cache: Cache.Identity | null,
 		]>()
 
-		protected readonly data: Record<string, CacheIdentity> = {}
+		protected readonly data: Record<string, Cache.Identity> = {}
 		protected readonly preloadRules = new SettingRules(
 			this.context,
 			set => set.preloadingRules,
@@ -241,18 +259,16 @@ export namespace AbstractFileResolve {
 			preload().catch(error => { self.console.error(error) })
 		}
 
-		public get(path: string): CacheIdentity | undefined {
+		public get(path: string): Cache.Identity | undefined {
 			return this.data[path]
 		}
 
-		public [Symbol.iterator](): IterableIterator<readonly [
-			string,
-			CacheIdentity,
-		]> {
+		public [Symbol.iterator](): IterableIterator<readonly [string, Cache
+			.Identity]> {
 			return Object.entries(this.data)[Symbol.iterator]()
 		}
 
-		protected async cache(file: TFile): Promise<CacheIdentity> {
+		protected async cache(file: TFile): Promise<Cache.Identity> {
 			const { data, context: { app: { vault } }, preloadRules } = this,
 				{ path } = file,
 				ret = {
@@ -265,7 +281,7 @@ export namespace AbstractFileResolve {
 			return ret
 		}
 
-		protected async uncache(path: string): Promise<CacheIdentity | null> {
+		protected async uncache(path: string): Promise<Cache.Identity | null> {
 			const { data } = this,
 				{ [path]: ret } = data
 			if (!ret) { return null }
@@ -275,15 +291,25 @@ export namespace AbstractFileResolve {
 			return ret
 		}
 	}
+	export namespace Cache {
+		export interface Identity {
+			readonly file: TFile
+			readonly content?: string
+		}
+	}
 }
 
 export class CompositeResolve implements Resolve {
+	public readonly onInvalidate = new EventEmitterLite<readonly [id: string]>()
 	protected readonly delegates
 
 	public constructor(
 		delegates: readonly Resolve[],
 	) {
 		this.delegates = Object.freeze([...delegates])
+		for (const delegate of this.delegates) {
+			delegate.onInvalidate.listen(async id => this.onInvalidate.emit(id))
+		}
 	}
 
 	public resolve(
@@ -306,6 +332,20 @@ export class CompositeResolve implements Resolve {
 		}
 		return null
 	}
+
+	public async invalidate(
+		...args: Parameters<Resolve["invalidate"]>
+	): Promise<Awaited<ReturnType<Resolve["invalidate"]>>> {
+		await Promise.all(this.delegates
+			.map(async de => de.invalidate(...args)))
+	}
+
+	public async invalidateAll(
+		...args: Parameters<Resolve["invalidateAll"]>
+	): Promise<Awaited<ReturnType<Resolve["invalidateAll"]>>> {
+		await Promise.all(this.delegates
+			.map(async de => de.invalidateAll(...args)))
+	}
 }
 
 export class InternalModulesResolve
@@ -318,12 +358,12 @@ export class InternalModulesResolve
 		const { context: { settings } } = this
 		context.register(settings.onMutate(
 			set => set.exposeInternalModules,
-			() => { this.invalidateAll() },
+			async () => this.invalidateAll0(),
 		))
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
-		this.validate(id, context)
+		this.validate0(id, context)
 		const { context: { settings } } = this
 		if (!settings.value.exposeInternalModules) { return null }
 		let value = null
@@ -340,7 +380,7 @@ export class InternalModulesResolve
 		id: string,
 		context: Context,
 	): Promise<Resolved | null> {
-		this.validate(id, context)
+		this.validate0(id, context)
 		const { context: { settings } } = this
 		if (!settings.value.exposeInternalModules) { return null }
 		let value = null
@@ -575,7 +615,7 @@ export class ExternalLinkResolve
 		context.register(settings.onMutate(
 			set => set.enableExternalLinks,
 			async (_0, _1, set) => {
-				this.invalidateAll()
+				await this.invalidateAll0()
 				await preload(set.preloadedExternalLinks)
 			},
 		))
@@ -590,11 +630,38 @@ export class ExternalLinkResolve
 			.catch(error => { self.console.error(error) })
 	}
 
+	public override async invalidate(id: string): Promise<void> {
+		const {
+			redirects, redirects: { [id]: idr },
+			identities, identities: { [idr ?? id]: id2 },
+			tsTranspile,
+		} = this
+		await super.invalidate(id)
+		// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+		delete redirects[id]
+		// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+		delete identities[idr ?? id]
+		const id3 = await Promise.resolve(id2).catch(() => { })
+		if (isObject(id3)) { tsTranspile.invalidate(id3) }
+	}
+
+	public override async invalidateAll(): Promise<void> {
+		const { identities, redirects, tsTranspile } = this,
+			ids = [...Object.values(identities)]
+		await super.invalidateAll()
+		clearProperties(redirects)
+		clearProperties(identities)
+		await Promise.all(ids.map(async id => {
+			const id2 = await Promise.resolve(id).catch(() => { })
+			if (isObject(id2)) { tsTranspile.invalidate(id2) }
+		}))
+	}
+
 	public override resolve(id: string, context: Context): Resolved | null {
 		const cwd = context.cwds.at(-1),
 			href = this.normalizeURL(id, cwd)
 		if (href === null) { return null }
-		this.validate(href, context)
+		this.validate0(href, context)
 		if (!this.context.settings.value.enableExternalLinks) { return null }
 
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-multi-assign
@@ -612,12 +679,12 @@ export class ExternalLinkResolve
 		const cwd = context.cwds.at(-1),
 			href0 = this.normalizeURL(id, cwd)
 		if (href0 === null) { return null }
-		this.validate(href0, context)
+		this.validate0(href0, context)
 		if (!this.context.settings.value.enableExternalLinks) { return null }
 
 		const [href, identity] = await this.aresolve0(id, cwd)
 		if (href === null) { return null }
-		this.validate(href, context)
+		this.validate0(href, context)
 		return { ...identity, cwd: href, id: href }
 	}
 
@@ -631,11 +698,11 @@ export class ExternalLinkResolve
 		const { tsTranspile } = this
 		let { identities: { [href]: identity } } = this
 		if (identity === void 0 || identity === "await") {
-			if (identity === "await") { this.invalidate(href) }
+			const awaiting = identity === "await"
 			// eslint-disable-next-line no-multi-assign
 			this.identities[href] = identity = (async (): Promise<ExternalLinkResolve
 				.Identity> => {
-				const ret: WeakCacheIdentity & Writable<ExternalLinkResolve
+				const ret: Writable<ExternalLinkResolve
 					.Identity> = {
 					[ExternalLinkResolve.Identity]: true,
 					code: (await this.fetchPool.addSingleTask({
@@ -665,7 +732,7 @@ export class ExternalLinkResolve
 					}
 					try {
 						const { ts } = await tsMorphBootstrap,
-							code = await tsTranspile.atranspile(ret.code, ret, {
+							code = await tsTranspile.atranspile(ret, ret.code, void 0, {
 								compilerOptions: {
 									module: ts.ModuleKind.CommonJS,
 								},
@@ -690,6 +757,7 @@ export class ExternalLinkResolve
 				try { await compile() } catch (error) { self.console.debug(error) }
 				return ret
 			})()
+			if (awaiting) { await this.invalidate0(href) }
 			try {
 				// eslint-disable-next-line no-multi-assign
 				this.identities[href] = identity = await identity
@@ -726,9 +794,9 @@ export class ExternalLinkResolve
 						})
 					},
 				}).promise()
-					.then(val => {
+					.then(async val => {
 						try {
-							this.invalidate(href)
+							await this.invalidate0(href)
 						} catch (error) { self.console.debug(error) }
 						return val
 					})).url

@@ -13,6 +13,7 @@ import {
 	Functions,
 	aroundIdentityFactory,
 	attachFunctionSourceMap,
+	clearProperties,
 	launderUnchecked,
 	patchWindows,
 	promisePromise,
@@ -71,20 +72,40 @@ function createRequire(
 	resolve: Resolve,
 	sourceRoot = "",
 ): Require {
+	function invalidate(self2: Require, id: string): void {
+		const { aliased, aliases, cache, dependants, dependencies } = self2,
+			id2 = aliased[id] ?? id,
+			seen = new Set(),
+			ing = [...aliases[id2] ?? [id2]]
+		for (let cur = ing.shift(); cur !== void 0; cur = ing.shift()) {
+			if (seen.has(cur)) { continue }
+			seen.add(cur)
+			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+			delete cache[cur]
+			const dependencies2 = dependencies[cur]
+			for (const dep of dependencies2 ?? []) {
+				dependants[dep]?.delete(cur)
+			}
+			dependencies2?.clear()
+			for (const dep of dependants[cur] ?? []) {
+				ing.push(...aliases[dep] ?? [dep])
+			}
+		}
+	}
 	function resolve0(
-		self1: Require,
+		self2: Require,
 		id: string,
 		resolved: Resolved | null,
 	): readonly [Resolved, ModuleCache] {
 		if (!resolved) { throw new Error(id) }
 		const { id: id2 } = resolved,
-			{ aliased, aliased: { [id]: oldID }, aliases, cache } = self1
+			{ aliased, aliased: { [id]: oldID }, aliases, cache } = self2
 		aliased[id] = id2;
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		(aliases[id2] ??= new Set([id2])).add(id)
 		if (oldID !== void 0 && id2 !== oldID) {
 			aliases[oldID]?.delete(id)
-			self1.invalidate(id)
+			invalidate(self2, id)
 		}
 		if (resolved.cache === false) {
 			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
@@ -206,11 +227,7 @@ function createRequire(
 		aliased: {},
 		aliases: {},
 		cache: {},
-		context: {
-			cwds: [],
-			dependencies: new WeakMap(),
-			get require() { return ret },
-		},
+		context: { cwds: [] } satisfies Context,
 		dependants: {},
 		dependencies: {},
 		async import(id0: string, opts?: ImportOptions) {
@@ -422,28 +439,22 @@ function createRequire(
 				cleanup.call()
 			}
 		},
-		invalidate(id: string) {
-			const { aliased, aliases, cache, dependants, dependencies } = ret,
-				id2 = aliased[id] ?? id,
-				seen = new Set(),
-				ing = [...aliases[id2] ?? [id2]]
-			for (let cur = ing.shift(); cur !== void 0; cur = ing.shift()) {
-				if (seen.has(cur)) { continue }
-				seen.add(cur)
-				// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-				delete cache[cur]
-				const dependencies2 = dependencies[cur]
-				for (const dep of dependencies2 ?? []) {
-					dependants[dep]?.delete(cur)
-				}
-				dependencies2?.clear()
-				for (const dep of dependants[cur] ?? []) {
-					ing.push(...aliases[dep] ?? [dep])
-				}
-			}
+		async invalidate(id: string) {
+			invalidate(ret, id)
+			await resolve.invalidate(id)
+		},
+		async invalidateAll() {
+			const { aliased, aliases, cache, dependants, dependencies } = ret
+			clearProperties(cache)
+			clearProperties(dependants)
+			clearProperties(dependencies)
+			clearProperties(aliased)
+			clearProperties(aliases)
+			await resolve.invalidateAll()
 		},
 		resolve,
 	})
+	resolve.onInvalidate.listen(id => { invalidate(ret, id) })
 	return ret
 }
 

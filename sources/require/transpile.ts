@@ -12,7 +12,6 @@ import {
 } from "@polyipseity/obsidian-plugin-library"
 import type { AsyncOrSync } from "ts-essentials"
 import { BUNDLE } from "../import.js"
-import type { CacheIdentity } from "./resolve.js"
 import type { ModulesPlugin } from "../main.js"
 import type { TFile } from "obsidian"
 import type { tsc } from "../worker.js"
@@ -23,17 +22,17 @@ const
 	tsMorphBootstrapSync = dynamicRequireLazy<typeof import("@ts-morph/bootstrap")
 	>(BUNDLE, "@ts-morph/bootstrap")
 
-export type WeakCacheIdentity = Partial<CacheIdentity>
-
 export interface Transpile {
 	readonly onInvalidate: EventEmitterLite<readonly []>
 	readonly atranspile: (
 		...args: Parameters<Transpile["transpile"]>
 	) => AsyncOrSync<ReturnType<Transpile["transpile"]>>
 	readonly transpile: (
+		id: object,
 		content: string,
-		identity?: WeakCacheIdentity,
+		file?: TFile,
 	) => string | null
+	readonly invalidate: (id: object) => AsyncOrSync<void>
 }
 
 interface ContentHeader {
@@ -83,35 +82,41 @@ abstract class AbstractTranspile implements Transpile {
 		...args: Parameters<typeof this.transpile>
 		// eslint-disable-next-line @typescript-eslint/no-invalid-this
 	): AsyncOrSync<ReturnType<typeof this.transpile>>
-
 	public abstract transpile(
+		id: object,
 		content: string,
-		identity?: WeakCacheIdentity,
+		file?: TFile,
 	): string | null
+	public abstract invalidate(id: object): AsyncOrSync<void>
 }
 
 export class TypeScriptTranspile
 	extends AbstractTranspile
 	implements Transpile {
-	protected readonly cache = new WeakMap<WeakCacheIdentity, string>()
-	protected readonly acache =
-		new WeakMap<WeakCacheIdentity, Promise<string | null>>()
+	protected readonly cache = new WeakMap<object, string>()
+	protected readonly acache = new WeakMap<object, Promise<string | null>>()
 
 	public constructor(
 		context: ModulesPlugin,
 		protected readonly workerPool = context.workerPool,
 	) { super(context) }
 
+	public override invalidate(id: object): void {
+		this.cache.delete(id)
+		this.acache.delete(id)
+	}
+
 	public override transpile(
+		id: object,
 		content: string,
-		identity?: WeakCacheIdentity,
+		file?: TFile,
 		header?: ContentHeader,
 	): string | null {
-		const ret = identity && this.cache.get(identity)
+		const ret = this.cache.get(id)
 		if (ret !== void 0) { return ret }
 		const header2 = cloneAsWritable(header ?? ContentHeader.parse(content))
 		if (header2.language === void 0 &&
-			(/.m?ts$/u).test(identity?.file?.extension ?? "")) {
+			(/.m?ts$/u).test(file?.extension ?? "")) {
 			header2.language = "TypeScript"
 		}
 		if (header2.language !== "TypeScript") { return null }
@@ -138,21 +143,22 @@ export class TypeScriptTranspile
 				project.formatDiagnosticsWithColorAndContext(diagnostics),
 			)
 		}
-		if (identity) { this.cache.set(identity, ret2) }
+		this.cache.set(id, ret2)
 		return ret2
 	}
 
 	public override atranspile(
+		id: object,
 		content: string,
-		identity?: WeakCacheIdentity,
+		file?: TFile,
 		header?: ContentHeader,
 	): AsyncOrSync<ReturnType<typeof this.transpile>> {
-		let ret = identity && this.acache.get(identity)
+		let ret = this.acache.get(id)
 		if (ret !== void 0) { return ret }
 		ret = (async (): Promise<string | null> => {
 			const header2 = cloneAsWritable(header ?? ContentHeader.parse(content))
 			if (header2.language === void 0 &&
-				(/.m?ts$/u).test(identity?.file?.extension ?? "")) {
+				(/.m?ts$/u).test(file?.extension ?? "")) {
 				header2.language = "TypeScript"
 			}
 			if (header2.language !== "TypeScript") { return null }
@@ -170,7 +176,7 @@ export class TypeScriptTranspile
 				},
 			])
 		})()
-		if (identity) { this.acache.set(identity, ret) }
+		this.acache.set(id, ret)
 		return ret
 	}
 }
@@ -190,31 +196,39 @@ export class MarkdownTranspile
 		))
 	}
 
+	public override invalidate(id: object): void {
+		this.tsTranspile.invalidate(id)
+	}
+
 	public override transpile(
+		id: object,
 		content: string,
-		identity?: WeakCacheIdentity,
+		file?: TFile,
 	): string | null {
-		if (identity?.file?.extension !== "md") { return null }
+		if (file?.extension !== "md") { return null }
 		const { tsTranspile } = this,
 			ret = this.transpileMarkdown(content)
 		return tsTranspile.transpile(
+			id,
 			ret,
-			identity,
-			this.getHeader(identity.file),
+			file,
+			this.getHeader(file),
 		) ?? ret
 	}
 
 	public override async atranspile(
+		id: object,
 		content: string,
-		identity?: WeakCacheIdentity,
+		file?: TFile,
 	): Promise<ReturnType<typeof this.transpile>> {
-		if (identity?.file?.extension !== "md") { return null }
+		if (file?.extension !== "md") { return null }
 		const { tsTranspile } = this,
 			ret = this.transpileMarkdown(content)
 		return await tsTranspile.atranspile(
+			id,
 			ret,
-			identity,
-			this.getHeader(identity.file),
+			file,
+			this.getHeader(file),
 		) ?? ret
 	}
 

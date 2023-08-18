@@ -43,8 +43,16 @@ declare module "obsidian-modules" {
 		 * Invalidate the cache of a module or an alias.
 		 *
 		 * @param id module specifier
+		 * @returns void
 		 */
-		readonly invalidate: (id: string) => void
+		readonly invalidate: (id: string) => AsyncOrSync<void>
+
+		/**
+		 * Invalidate all caches.
+		 *
+		 * @returns void
+		 */
+		readonly invalidateAll: () => AsyncOrSync<void>
 
 		/**
 		 * Object for resolving module specifiers.
@@ -141,6 +149,11 @@ declare module "obsidian-modules" {
 	interface Resolve {
 
 		/**
+		 * Module resolution invalidation event.
+		 */
+		readonly onInvalidate: EventEmitterLite<readonly [id: string]>
+
+		/**
 		 * Resolves a module specifier.
 		 *
 		 * @param id module specifier
@@ -158,6 +171,21 @@ declare module "obsidian-modules" {
 		readonly aresolve: (
 			...args: Parameters<Resolve["resolve"]>
 		) => AsyncOrSync<ReturnType<Resolve["resolve"]>>
+
+		/**
+		 * Invalidate the cache of a module resolution.
+		 *
+		 * @param id module specifier
+		 * @returns void
+		 */
+		readonly invalidate: (id: string) => AsyncOrSync<void>
+
+		/**
+		 * Invalidate all caches.
+		 *
+		 * @returns void
+		 */
+		readonly invalidateAll: () => AsyncOrSync<void>
 	}
 
 	/**
@@ -214,12 +242,8 @@ declare module "obsidian-modules" {
 		 * Identity of the parent module being loaded.
 		 */
 		parent?: string | undefined
-
-		/**
-		 * Current {@link Require}.
-		 */
-		readonly require: Require
 	}
 }
 import type { } from "obsidian-modules"
 import type { AsyncOrSync } from "ts-essentials"
+import type { EventEmitterLite } from "@polyipseity/obsidian-plugin-library"
