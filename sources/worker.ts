@@ -57,21 +57,9 @@ export async function parseAndRewriteRequire(
 	input: parseAndRewriteRequire.Input,
 ): Promise<parseAndRewriteRequire.Output> {
 	const { importable, escapeJavaScriptString } = await library,
+		{ OPTIONS, SELF_REQUIRE_EXPRESSION } = parseAndRewriteRequire,
 		requires: string[] = [],
-		opts: Options = {
-			allowAwaitOutsideFunction: false,
-			allowHashBang: true,
-			allowImportExportEverywhere: false,
-			allowReserved: true,
-			allowReturnOutsideFunction: false,
-			allowSuperOutsideMethod: false,
-			ecmaVersion: "latest",
-			locations: false,
-			preserveParens: false,
-			ranges: false,
-			sourceType: "script",
-		},
-		tree = parse(input.code, opts)
+		tree = parse(input.code, OPTIONS)
 	simple(tree, {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		CallExpression: node => {
@@ -98,7 +86,7 @@ export async function parseAndRewriteRequire(
 			}
 			const value2 = normalizeURL(`${prefix}${value}`, input.href)
 			if (value2 === null) { return }
-			node2.callee = parseExpressionAt("self.require", 0, opts)
+			node2.callee = SELF_REQUIRE_EXPRESSION
 			arg0.raw = escapeJavaScriptString(value2)
 			requires.push(arg0.value = value2)
 		},
@@ -109,6 +97,21 @@ export async function parseAndRewriteRequire(
 	}
 }
 export namespace parseAndRewriteRequire {
+	export const OPTIONS: Options = {
+		allowAwaitOutsideFunction: false,
+		allowHashBang: true,
+		allowImportExportEverywhere: false,
+		allowReserved: true,
+		allowReturnOutsideFunction: false,
+		allowSuperOutsideMethod: false,
+		ecmaVersion: "latest",
+		locations: false,
+		preserveParens: false,
+		ranges: false,
+		sourceType: "script",
+	}
+	export const SELF_REQUIRE_EXPRESSION =
+		parseExpressionAt("self.require", 0, OPTIONS)
 	export interface Input {
 		readonly code: string
 		readonly href: string
