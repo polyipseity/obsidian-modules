@@ -127,7 +127,8 @@ function createRequire(
 	}
 	function depends(self1: Require, id: string, context: Context): void {
 		const { dependencies, dependants } = self1,
-			{ parent } = context
+			{ parents } = context,
+			parent = parents.at(-1)
 		if (parent === void 0) { return }
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		(dependencies[parent] ??= new Set()).add(id);
@@ -140,9 +141,9 @@ function createRequire(
 		context: Context,
 	): void {
 		const { cwd, id } = resolved,
-			{ cwds, parent } = context
-		cleanup.push(() => { context.parent = parent })
-		context.parent = id
+			{ cwds, parents } = context
+		parents.push(id)
+		cleanup.push(() => { parents.pop() })
 		cwds.push(cwd)
 		cleanup.push(() => { cwds.pop() })
 	}
@@ -227,7 +228,7 @@ function createRequire(
 		aliased: {},
 		aliases: {},
 		cache: {},
-		context: { cwds: [] } satisfies Context,
+		context: { cwds: [], parents: [] } satisfies Context,
 		dependants: {},
 		dependencies: {},
 		async import(id0: string, opts?: ImportOptions) {

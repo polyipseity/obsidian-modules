@@ -241,7 +241,7 @@ declare module "obsidian-modules" {
 		/**
 		 * Identity of the parent module being loaded.
 		 */
-		parent?: string | undefined
+		readonly parents: (string | undefined)[]
 	}
 }
 import type { } from "obsidian-modules"
