@@ -6,7 +6,6 @@ import {
 	anyToError,
 	codePoint,
 	dynamicRequire,
-	dynamicRequireLazy,
 	dynamicRequireSync,
 } from "@polyipseity/obsidian-plugin-library"
 import type { Context, Require, Resolve, Resolved } from "obsidian-modules"
@@ -24,7 +23,7 @@ import { isObject } from "lodash-es"
 import { normalizeURL } from "../util.js"
 
 const
-	tsMorphBootstrap = dynamicRequireLazy<typeof import("@ts-morph/bootstrap")
+	tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")
 	>(BUNDLE, "@ts-morph/bootstrap")
 
 export interface CacheIdentity {
@@ -655,7 +654,7 @@ export class ExternalLinkResolve
 							)
 					}
 					try {
-						const { ts } = tsMorphBootstrap,
+						const { ts } = await tsMorphBootstrap,
 							code = await tsTranspile.atranspile(ret.code, ret, {
 								compilerOptions: {
 									module: ts.ModuleKind.CommonJS,

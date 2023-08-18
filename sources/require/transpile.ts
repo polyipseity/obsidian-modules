@@ -3,6 +3,7 @@ import {
 	type Fixed,
 	cloneAsWritable,
 	deepFreeze,
+	dynamicRequire,
 	dynamicRequireLazy,
 	fixTyped,
 	launderUnchecked,
@@ -17,7 +18,9 @@ import type { TFile } from "obsidian"
 import type { tsc } from "../worker.js"
 
 const
-	tsMorphBootstrap = dynamicRequireLazy<typeof import("@ts-morph/bootstrap")
+	tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")
+	>(BUNDLE, "@ts-morph/bootstrap"),
+	tsMorphBootstrapSync = dynamicRequireLazy<typeof import("@ts-morph/bootstrap")
 	>(BUNDLE, "@ts-morph/bootstrap")
 
 export type WeakCacheIdentity = Partial<CacheIdentity>
@@ -112,7 +115,7 @@ export class TypeScriptTranspile
 			header2.language = "TypeScript"
 		}
 		if (header2.language !== "TypeScript") { return null }
-		const { createProjectSync, ts } = tsMorphBootstrap,
+		const { createProjectSync, ts } = tsMorphBootstrapSync,
 			project = createProjectSync({
 				compilerOptions: {
 					inlineSourceMap: true,
@@ -153,7 +156,7 @@ export class TypeScriptTranspile
 				header2.language = "TypeScript"
 			}
 			if (header2.language !== "TypeScript") { return null }
-			const { ts } = tsMorphBootstrap
+			const { ts } = await tsMorphBootstrap
 			return (await this.workerPool).exec<typeof tsc>("tsc", [
 				{
 					compilerOptions: {
