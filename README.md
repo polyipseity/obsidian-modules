@@ -125,6 +125,7 @@ module.exports.variable = "string"
 module.exports.default = 42
 exports.abbreviatedForm = {}
 ```
+- The full API is available from [`sources/@types/obsidian-modules.ts`](sources/%40types/obsidian-modules.ts).
 
 ## Contributing
 
