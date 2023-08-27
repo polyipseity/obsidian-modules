@@ -20,7 +20,7 @@
 		"promise-pool-executor": "^1.1.1",
 		"semver": "^7.5.4",
 		"ts-essentials": "^9.3.2",
-		"workerpool": "^6.4.0"
+		"workerpool": "^6.4.2"
 	},
 	"description": "Load JavaScript and related languages like TypeScript modules from the vault and the Internet.",
 	"devDependencies": {
@@ -34,7 +34,7 @@
 		"@types/lodash-es": "^4.17.8",
 		"@types/node": "^20.5.6",
 		"@types/semver": "^7.5.0",
-		"@types/workerpool": "^6.4.0",
+		"@types/workerpool": "^6.4.1",
 		"@typescript-eslint/eslint-plugin": "^6.4.1",
 		"@typescript-eslint/parser": "^6.4.1",
 		"builtin-modules": "^3.3.0",
