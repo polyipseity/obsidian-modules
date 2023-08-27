@@ -5,7 +5,7 @@ declare module "obsidian" {
 		extends Private<$MarkdownPreviewRenderer, PrivateKey> { }
 	interface Plugins extends Private<$Plugins, PrivateKey> { }
 }
-import type { MarkdownPreviewView, Plugin, Plugins } from "obsidian"
+import type { MarkdownFileInfo, Plugin, Plugins } from "obsidian"
 import type { Private } from "@polyipseity/obsidian-plugin-library"
 import type { TemplaterPlugin } from "templater-obsidian"
 
@@ -22,7 +22,7 @@ interface $App {
 }
 
 interface $MarkdownPreviewRenderer {
-	readonly owner: MarkdownPreviewView
+	readonly owner: MarkdownFileInfo
 	readonly onRender: () => void
 }
 

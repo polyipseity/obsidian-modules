@@ -22,13 +22,15 @@ export function patchContextForPreview(context: ModulesPlugin): void {
 				): ReturnType<typeof proto> {
 					const { api: { requires } } = context,
 						req = requires.get(self),
-						{ path } = this.owner.file
-					req?.context.cwds.push(getWD(path))
+						path = this.owner.file?.path
+					if (path !== void 0) { req?.context.cwds.push(getWD(path)) }
 					try {
 						proto.apply(this, args)
 					} finally {
-						// Runs after all microtasks are done
-						self.setTimeout(() => { req?.context.cwds.pop() }, 0)
+						if (path !== void 0) {
+							// Runs after all microtasks are done
+							self.setTimeout(() => { req?.context.cwds.pop() }, 0)
+						}
 					}
 				}
 			},
