@@ -11,6 +11,8 @@ import {
 import {
 	type AnyObject,
 	Functions,
+	activeSelf,
+	addCommand,
 	aroundIdentityFactory,
 	attachFunctionSourceMap,
 	clearProperties,
@@ -44,7 +46,13 @@ import { parse } from "acorn"
 export const REQUIRE_TAG = Symbol("require")
 
 export function loadRequire(context: ModulesPlugin): void {
-	const { app: { workspace }, manifest: { id } } = context,
+	const
+		{
+			api: { requires },
+			app, app: { workspace },
+			language: { value: i18n },
+			manifest: { id },
+		} = context,
 		tsTranspile = new TypeScriptTranspile(context),
 		transpiles = [
 			new MarkdownTranspile(context, tsTranspile),
@@ -64,6 +72,20 @@ export function loadRequire(context: ModulesPlugin): void {
 	patchContextForPreview(context)
 	patchContextForEditor(context)
 	patchContextForTemplater(context)
+	addCommand(context, () => i18n.t("commands.clear-cache"), {
+		callback() {
+			const { lastEvent } = app;
+			(async (): Promise<void> => {
+				try {
+					await requires.get(activeSelf(lastEvent))?.invalidateAll()
+				} catch (error) {
+					activeSelf(lastEvent).console.error(error)
+				}
+			})()
+		},
+		icon: i18n.t("asset:commands.clear-cache-icon"),
+		id: "clear-cache",
+	})
 }
 
 function createRequire(

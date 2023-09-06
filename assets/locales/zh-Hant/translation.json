@@ -1,5 +1,6 @@
 {
 	"commands": {
+		"clear-cache": "清除緩存",
 		"open-documentation-changelog": "$t(generic.open)$t(generic.documentations.changelog)",
 		"open-documentation-donate": "$t(generic.open)$t(generic.documentations.donate)",
 		"open-documentation-readme": "$t(generic.open)$t(generic.documentations.readme)"
