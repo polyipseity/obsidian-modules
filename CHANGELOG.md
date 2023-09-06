@@ -1,5 +1,17 @@
 # obsidian-modules
 
+## 2.1.0
+
+### Minor Changes
+
+- 9a7c8b6: Add command "Clear cache".
+- 58abf99: Make the public `invalidate` invalidate more things.
+
+### Patch Changes
+
+- fdbca01: Reduce memory usage by up to 75% for preloaded files.
+- 663d9eb: Fix canvas rendering nothing. Fixes [GH#2](https://github.com/polyipseity/obsidian-modules/issues/2).
+
 ## 2.0.0
 
 ### Major Changes
