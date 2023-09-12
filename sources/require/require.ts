@@ -69,8 +69,8 @@ export function loadRequire(context: ModulesPlugin): void {
 		])
 	context.register(patchWindows(workspace, self0 =>
 		patchRequire(context, self0, resolve)))
-	patchContextForPreview(context)
 	patchContextForEditor(context)
+	patchContextForPreview(context)
 	patchContextForTemplater(context)
 	addCommand(context, () => i18n.t("commands.clear-cache"), {
 		callback() {

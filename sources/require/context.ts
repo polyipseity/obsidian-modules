@@ -11,29 +11,6 @@ import { around } from "monkey-around"
 import { noop } from "lodash-es"
 import { revealPrivate } from "@polyipseity/obsidian-plugin-library"
 
-export function patchContextForPreview(context: ModulesPlugin): void {
-	revealPrivate(context, [MarkdownPreviewRenderer.prototype], rend => {
-		context.register(around(rend, {
-			onRender(next) {
-				return function fn(
-					this: typeof rend,
-					...args: Parameters<typeof next>
-				): ReturnType<typeof next> {
-					const { api: { requires } } = context,
-						req = requires.get(self)
-					req?.context.cwds.push(this.owner.file?.parent?.path ?? null)
-					try {
-						next.apply(this, args)
-					} finally {
-						// Runs after all microtasks are done
-						self.setTimeout(() => { req?.context.cwds.pop() }, 0)
-					}
-				}
-			},
-		}))
-	}, noop)
-}
-
 export function patchContextForEditor(context: ModulesPlugin): void {
 	context.register(around(EditorView.prototype, {
 		update(next) {
@@ -57,6 +34,29 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 			}
 		},
 	}))
+}
+
+export function patchContextForPreview(context: ModulesPlugin): void {
+	revealPrivate(context, [MarkdownPreviewRenderer.prototype], rend => {
+		context.register(around(rend, {
+			onRender(next) {
+				return function fn(
+					this: typeof rend,
+					...args: Parameters<typeof next>
+				): ReturnType<typeof next> {
+					const { api: { requires } } = context,
+						req = requires.get(self)
+					req?.context.cwds.push(this.owner.file?.parent?.path ?? null)
+					try {
+						next.apply(this, args)
+					} finally {
+						// Runs after all microtasks are done
+						self.setTimeout(() => { req?.context.cwds.pop() }, 0)
+					}
+				}
+			},
+		}))
+	}, noop)
 }
 
 export function patchContextForTemplater(context: ModulesPlugin): void {
