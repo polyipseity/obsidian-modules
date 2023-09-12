@@ -3,13 +3,15 @@ import {
 	MarkdownPreviewRenderer,
 	editorInfoField,
 } from "obsidian"
+import {
+	patchPlugin,
+	revealPrivate,
+} from "@polyipseity/obsidian-plugin-library"
 import { EditorView } from "@codemirror/view"
 import type { ModulesPlugin } from "../main.js"
 import type { StateField } from "@codemirror/state"
-import type { TemplaterPlugin } from "templater-obsidian"
 import { around } from "monkey-around"
 import { noop } from "lodash-es"
-import { revealPrivate } from "@polyipseity/obsidian-plugin-library"
 
 export function patchContextForEditor(context: ModulesPlugin): void {
 	context.register(around(EditorView.prototype, {
@@ -59,8 +61,10 @@ export function patchContextForPreview(context: ModulesPlugin): void {
 	}, noop)
 }
 
-export function patchContextForTemplater(context: ModulesPlugin): void {
-	function patch(plugin: TemplaterPlugin): void {
+export async function patchContextForTemplater(
+	context: ModulesPlugin,
+): Promise<void> {
+	context.register(await patchPlugin(context, "templater-obsidian", plugin => {
 		const { templater: {
 			// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
 			functions_generator: { user_functions: { user_script_functions } },
@@ -105,31 +109,5 @@ export function patchContextForTemplater(context: ModulesPlugin): void {
 				}
 			},
 		}))
-	}
-	revealPrivate(context, [context.app], app2 => {
-		const { plugins } = app2
-		context.register(around(plugins, {
-			loadPlugin(next) {
-				return async function fn(
-					this: typeof plugins,
-					...args: Parameters<typeof next>
-				): Promise<Awaited<ReturnType<typeof next>>> {
-					const ret = await next.apply(this, args)
-					try {
-						const [id] = args
-						if (ret && id === "templater-obsidian") {
-							type Proto = typeof next<typeof id>
-							const ret2 = ret as NonNullable<Awaited<ReturnType<Proto>>>
-							patch(ret2)
-						}
-					} catch (error) {
-						self.console.error(error)
-					}
-					return ret
-				}
-			},
-		}))
-		const tp = plugins.getPlugin("templater-obsidian")
-		if (tp) { patch(tp) }
-	}, noop)
+	}))
 }

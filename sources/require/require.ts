@@ -45,7 +45,7 @@ import { parse } from "acorn"
 
 export const REQUIRE_TAG = Symbol("require")
 
-export function loadRequire(context: ModulesPlugin): void {
+export async function loadRequire(context: ModulesPlugin): Promise<void> {
 	const
 		{
 			api: { requires },
@@ -69,9 +69,6 @@ export function loadRequire(context: ModulesPlugin): void {
 		])
 	context.register(patchWindows(workspace, self0 =>
 		patchRequire(context, self0, resolve)))
-	patchContextForEditor(context)
-	patchContextForPreview(context)
-	patchContextForTemplater(context)
 	addCommand(context, () => i18n.t("commands.clear-cache"), {
 		callback() {
 			const { lastEvent } = app;
@@ -86,6 +83,9 @@ export function loadRequire(context: ModulesPlugin): void {
 		icon: i18n.t("asset:commands.clear-cache-icon"),
 		id: "clear-cache",
 	})
+	patchContextForEditor(context)
+	patchContextForPreview(context)
+	await patchContextForTemplater(context)
 }
 
 function createRequire(

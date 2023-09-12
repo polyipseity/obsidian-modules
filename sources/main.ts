@@ -107,7 +107,7 @@ export class ModulesPlugin
 					Promise.resolve().then(() => {
 						loadSettings(this, loadDocumentations(this, isNil(loaded)))
 					}),
-					Promise.resolve().then(() => { loadRequire(this) }),
+					loadRequire(this),
 				])
 			} catch (error) {
 				self.console.error(error)
