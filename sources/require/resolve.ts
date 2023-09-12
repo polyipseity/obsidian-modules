@@ -658,7 +658,7 @@ export class ExternalLinkResolve
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
-		const cwd = context.cwds.at(-1),
+		const cwd = context.cwds.at(-1) ?? void 0,
 			href = this.normalizeURL(id, cwd)
 		if (href === null) { return null }
 		this.validate0(href, context)
@@ -676,7 +676,7 @@ export class ExternalLinkResolve
 		id: string,
 		context: Context,
 	): Promise<Resolved | null> {
-		const cwd = context.cwds.at(-1),
+		const cwd = context.cwds.at(-1) ?? void 0,
 			href0 = this.normalizeURL(id, cwd)
 		if (href0 === null) { return null }
 		this.validate0(href0, context)

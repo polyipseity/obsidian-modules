@@ -166,7 +166,7 @@ function createRequire(
 			{ cwds, parents } = context
 		parents.push(id)
 		cleanup.push(() => { parents.pop() })
-		cwds.push(cwd)
+		cwds.push(cwd ?? null)
 		cleanup.push(() => { cwds.pop() })
 	}
 	const ret: Require = Object.assign((id0: string, opts?: RequireOptions) => {
@@ -176,7 +176,7 @@ function createRequire(
 				cwd = opts?.cwd
 			if (cwd !== void 0) {
 				cwds.push(cwd)
-				cleanup.push(() => cwds.pop())
+				cleanup.push(() => { cwds.pop() })
 			}
 			depends(ret, id0, context)
 			const [rd, cache] = resolve0(ret, id0, resolve1.resolve(id0, context)),

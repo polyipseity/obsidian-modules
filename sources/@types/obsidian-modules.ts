@@ -98,9 +98,12 @@ declare module "obsidian-modules" {
 		/**
 		 * Current working directory for resolving contextual module specifiers.
 		 *
+		 * `undefined` does not change the working directory, while `null`
+		 * overrides it with no working directory.
+		 *
 		 * @default string automatically inferred if possible
 		 */
-		readonly cwd?: string | undefined
+		readonly cwd?: string | null | undefined
 	}
 
 	/**
@@ -219,8 +222,10 @@ declare module "obsidian-modules" {
 
 		/**
 		 * Working directory of the resolved module.
+		 *
+		 * `undefined` is an alias for `null`.
 		 */
-		readonly cwd?: string | undefined
+		readonly cwd?: string | null | undefined
 
 		/**
 		 * Exports of the resolved module.
@@ -235,8 +240,10 @@ declare module "obsidian-modules" {
 
 		/**
 		 * Current working directory.
+		 *
+		 * `null` means no working directory.
 		 */
-		readonly cwds: (string | undefined)[]
+		readonly cwds: (string | null)[]
 
 		/**
 		 * Identity of the parent module being loaded.
