@@ -5,12 +5,13 @@ import {
 	MarkdownPreviewRenderer,
 	editorInfoField,
 } from "obsidian"
-import { constant, noop } from "lodash-es"
 import {
+	Functions,
 	patchPlugin,
 	revealPrivate,
 	sleep2,
 } from "@polyipseity/obsidian-plugin-library"
+import { constant, noop } from "lodash-es"
 import { EditorView } from "@codemirror/view"
 import type { ModulesPlugin } from "../main.js"
 import type { StateField } from "@codemirror/state"
@@ -24,7 +25,7 @@ export async function patchContextForDataview(
 		const comp = new Component()
 		try {
 			const dv = plugin.localApi("", comp, self.document.createElement("div"))
-			plugin.register(around(
+			return around(
 				Object.getPrototypeOf(dv) as typeof dv,
 				{
 					view(next) {
@@ -53,7 +54,7 @@ export async function patchContextForDataview(
 						}
 					},
 				},
-			))
+			)
 		} finally {
 			comp.unload()
 		}
@@ -132,47 +133,56 @@ export async function patchContextForTemplater(
 ): Promise<void> {
 	const { api: { requires } } = context
 	context.register(await patchPlugin(context, "templater-obsidian", plugin => {
-		const { templater: {
-			// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
-			functions_generator: { user_functions: { user_script_functions } },
-			parser,
-		} } = plugin
-		plugin.register(around(parser, {
-			// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
-			parse_commands(next) {
-				return async function fn(
-					this: typeof parser,
-					...args: Parameters<typeof next>
-				): Promise<Awaited<ReturnType<typeof next>>> {
-					const req = requires.get(self),
-						[, tp] = args
-					req?.context.cwds.push(tp.config.template_file?.parent?.path ?? null)
-					try {
-						return await next.apply(this, args)
-					} finally {
-						req?.context.cwds.pop()
+		const ret = new Functions({ async: false, settled: true })
+		try {
+			const { templater: {
+				// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
+				functions_generator: { user_functions: { user_script_functions } },
+				parser,
+			} } = plugin
+			ret.push(around(parser, {
+				// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
+				parse_commands(next) {
+					return async function fn(
+						this: typeof parser,
+						...args: Parameters<typeof next>
+					): Promise<Awaited<ReturnType<typeof next>>> {
+						const req = requires.get(self),
+							[, tp] = args
+						req?.context.cwds.push(
+							tp.config.template_file?.parent?.path ?? null,
+						)
+						try {
+							return await next.apply(this, args)
+						} finally {
+							req?.context.cwds.pop()
+						}
 					}
-				}
-			},
-		}))
-		plugin.register(around(user_script_functions, {
-			// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
-			load_user_script_function(next) {
-				return async function fn(
-					// eslint-disable-next-line camelcase
-					this: typeof user_script_functions,
-					...args: Parameters<typeof next>
-				): Promise<Awaited<ReturnType<typeof next>>> {
-					const req = requires.get(self),
-						[file] = args
-					req?.context.cwds.push(file.parent?.path ?? null)
-					try {
-						await next.apply(this, args)
-					} finally {
-						req?.context.cwds.pop()
+				},
+			}))
+			ret.push(around(user_script_functions, {
+				// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
+				load_user_script_function(next) {
+					return async function fn(
+						// eslint-disable-next-line camelcase
+						this: typeof user_script_functions,
+						...args: Parameters<typeof next>
+					): Promise<Awaited<ReturnType<typeof next>>> {
+						const req = requires.get(self),
+							[file] = args
+						req?.context.cwds.push(file.parent?.path ?? null)
+						try {
+							await next.apply(this, args)
+						} finally {
+							req?.context.cwds.pop()
+						}
 					}
-				}
-			},
-		}))
+				},
+			}))
+			return () => { ret.call() }
+		} catch (error) {
+			ret.call()
+			throw error
+		}
 	}))
 }
