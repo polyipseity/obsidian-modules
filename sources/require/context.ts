@@ -15,14 +15,14 @@ import type { StateField } from "@codemirror/state"
 import { around } from "monkey-around"
 
 export function patchContextForEditor(context: ModulesPlugin): void {
+	const { api: { requires } } = context
 	context.register(around(EditorView.prototype, {
 		update(next) {
 			return function fn(
 				this: typeof EditorView.prototype,
 				...args: Parameters<typeof next>
 			): ReturnType<typeof next> {
-				const { api: { requires } } = context,
-					req = requires.get(self),
+				const req = requires.get(self),
 					info = this.state.field(
 						// Typing bug
 						editorInfoField as StateField<MarkdownFileInfo>,
@@ -51,6 +51,7 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 }
 
 export function patchContextForPreview(context: ModulesPlugin): void {
+	const { api: { requires } } = context
 	revealPrivate(context, [MarkdownPreviewRenderer.prototype], rend => {
 		context.register(around(rend, {
 			onRender(next) {
@@ -58,8 +59,7 @@ export function patchContextForPreview(context: ModulesPlugin): void {
 					this: typeof rend,
 					...args: Parameters<typeof next>
 				): ReturnType<typeof next> {
-					const { api: { requires } } = context,
-						req = requires.get(self),
+					const req = requires.get(self),
 						{ owner } = this
 					let path = owner.file?.parent?.path
 					if (path === void 0 && "owner" in owner) {
@@ -84,6 +84,7 @@ export function patchContextForPreview(context: ModulesPlugin): void {
 export async function patchContextForTemplater(
 	context: ModulesPlugin,
 ): Promise<void> {
+	const { api: { requires } } = context
 	context.register(await patchPlugin(context, "templater-obsidian", plugin => {
 		const { templater: {
 			// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
@@ -97,8 +98,7 @@ export async function patchContextForTemplater(
 					this: typeof parser,
 					...args: Parameters<typeof next>
 				): Promise<Awaited<ReturnType<typeof next>>> {
-					const { api: { requires } } = context,
-						req = requires.get(self),
+					const req = requires.get(self),
 						[, tp] = args
 					req?.context.cwds.push(tp.config.template_file?.parent?.path ?? null)
 					try {
@@ -117,8 +117,7 @@ export async function patchContextForTemplater(
 					this: typeof user_script_functions,
 					...args: Parameters<typeof next>
 				): Promise<Awaited<ReturnType<typeof next>>> {
-					const { api: { requires } } = context,
-						req = requires.get(self),
+					const req = requires.get(self),
 						[file] = args
 					req?.context.cwds.push(file.parent?.path ?? null)
 					try {
