@@ -1,5 +1,6 @@
 import {
 	type CanvasNodeInfo,
+	Component,
 	type MarkdownFileInfo,
 	MarkdownPreviewRenderer,
 	editorInfoField,
@@ -43,7 +44,7 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 					next.apply(this, args)
 				} finally {
 					// Runs after all microtasks are done
-					self.setTimeout(() => { req?.context.cwds.pop() }, 0)
+					self.setTimeout(() => { req?.context.cwds.pop() })
 				}
 			}
 		},
@@ -73,7 +74,7 @@ export function patchContextForPreview(context: ModulesPlugin): void {
 						next.apply(this, args)
 					} finally {
 						// Runs after all microtasks are done
-						self.setTimeout(() => { req?.context.cwds.pop() }, 0)
+						self.setTimeout(() => { req?.context.cwds.pop() })
 					}
 				}
 			},
