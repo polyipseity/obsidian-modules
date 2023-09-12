@@ -20,16 +20,13 @@ export function patchContextForPreview(context: ModulesPlugin): void {
 					...args: Parameters<typeof proto>
 				): ReturnType<typeof proto> {
 					const { api: { requires } } = context,
-						req = requires.get(self),
-						path = this.owner.file?.parent?.path
-					if (path !== void 0) { req?.context.cwds.push(path) }
+						req = requires.get(self)
+					req?.context.cwds.push(this.owner.file?.parent?.path ?? null)
 					try {
 						proto.apply(this, args)
 					} finally {
-						if (path !== void 0) {
-							// Runs after all microtasks are done
-							self.setTimeout(() => { req?.context.cwds.pop() }, 0)
-						}
+						// Runs after all microtasks are done
+						self.setTimeout(() => { req?.context.cwds.pop() }, 0)
 					}
 				}
 			},
@@ -45,20 +42,17 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 				...args: Parameters<typeof proto>
 			): ReturnType<typeof proto> {
 				const { api: { requires } } = context,
-					req = requires.get(self),
-					path = this.state.field(
-						// Typing bug
-						editorInfoField as StateField<MarkdownFileInfo>,
-						false,
-					)?.file?.parent?.path
-				if (path !== void 0) { req?.context.cwds.push(path) }
+					req = requires.get(self)
+				req?.context.cwds.push(this.state.field(
+					// Typing bug
+					editorInfoField as StateField<MarkdownFileInfo>,
+					false,
+				)?.file?.parent?.path ?? null)
 				try {
 					proto.apply(this, args)
 				} finally {
-					if (path !== void 0) {
-						// Runs after all microtasks are done
-						self.setTimeout(() => { req?.context.cwds.pop() }, 0)
-					}
+					// Runs after all microtasks are done
+					self.setTimeout(() => { req?.context.cwds.pop() }, 0)
 				}
 			}
 		},
