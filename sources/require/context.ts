@@ -1,8 +1,10 @@
 import {
+	type CanvasNodeInfo,
 	type MarkdownFileInfo,
 	MarkdownPreviewRenderer,
 	editorInfoField,
 } from "obsidian"
+import { constant, noop } from "lodash-es"
 import {
 	patchPlugin,
 	revealPrivate,
@@ -11,7 +13,6 @@ import { EditorView } from "@codemirror/view"
 import type { ModulesPlugin } from "../main.js"
 import type { StateField } from "@codemirror/state"
 import { around } from "monkey-around"
-import { noop } from "lodash-es"
 
 export function patchContextForEditor(context: ModulesPlugin): void {
 	context.register(around(EditorView.prototype, {
@@ -21,12 +22,23 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 				...args: Parameters<typeof next>
 			): ReturnType<typeof next> {
 				const { api: { requires } } = context,
-					req = requires.get(self)
-				req?.context.cwds.push(this.state.field(
-					// Typing bug
-					editorInfoField as StateField<MarkdownFileInfo>,
-					false,
-				)?.file?.parent?.path ?? null)
+					req = requires.get(self),
+					info = this.state.field(
+						// Typing bug
+						editorInfoField as StateField<MarkdownFileInfo>,
+						false,
+					)
+				let path = info?.file?.parent?.path
+				if (path === void 0 && info) {
+					const info2 = info as CanvasNodeInfo | typeof info
+					path = revealPrivate(context, [info2], info3 => {
+						if ("node" in info3) {
+							return info3.node.canvas.view.file.parent?.path
+						}
+						return path
+					}, constant(path))
+				}
+				req?.context.cwds.push(path ?? null)
 				try {
 					next.apply(this, args)
 				} finally {
@@ -47,8 +59,16 @@ export function patchContextForPreview(context: ModulesPlugin): void {
 					...args: Parameters<typeof next>
 				): ReturnType<typeof next> {
 					const { api: { requires } } = context,
-						req = requires.get(self)
-					req?.context.cwds.push(this.owner.file?.parent?.path ?? null)
+						req = requires.get(self),
+						{ owner } = this
+					let path = owner.file?.parent?.path
+					if (path === void 0 && "owner" in owner) {
+						const { owner: owner2 } = owner
+						if ("node" in owner2) {
+							path = owner2.node.canvas.view.file.parent?.path
+						}
+					}
+					req?.context.cwds.push(path ?? null)
 					try {
 						next.apply(this, args)
 					} finally {
