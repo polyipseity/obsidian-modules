@@ -497,7 +497,7 @@ function parsePath(path: string): string {
 	}, []).join("/")
 }
 
-export function getWD(path: string): string {
+function getWD(path: string): string {
 	return path.split("/")
 		.slice(0, -1)
 		.join("/")

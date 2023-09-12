@@ -8,7 +8,6 @@ import type { ModulesPlugin } from "../main.js"
 import type { StateField } from "@codemirror/state"
 import type { TemplaterPlugin } from "templater-obsidian"
 import { around } from "monkey-around"
-import { getWD } from "./resolve.js"
 import { noop } from "lodash-es"
 import { revealPrivate } from "@polyipseity/obsidian-plugin-library"
 
@@ -22,8 +21,8 @@ export function patchContextForPreview(context: ModulesPlugin): void {
 				): ReturnType<typeof proto> {
 					const { api: { requires } } = context,
 						req = requires.get(self),
-						path = this.owner.file?.path
-					if (path !== void 0) { req?.context.cwds.push(getWD(path)) }
+						path = this.owner.file?.parent?.path
+					if (path !== void 0) { req?.context.cwds.push(path) }
 					try {
 						proto.apply(this, args)
 					} finally {
@@ -51,8 +50,8 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 						// Typing bug
 						editorInfoField as StateField<MarkdownFileInfo>,
 						false,
-					)?.file?.path
-				if (path !== void 0) { req?.context.cwds.push(getWD(path)) }
+					)?.file?.parent?.path
+				if (path !== void 0) { req?.context.cwds.push(path) }
 				try {
 					proto.apply(this, args)
 				} finally {
