@@ -1,11 +1,12 @@
 declare module "templater-obsidian" {
-	// https://silentvoid13.github.io/Templater/internal-functions/internal-modules/file-module.html
-	interface FileModule {
-		readonly folder: (relative?: boolean) => string
+	// https://silentvoid13.github.io/Templater/internal-functions/internal-modules/config-module.html
+	interface ConfigModule {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		readonly template_file: TFile | undefined
 	}
 	// https://silentvoid13.github.io/Templater/internal-functions/overview.html
 	interface FunctionsObject extends Record<string, unknown> {
-		readonly file: FileModule
+		readonly config: ConfigModule
 	}
 	// https://github.com/SilentVoid13/Templater/blob/487805b5ad1fd7fbc145040ed82b4c41fc2c48e2/src/core/parser/Parser.ts#L7
 	interface Parser {
@@ -25,4 +26,4 @@ declare module "templater-obsidian" {
 	}
 }
 import type { } from "templater-obsidian"
-import type { Plugin } from "obsidian"
+import type { Plugin, TFile } from "obsidian"

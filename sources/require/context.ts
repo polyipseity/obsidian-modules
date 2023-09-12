@@ -72,7 +72,7 @@ export function patchContextForTemplater(context: ModulesPlugin): void {
 					const { api: { requires } } = context,
 						req = requires.get(self),
 						[, tp] = args
-					req?.context.cwds.push(tp.file.folder(true))
+					req?.context.cwds.push(tp.config.template_file?.parent?.path ?? null)
 					try {
 						return await proto.apply(this, args)
 					} finally {

@@ -135,7 +135,6 @@ Contributions are welcome!
 
 The todos here, ordered alphabetically, are things planned for the plugin. There are no guarantees that they will be completed. However, we are likely to accept contributions for them.
 
-- Fix context detection for Templater templates.
 - Add startup modules.
 - Add context detection for Templater user scripts (not templates), `dv.view`, and canvases.
 - User-defined module aliases.
