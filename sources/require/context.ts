@@ -61,7 +61,11 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 
 export function patchContextForTemplater(context: ModulesPlugin): void {
 	function patch(plugin: TemplaterPlugin): void {
-		const { templater: { parser } } = plugin
+		const { templater: {
+			// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
+			functions_generator: { user_functions: { user_script_functions } },
+			parser,
+		} } = plugin
 		plugin.register(around(parser, {
 			// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
 			parse_commands(next) {
@@ -75,6 +79,26 @@ export function patchContextForTemplater(context: ModulesPlugin): void {
 					req?.context.cwds.push(tp.config.template_file?.parent?.path ?? null)
 					try {
 						return await next.apply(this, args)
+					} finally {
+						req?.context.cwds.pop()
+					}
+				}
+			},
+		}))
+		plugin.register(around(user_script_functions, {
+			// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
+			load_user_script_function(next) {
+				return async function fn(
+					// eslint-disable-next-line camelcase
+					this: typeof user_script_functions,
+					...args: Parameters<typeof next>
+				): Promise<Awaited<ReturnType<typeof next>>> {
+					const { api: { requires } } = context,
+						req = requires.get(self),
+						[file] = args
+					req?.context.cwds.push(file.parent?.path ?? null)
+					try {
+						await next.apply(this, args)
 					} finally {
 						req?.context.cwds.pop()
 					}
