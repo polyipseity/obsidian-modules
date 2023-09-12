@@ -1,5 +1,20 @@
 # obsidian-modules
 
+## 2.2.0
+
+### Minor Changes
+
+- 3b251be: Add cwd detection for `dv.view` in Dataview.
+- ef032bf: Add cwd detection for Templater user scripts.
+- fdbee2f: Add cwd detection for canvases.
+- 2fd4dc4: Change the type and meaning of `null` and `undefined` for working directory. This allows overriding the working directory with no working directory in `CommonOptions`.
+- 5fbad90: Always change the cwd context in preview and editor.
+
+### Patch Changes
+
+- 92b9215: Fix context detection for Templater templates.
+- 004ed2e: Fix weird behaviors if the vault has more than 1000 files. Fixes [GH#4](https://github.com/polyipseity/obsidian-modules/issues/4).
+
 ## 2.1.0
 
 ### Minor Changes
