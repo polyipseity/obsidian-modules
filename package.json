@@ -6,7 +6,7 @@
 	"dependencies": {
 		"@aidenlx/esbuild-plugin-inline-worker": "^1.0.1",
 		"@codemirror/state": "^6.2.1",
-		"@codemirror/view": "^6.16.0",
+		"@codemirror/view": "^6.18.1",
 		"@polyipseity/obsidian-plugin-library": "^1.18.1",
 		"@ts-morph/bootstrap": "^0.20.0",
 		"acorn": "^8.10.0",
