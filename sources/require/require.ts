@@ -33,6 +33,7 @@ import type {
 import { MarkdownTranspile, TypeScriptTranspile } from "./transpile.js"
 import { constant, isObject, noop } from "lodash-es"
 import {
+	patchContextForDataview,
 	patchContextForEditor,
 	patchContextForPreview,
 	patchContextForTemplater,
@@ -85,7 +86,10 @@ export async function loadRequire(context: ModulesPlugin): Promise<void> {
 	})
 	patchContextForEditor(context)
 	patchContextForPreview(context)
-	await patchContextForTemplater(context)
+	await Promise.all([
+		patchContextForDataview(context),
+		patchContextForTemplater(context),
+	])
 }
 
 function createRequire(

@@ -10,6 +10,7 @@ declare module "obsidian" {
 		extends Private<$MarkdownPreviewRenderer, PrivateKey> { }
 	namespace Plugins {
 		interface Mapping {
+			readonly dataview: DataviewPlugin
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			readonly "templater-obsidian": TemplaterPlugin
 		}
@@ -23,6 +24,7 @@ import type {
 	MarkdownEmbedInfo,
 	MarkdownFileInfo,
 } from "obsidian"
+import type { DataviewPlugin } from "dataview"
 import type { Private } from "@polyipseity/obsidian-plugin-library"
 import type { TemplaterPlugin } from "templater-obsidian"
 

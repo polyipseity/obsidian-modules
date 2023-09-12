@@ -136,7 +136,6 @@ Contributions are welcome!
 The todos here, ordered alphabetically, are things planned for the plugin. There are no guarantees that they will be completed. However, we are likely to accept contributions for them.
 
 - Add startup modules.
-- Add context detection for `dv.view`.
 - User-defined module aliases.
 - Add bare module transformation support for more CDNs such as <https://cdn.jsdelivr.net>.
 - Faster import analysis and transformation.

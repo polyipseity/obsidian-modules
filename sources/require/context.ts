@@ -9,11 +9,56 @@ import { constant, noop } from "lodash-es"
 import {
 	patchPlugin,
 	revealPrivate,
+	sleep2,
 } from "@polyipseity/obsidian-plugin-library"
 import { EditorView } from "@codemirror/view"
 import type { ModulesPlugin } from "../main.js"
 import type { StateField } from "@codemirror/state"
 import { around } from "monkey-around"
+
+export async function patchContextForDataview(
+	context: ModulesPlugin,
+): Promise<void> {
+	const { app: { metadataCache }, api: { requires } } = context
+	context.register(await patchPlugin(context, "dataview", plugin => {
+		const comp = new Component()
+		try {
+			const dv = plugin.localApi("", comp, self.document.createElement("div"))
+			plugin.register(around(
+				Object.getPrototypeOf(dv) as typeof dv,
+				{
+					view(next) {
+						return async function fn(
+							this: typeof dv,
+							...args: Parameters<typeof next>
+						): Promise<Awaited<ReturnType<typeof next>>> {
+							const req = requires.get(self),
+								{ currentFilePath } = this,
+								[viewName] = args,
+								file = metadataCache.getFirstLinkpathDest(
+									`${viewName}.js`,
+									currentFilePath,
+								) ?? metadataCache.getFirstLinkpathDest(
+									`${viewName}/view.js`,
+									currentFilePath,
+								)
+							await sleep2(self, 0)
+							await sleep2(self, 0)
+							req?.context.cwds.push(file?.parent?.path ?? null)
+							try {
+								await next.apply(this, args)
+							} finally {
+								req?.context.cwds.pop()
+							}
+						}
+					},
+				},
+			))
+		} finally {
+			comp.unload()
+		}
+	}))
+}
 
 export function patchContextForEditor(context: ModulesPlugin): void {
 	const { api: { requires } } = context
