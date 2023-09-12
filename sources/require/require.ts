@@ -518,16 +518,16 @@ function createAndSetRequire(
 	requires.set(self0, req)
 	if (name in self0 || name === "require") {
 		return around(self0, {
-			require(proto) {
+			require(next) {
 				return Object.assign(function fn(
 					this: typeof self0 | undefined,
-					...args: Parameters<typeof proto>
-				): ReturnType<typeof proto> {
+					...args: Parameters<typeof next>
+				): ReturnType<typeof next> {
 					try {
 						const args2 = [...args]
 						// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 						if (args2[1]) { args2[1] = Object.assign(() => { }, args2[1]) }
-						return proto.apply(this, args)
+						return next.apply(this, args)
 					} catch (error) {
 						self0.console.debug(error)
 						return req(...args)

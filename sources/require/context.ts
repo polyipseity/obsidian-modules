@@ -14,16 +14,16 @@ import { revealPrivate } from "@polyipseity/obsidian-plugin-library"
 export function patchContextForPreview(context: ModulesPlugin): void {
 	revealPrivate(context, [MarkdownPreviewRenderer.prototype], rend => {
 		context.register(around(rend, {
-			onRender(proto) {
+			onRender(next) {
 				return function fn(
 					this: typeof rend,
-					...args: Parameters<typeof proto>
-				): ReturnType<typeof proto> {
+					...args: Parameters<typeof next>
+				): ReturnType<typeof next> {
 					const { api: { requires } } = context,
 						req = requires.get(self)
 					req?.context.cwds.push(this.owner.file?.parent?.path ?? null)
 					try {
-						proto.apply(this, args)
+						next.apply(this, args)
 					} finally {
 						// Runs after all microtasks are done
 						self.setTimeout(() => { req?.context.cwds.pop() }, 0)
@@ -36,11 +36,11 @@ export function patchContextForPreview(context: ModulesPlugin): void {
 
 export function patchContextForEditor(context: ModulesPlugin): void {
 	context.register(around(EditorView.prototype, {
-		update(proto) {
+		update(next) {
 			return function fn(
 				this: typeof EditorView.prototype,
-				...args: Parameters<typeof proto>
-			): ReturnType<typeof proto> {
+				...args: Parameters<typeof next>
+			): ReturnType<typeof next> {
 				const { api: { requires } } = context,
 					req = requires.get(self)
 				req?.context.cwds.push(this.state.field(
@@ -49,7 +49,7 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 					false,
 				)?.file?.parent?.path ?? null)
 				try {
-					proto.apply(this, args)
+					next.apply(this, args)
 				} finally {
 					// Runs after all microtasks are done
 					self.setTimeout(() => { req?.context.cwds.pop() }, 0)
@@ -64,17 +64,17 @@ export function patchContextForTemplater(context: ModulesPlugin): void {
 		const { templater: { parser } } = plugin
 		plugin.register(around(parser, {
 			// eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
-			parse_commands(proto) {
+			parse_commands(next) {
 				return async function fn(
 					this: typeof parser,
-					...args: Parameters<typeof proto>
-				): Promise<Awaited<ReturnType<typeof proto>>> {
+					...args: Parameters<typeof next>
+				): Promise<Awaited<ReturnType<typeof next>>> {
 					const { api: { requires } } = context,
 						req = requires.get(self),
 						[, tp] = args
 					req?.context.cwds.push(tp.config.template_file?.parent?.path ?? null)
 					try {
-						return await proto.apply(this, args)
+						return await next.apply(this, args)
 					} finally {
 						req?.context.cwds.pop()
 					}
@@ -85,16 +85,16 @@ export function patchContextForTemplater(context: ModulesPlugin): void {
 	revealPrivate(context, [context.app], app2 => {
 		const { plugins } = app2
 		context.register(around(plugins, {
-			loadPlugin(proto) {
+			loadPlugin(next) {
 				return async function fn(
 					this: typeof plugins,
-					...args: Parameters<typeof proto>
-				): Promise<Awaited<ReturnType<typeof proto>>> {
-					const ret = await proto.apply(this, args)
+					...args: Parameters<typeof next>
+				): Promise<Awaited<ReturnType<typeof next>>> {
+					const ret = await next.apply(this, args)
 					try {
 						const [id] = args
 						if (ret && id === "templater-obsidian") {
-							type Proto = typeof proto<typeof id>
+							type Proto = typeof next<typeof id>
 							const ret2 = ret as NonNullable<Awaited<ReturnType<Proto>>>
 							patch(ret2)
 						}
