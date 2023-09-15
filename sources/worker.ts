@@ -73,7 +73,7 @@ export async function parseAndRewriteRequire(
 				return
 			}
 			const { value } = arg0
-			if (importable({}, value)) { return }
+			if (importable(new Map(), value)) { return }
 			let prefix = ""
 			if (!(/^\.{0,2}\//u).test(value)) {
 				try {

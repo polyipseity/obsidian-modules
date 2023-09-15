@@ -368,7 +368,7 @@ export class InternalModulesResolve
 		if (!settings.value.exposeInternalModules) { return null }
 		let value = null
 		try {
-			value = dynamicRequireSync({}, id)
+			value = dynamicRequireSync(new Map(), id)
 		} catch (error) {
 			self.console.debug(error)
 			return null
@@ -385,7 +385,7 @@ export class InternalModulesResolve
 		if (!settings.value.exposeInternalModules) { return null }
 		let value = null
 		try {
-			value = await dynamicRequire({}, id)
+			value = await dynamicRequire(new Map(), id)
 		} catch (error) {
 			self.console.debug(error)
 			return null
