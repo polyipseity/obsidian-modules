@@ -809,7 +809,7 @@ export class ExternalLinkResolve
 }
 export namespace ExternalLinkResolve {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
-	export const Identity = Symbol("Identity")
+	export const Identity = Symbol("ExternalLinkResolve.Identity")
 	export interface Identity {
 		readonly [Identity]: true
 		readonly code: string
