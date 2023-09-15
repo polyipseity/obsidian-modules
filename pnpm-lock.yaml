@@ -22,7 +22,7 @@ importers:
         version: 6.18.1
       '@polyipseity/obsidian-plugin-library':
         specifier: ^1.21.0
-        version: 1.21.0(@capacitor/core@5.2.0)(@codemirror/state@6.2.1)(@codemirror/view@6.18.1)(esbuild@0.17.9)(typescript@5.2.2)
+        version: 1.21.0(@capacitor/core@5.2.0)(@codemirror/state@6.2.1)(@codemirror/view@6.18.1)(esbuild@0.17.19)(typescript@5.2.2)
       '@ts-morph/bootstrap':
         specifier: ^0.20.0
         version: 0.20.0
