@@ -62,17 +62,17 @@ declare module "obsidian-modules" {
 		/**
 		 * Cache for loaded modules.
 		 */
-		readonly cache: Record<string, ModuleCache>
+		readonly cache: Map<string, ModuleCache>
 
 		/**
 		 * Aliased modules.
 		 */
-		readonly aliased: Record<string, string>
+		readonly aliased: Map<string, string>
 
 		/**
 		 * Module aliases.
 		 */
-		readonly aliases: Record<string, Set<string>>
+		readonly aliases: Map<string, Set<string>>
 
 		/**
 		 * Context for loading modules.
@@ -82,12 +82,12 @@ declare module "obsidian-modules" {
 		/**
 		 * Module dependants.
 		 */
-		readonly dependants: Record<string, Set<string>>
+		readonly dependants: Map<string, Set<string>>
 
 		/**
 		 * Module dependencies.
 		 */
-		readonly dependencies: Record<string, Set<string>>
+		readonly dependencies: Map<string, Set<string>>
 	}
 
 	/**

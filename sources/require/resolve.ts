@@ -226,7 +226,7 @@ export namespace AbstractFileResolve {
 			cache: Cache.Identity | null,
 		]>()
 
-		protected readonly data: Record<string, Cache.Identity> = {}
+		protected readonly data = new Map<string, Cache.Identity>()
 		protected readonly preloadRules = new SettingRules(
 			this.context,
 			set => set.preloadingRules,
@@ -260,7 +260,7 @@ export namespace AbstractFileResolve {
 		}
 
 		public get(path: string): Cache.Identity | undefined {
-			return this.data[path]
+			return this.data.get(path)
 		}
 
 		public [Symbol.iterator](): IterableIterator<readonly [string, Cache
@@ -277,16 +277,16 @@ export namespace AbstractFileResolve {
 						? { content: await vault.cachedRead(file) }
 						: {},
 				}
-			await this.onInvalidate.emit(path, data[path] = ret)
+			data.set(path, ret)
+			await this.onInvalidate.emit(path, ret)
 			return ret
 		}
 
 		protected async uncache(path: string): Promise<Cache.Identity | null> {
 			const { data } = this,
-				{ [path]: ret } = data
+				ret = data.get(path)
 			if (!ret) { return null }
-			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-			delete data[path]
+			data.delete(path)
 			await this.onInvalidate.emit(path, null)
 			return ret
 		}
@@ -351,7 +351,7 @@ export class CompositeResolve implements Resolve {
 export class InternalModulesResolve
 	extends AbstractResolve
 	implements Resolve {
-	protected readonly identities: Record<string, object | undefined> = {}
+	protected readonly identities = new Map<string, object | undefined>()
 
 	public constructor(context: ModulesPlugin) {
 		super(context)
@@ -590,9 +590,10 @@ function parseWikilink(
 export class ExternalLinkResolve
 	extends AbstractResolve
 	implements Resolve {
-	protected readonly redirects: Record<string, string> = {}
-	protected readonly identities: Record<string, AsyncOrSync<ExternalLinkResolve
-		.Identity> | Error | "await"> = {}
+	protected readonly redirects = new Map<string, string>()
+	protected readonly identities =
+		new Map<string, AsyncOrSync<ExternalLinkResolve
+			.Identity> | Error | "await">()
 
 	public constructor(
 		context: ModulesPlugin,
@@ -609,7 +610,7 @@ export class ExternalLinkResolve
 			}
 		context.registerDomEvent(self, "online", () => {
 			for (const [key, value] of Object.entries(this.identities)) {
-				if (value instanceof Error) { this.identities[key] = "await" }
+				if (value instanceof Error) { this.identities.set(key, "await") }
 			}
 		}, { passive: true })
 		context.register(settings.onMutate(
@@ -631,23 +632,19 @@ export class ExternalLinkResolve
 	}
 
 	public override async invalidate(id: string): Promise<void> {
-		const {
-			redirects, redirects: { [id]: idr },
-			identities, identities: { [idr ?? id]: id2 },
-			tsTranspile,
-		} = this
+		const { redirects, identities, tsTranspile } = this,
+			idr = redirects.get(id),
+			id2 = identities.get(idr ?? id)
 		await super.invalidate(id)
-		// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-		delete redirects[id]
-		// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-		delete identities[idr ?? id]
+		redirects.delete(id)
+		identities.delete(idr ?? id)
 		const id3 = await Promise.resolve(id2).catch(() => { })
 		if (isObject(id3)) { tsTranspile.invalidate(id3) }
 	}
 
 	public override async invalidateAll(): Promise<void> {
 		const { identities, redirects, tsTranspile } = this,
-			ids = [...Object.values(identities)]
+			ids = [...identities.values()]
 		await super.invalidateAll()
 		clearProperties(redirects)
 		clearProperties(identities)
@@ -664,8 +661,12 @@ export class ExternalLinkResolve
 		this.validate0(href, context)
 		if (!this.context.settings.value.enableExternalLinks) { return null }
 
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-multi-assign
-		const identity = this.identities[href] ??= "await"
+		const identity = this.identities.get(href) ??
+			((): typeof val => {
+				const val = "await"
+				this.identities.set(href, val)
+				return val
+			})()
 		if (identity instanceof Error) { throw identity }
 		return isObject(identity) && ExternalLinkResolve.Identity in identity
 			? { ...identity, cwd: href, id: href }
@@ -696,74 +697,74 @@ export class ExternalLinkResolve
 		const href = await this.anormalizeURL(id, cwd)
 		if (href === null) { return [null, null] }
 		const { tsTranspile } = this
-		let { identities: { [href]: identity } } = this
+		let identity = this.identities.get(href)
 		if (identity === void 0 || identity === "await") {
 			const awaiting = identity === "await"
-			// eslint-disable-next-line no-multi-assign
-			this.identities[href] = identity = (async (): Promise<ExternalLinkResolve
-				.Identity> => {
-				const ret: Writable<ExternalLinkResolve
-					.Identity> = {
-					[ExternalLinkResolve.Identity]: true,
-					code: (await this.fetchPool.addSingleTask({
-						data: href,
-						async generator(data) {
-							return requestUrl(data)
-						},
-					}).promise()).text,
-				}
-				let compile = (): unknown => null
-				try {
-					compile = async (): Promise<void> => {
-						// eslint-disable-next-line require-atomic-updates
-						ret.compiledSyncCode =
-							await (await this.workerPool).exec<typeof attachSourceMap>(
-								"attachSourceMap",
-								[
-									{
-										code: ret.code,
-										id: href,
-										prefix: PRECOMPILE_SYNC_PREFIX,
-										sourceRoot: this.sourceRoot,
-										type: "script",
-									},
-								],
-							)
+			this.identities.set(
+				href,
+				identity = (async (): Promise<ExternalLinkResolve
+					.Identity> => {
+					const ret: Writable<ExternalLinkResolve
+						.Identity> = {
+						[ExternalLinkResolve.Identity]: true,
+						code: (await this.fetchPool.addSingleTask({
+							data: href,
+							async generator(data) {
+								return requestUrl(data)
+							},
+						}).promise()).text,
 					}
+					let compile = (): unknown => null
 					try {
-						const { ts } = await tsMorphBootstrap,
-							code = await tsTranspile.atranspile(ret, ret.code, void 0, {
-								compilerOptions: {
-									module: ts.ModuleKind.CommonJS,
-								},
-								language: "TypeScript",
-							})
-						if (code !== null) {
+						compile = async (): Promise<void> => {
 							// eslint-disable-next-line require-atomic-updates
-							ret.code = code
+							ret.compiledSyncCode =
+								await (await this.workerPool).exec<typeof attachSourceMap>(
+									"attachSourceMap",
+									[
+										{
+											code: ret.code,
+											id: href,
+											prefix: PRECOMPILE_SYNC_PREFIX,
+											sourceRoot: this.sourceRoot,
+											type: "script",
+										},
+									],
+								)
 						}
-					} catch (error) {
-						self.console.debug(error)
-					}
-					const { code, requires } =
-						await (await this.workerPool).exec<typeof parseAndRewriteRequire>(
-							"parseAndRewriteRequire",
-							[{ code: ret.code, href }],
-						)
-					// eslint-disable-next-line require-atomic-updates
-					ret.code = code
-					await Promise.all(requires.map(async req => this.aresolve0(req)))
-				} catch (error) { self.console.debug(error) }
-				try { await compile() } catch (error) { self.console.debug(error) }
-				return ret
-			})()
+						try {
+							const { ts } = await tsMorphBootstrap,
+								code = await tsTranspile.atranspile(ret, ret.code, void 0, {
+									compilerOptions: {
+										module: ts.ModuleKind.CommonJS,
+									},
+									language: "TypeScript",
+								})
+							if (code !== null) {
+								// eslint-disable-next-line require-atomic-updates
+								ret.code = code
+							}
+						} catch (error) {
+							self.console.debug(error)
+						}
+						const { code, requires } =
+							await (await this.workerPool).exec<typeof parseAndRewriteRequire>(
+								"parseAndRewriteRequire",
+								[{ code: ret.code, href }],
+							)
+						// eslint-disable-next-line require-atomic-updates
+						ret.code = code
+						await Promise.all(requires.map(async req => this.aresolve0(req)))
+					} catch (error) { self.console.debug(error) }
+					try { await compile() } catch (error) { self.console.debug(error) }
+					return ret
+				})(),
+			)
 			if (awaiting) { await this.invalidate0(href) }
 			try {
-				// eslint-disable-next-line no-multi-assign
-				this.identities[href] = identity = await identity
+				this.identities.set(href, identity = await identity)
 			} catch (error) {
-				// eslint-disable-next-line no-multi-assign
-				this.identities[href] = identity = anyToError(error)
+				this.identities.set(href, identity = anyToError(error))
 			}
 		}
 		if (identity instanceof Error) { throw identity }
@@ -774,7 +775,7 @@ export class ExternalLinkResolve
 		...args: Parameters<typeof normalizeURL>
 	): ReturnType<typeof normalizeURL> {
 		const href = normalizeURL(...args)
-		return href === null ? null : this.redirects[href] ?? href
+		return href === null ? null : this.redirects.get(href) ?? href
 	}
 
 	protected async anormalizeURL(
@@ -783,23 +784,27 @@ export class ExternalLinkResolve
 		const href = this.normalizeURL(...args)
 		if (href !== null) {
 			try {
-				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-return-assign
-				return this.redirects[href] ??= (await this.fetchPool.addSingleTask({
-					data: href,
-					async generator(data) {
-						return fetch(data, {
-							mode: "cors",
-							redirect: "follow",
-							referrerPolicy: "no-referrer",
-						})
-					},
-				}).promise()
-					.then(async val => {
-						try {
-							await this.invalidate0(href)
-						} catch (error) { self.console.debug(error) }
-						return val
-					})).url
+				return this.redirects.get(href) ?? await (async (): Promise<
+					typeof val> => {
+					const val = (await this.fetchPool.addSingleTask({
+						data: href,
+						async generator(data) {
+							return fetch(data, {
+								mode: "cors",
+								redirect: "follow",
+								referrerPolicy: "no-referrer",
+							})
+						},
+					}).promise()
+						.then(async val2 => {
+							try {
+								await this.invalidate0(href)
+							} catch (error) { self.console.debug(error) }
+							return val2
+						})).url
+					this.redirects.set(href, val)
+					return val
+				})()
 			} catch (error) {
 				self.console.debug(error)
 			}

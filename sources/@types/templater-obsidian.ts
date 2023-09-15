@@ -10,7 +10,7 @@ declare module "templater-obsidian" {
 		readonly user_functions: UserFunctions
 	}
 	// https://silentvoid13.github.io/Templater/internal-functions/overview.html
-	interface FunctionsObject extends Record<string, unknown> {
+	interface FunctionsObject {
 		readonly config: ConfigModule
 	}
 	// https://github.com/SilentVoid13/Templater/blob/487805b5ad1fd7fbc145040ed82b4c41fc2c48e2/src/core/parser/Parser.ts#L7

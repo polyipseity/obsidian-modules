@@ -100,21 +100,20 @@ function createRequire(
 ): Require {
 	function invalidate(self2: Require, id: string): void {
 		const { aliased, aliases, cache, dependants, dependencies } = self2,
-			id2 = aliased[id] ?? id,
+			id2 = aliased.get(id) ?? id,
 			seen = new Set(),
-			ing = [...aliases[id2] ?? [id2]]
+			ing = [...aliases.get(id2) ?? [id2]]
 		for (let cur = ing.shift(); cur !== void 0; cur = ing.shift()) {
 			if (seen.has(cur)) { continue }
 			seen.add(cur)
-			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-			delete cache[cur]
-			const dependencies2 = dependencies[cur]
+			cache.delete(cur)
+			const dependencies2 = dependencies.get(cur)
 			for (const dep of dependencies2 ?? []) {
-				dependants[dep]?.delete(cur)
+				dependants.get(dep)?.delete(cur)
 			}
 			dependencies2?.clear()
-			for (const dep of dependants[cur] ?? []) {
-				ing.push(...aliases[dep] ?? [dep])
+			for (const dep of dependants.get(cur) ?? []) {
+				ing.push(...aliases.get(dep) ?? [dep])
 			}
 		}
 	}
@@ -125,20 +124,27 @@ function createRequire(
 	): readonly [Resolved, ModuleCache] {
 		if (!resolved) { throw new Error(id) }
 		const { id: id2 } = resolved,
-			{ aliased, aliased: { [id]: oldID }, aliases, cache } = self2
-		aliased[id] = id2;
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		(aliases[id2] ??= new Set([id2])).add(id)
+			{ aliased, aliases, cache } = self2,
+			oldID = aliased.get(id)
+		aliased.set(id, id2);
+		(aliases.get(id2) ?? ((): typeof val => {
+			const val = new Set([id2])
+			aliases.set(id2, val)
+			return val
+		})()).add(id)
 		if (oldID !== void 0 && id2 !== oldID) {
-			aliases[oldID]?.delete(id)
+			aliases.get(oldID)?.delete(id)
 			invalidate(self2, id)
 		}
-		if (resolved.cache === false) {
-			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-			delete cache[id2]
-		}
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-return-assign
-		return [resolved, cache[id2] ??= {}]
+		if (resolved.cache === false) { cache.delete(id2) }
+		return [
+			resolved,
+			cache.get(id2) ?? ((): typeof val => {
+				const val = {}
+				cache.set(id2, val)
+				return val
+			})(),
+		]
 	}
 	function cache0<T>(
 		cache: ModuleCache,
@@ -156,10 +162,16 @@ function createRequire(
 			{ parents } = context,
 			parent = parents.at(-1)
 		if (parent === void 0) { return }
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		(dependencies[parent] ??= new Set()).add(id);
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		(dependants[id] ??= new Set()).add(parent)
+		(dependencies.get(parent) ?? ((): typeof val => {
+			const val = new Set<string>()
+			dependencies.set(parent, val)
+			return val
+		})()).add(id);
+		(dependants.get(id) ?? ((): typeof val => {
+			const val = new Set<string>()
+			dependants.set(id, val)
+			return val
+		})()).add(parent)
 	}
 	function preload(
 		cleanup: Functions,
@@ -251,12 +263,12 @@ function createRequire(
 		}
 	}, {
 		[REQUIRE_TAG]: true,
-		aliased: {},
-		aliases: {},
-		cache: {},
+		aliased: new Map(),
+		aliases: new Map(),
+		cache: new Map(),
 		context: { cwds: [], parents: [] } satisfies Context,
-		dependants: {},
-		dependencies: {},
+		dependants: new Map(),
+		dependencies: new Map(),
 		async import(id0: string, opts?: ImportOptions) {
 			const cleanup = new Functions({ async: false, settled: true })
 			try {
