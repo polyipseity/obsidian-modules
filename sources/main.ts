@@ -4,16 +4,17 @@ import {
 	type PluginContext,
 	SI_PREFIX_SCALE,
 	SettingsManager,
+	StorageSettingsManager,
 	createI18n,
 	semVerString,
 } from "@polyipseity/obsidian-plugin-library"
+import { LocalSettings, Settings } from "./settings-data.js"
 import { MAX_FETCH_CONCURRENCY, PLUGIN_UNLOAD_DELAY } from "./magic.js"
 import { type WorkerPool, pool } from "workerpool"
 import type { API } from "obsidian-modules"
 import PLazy from "p-lazy"
 import { PluginLocales } from "../assets/locales.js"
 import { PromisePoolExecutor } from "promise-pool-executor"
-import { Settings } from "./settings-data.js"
 import { isNil } from "lodash-es"
 import { loadDocumentations } from "./documentations.js"
 import { loadRequire } from "./require/require.js"
@@ -24,9 +25,10 @@ import worker from "worker:./worker.js"
 
 export class ModulesPlugin
 	extends Plugin
-	implements PluginContext<Settings> {
+	implements PluginContext<Settings, LocalSettings> {
 	public readonly version
 	public readonly language: LanguageManager
+	public readonly localSettings: StorageSettingsManager<LocalSettings>
 	public readonly settings: SettingsManager<Settings>
 
 	public readonly api: API = Object.freeze({ requires: new WeakMap() })
@@ -67,6 +69,7 @@ export class ModulesPlugin
 				},
 			),
 		)
+		this.localSettings = new StorageSettingsManager(this, LocalSettings.fix)
 		this.settings = new SettingsManager(this, Settings.fix)
 	}
 
@@ -85,9 +88,10 @@ export class ModulesPlugin
 				const loaded: unknown = await this.loadData(),
 					{
 						language,
+						localSettings,
 						settings,
 					} = this,
-					earlyChildren = [language, settings],
+					earlyChildren = [language, localSettings, settings],
 					// Placeholder to resolve merge conflicts more easily
 					children: never[] = []
 				for (const child of earlyChildren) { child.unload() }
