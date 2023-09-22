@@ -162,7 +162,7 @@ export abstract class AbstractFileResolve
 				id: id0,
 			}
 		} catch (error) {
-			self.console.debug(error)
+			/* @__PURE__ */ self.console.debug(error)
 			return null
 		}
 	}
@@ -370,7 +370,7 @@ export class InternalModulesResolve
 		try {
 			value = dynamicRequireSync(new Map(), id)
 		} catch (error) {
-			self.console.debug(error)
+			/* @__PURE__ */ self.console.debug(error)
 			return null
 		}
 		return { code: "", id, value }
@@ -387,7 +387,7 @@ export class InternalModulesResolve
 		try {
 			value = await dynamicRequire(new Map(), id)
 		} catch (error) {
-			self.console.debug(error)
+			/* @__PURE__ */ self.console.debug(error)
 			return null
 		}
 		return { code: "", id, value }
@@ -745,7 +745,7 @@ export class ExternalLinkResolve
 								ret.code = code
 							}
 						} catch (error) {
-							self.console.debug(error)
+							/* @__PURE__ */ self.console.debug(error)
 						}
 						const { code, requires } =
 							await (await this.workerPool).exec<typeof parseAndRewriteRequire>(
@@ -755,8 +755,10 @@ export class ExternalLinkResolve
 						// eslint-disable-next-line require-atomic-updates
 						ret.code = code
 						await Promise.all(requires.map(async req => this.aresolve0(req)))
-					} catch (error) { self.console.debug(error) }
-					try { await compile() } catch (error) { self.console.debug(error) }
+					} catch (error) { /* @__PURE__ */ self.console.debug(error) }
+					try { await compile() } catch (error) {
+						/* @__PURE__ */ self.console.debug(error)
+					}
 					return ret
 				})(),
 			)
@@ -799,14 +801,14 @@ export class ExternalLinkResolve
 						.then(async val2 => {
 							try {
 								await this.invalidate0(href)
-							} catch (error) { self.console.debug(error) }
+							} catch (error) { /* @__PURE__ */ self.console.debug(error) }
 							return val2
 						})).url
 					this.redirects.set(href, val)
 					return val
 				})()
 			} catch (error) {
-				self.console.debug(error)
+				/* @__PURE__ */ self.console.debug(error)
 			}
 		}
 		return href

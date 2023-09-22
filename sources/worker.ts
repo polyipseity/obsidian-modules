@@ -80,7 +80,7 @@ export async function parseAndRewriteRequire(
 					// eslint-disable-next-line no-new
 					new URL(value)
 				} catch (error) {
-					self.console.debug(error)
+					/* @__PURE__ */ self.console.debug(error)
 					prefix = "/"
 				}
 			}

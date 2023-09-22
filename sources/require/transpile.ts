@@ -64,7 +64,7 @@ namespace ContentHeader {
 		try {
 			ret = JSON.parse(json ?? "{}")
 		} catch (error) {
-			self.console.debug(error)
+			/* @__PURE__ */ self.console.debug(error)
 		}
 		return fix(ret).value
 	}

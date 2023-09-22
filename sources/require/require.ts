@@ -545,7 +545,7 @@ function createAndSetRequire(
 						if (args2[1]) { args2[1] = Object.assign(() => { }, args2[1]) }
 						return next.apply(this, args)
 					} catch (error) {
-						self0.console.debug(error)
+						/* @__PURE__ */ self0.console.debug(error)
 						return req(...args)
 					}
 				}, req) as unknown as NodeRequire

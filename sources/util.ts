@@ -6,7 +6,7 @@ export function normalizeURL(id: string, cwd?: string): string | null {
 			({ href } = new URL(id, cwd))
 			if (!filter.test(href)) { href = null }
 		} catch (error) {
-			self.console.debug(error)
+			/* @__PURE__ */ self.console.debug(error)
 		}
 	}
 	if (href === null) {
@@ -14,7 +14,7 @@ export function normalizeURL(id: string, cwd?: string): string | null {
 			({ href } = new URL(id))
 			if (!filter.test(href)) { href = null }
 		} catch (error) {
-			self.console.debug(error)
+			/* @__PURE__ */ self.console.debug(error)
 		}
 	}
 	return href
