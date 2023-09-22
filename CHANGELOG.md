@@ -1,5 +1,18 @@
 # obsidian-modules
 
+## 2.3.0
+
+No more console spamming and unchecked `data.json` growth!
+
+### Minor Changes
+
+- d724fef: Move settings `recovery` and `lastReadChangelogVersion` to `localStorage`. (6d612c570926387ee6b5991475cb993517a39d45)
+- 307489d: Replace some `Record`s with `Map`s. (https://2ality.com/2012/01/objects-as-maps.html)
+
+### Patch Changes
+
+- b496460: Remove debug statements. Addresses [GH#5](https://github.com/polyipseity/obsidian-modules/issues/5). (+f9fc1874e2c0b0b6c486ae6a13e52bf09cef588d)
+
 ## 2.2.0
 
 ### Minor Changes
