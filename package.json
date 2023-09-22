@@ -6,9 +6,9 @@
 	"dependencies": {
 		"@aidenlx/esbuild-plugin-inline-worker": "^1.0.1",
 		"@codemirror/state": "^6.2.1",
-		"@codemirror/view": "^6.18.1",
+		"@codemirror/view": "^6.20.0",
 		"@polyipseity/obsidian-plugin-library": "^1.22.0",
-		"@ts-morph/bootstrap": "^0.20.0",
+		"@ts-morph/bootstrap": "^0.21.0",
 		"acorn": "^8.10.0",
 		"acorn-walk": "^8.2.0",
 		"astring": "^1.8.6",
@@ -20,7 +20,7 @@
 		"promise-pool-executor": "^1.1.1",
 		"semver": "^7.5.4",
 		"ts-essentials": "^9.4.0",
-		"workerpool": "^6.4.2"
+		"workerpool": "^6.5.0"
 	},
 	"description": "Load JavaScript and related languages like TypeScript modules from the vault and the Internet.",
 	"devDependencies": {
@@ -33,7 +33,7 @@
 		"@types/lodash-es": "^4.17.9",
 		"@types/node": "^20.6.3",
 		"@types/semver": "^7.5.2",
-		"@types/workerpool": "^6.4.1",
+		"@types/workerpool": "^6.4.2",
 		"@typescript-eslint/eslint-plugin": "^6.7.2",
 		"@typescript-eslint/parser": "^6.7.2",
 		"builtin-modules": "^3.3.0",
