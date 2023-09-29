@@ -16,6 +16,7 @@ import {
 	aroundIdentityFactory,
 	attachFunctionSourceMap,
 	clearProperties,
+	escapeJavaScriptString as escJSStr,
 	launderUnchecked,
 	patchWindows,
 	promisePromise,
@@ -228,7 +229,12 @@ function createRequire(
 					})
 				}
 				preload(cleanup, rd, context)
-				new self0.Function("module", "exports", "process", compiledSyncCode ??
+				new self0.Function(
+					"module",
+					"exports",
+					"process",
+					"app",
+					compiledSyncCode ??
 					attachFunctionSourceMap(
 						self0.Function,
 						`${PRECOMPILE_SYNC_PREFIX}${code}`,
@@ -240,10 +246,11 @@ function createRequire(
 							file: id,
 							sourceRoot: `${sourceRoot}${sourceRoot && "/"}${id}`,
 						},
-						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-					))(module, module.exports, self0.process ??
-						// eslint-disable-next-line @typescript-eslint/naming-convention
-						{ env: { NODE_DEV: "production" } })
+					),
+					// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+				)(module, module.exports, self0.process ??
+					// eslint-disable-next-line @typescript-eslint/naming-convention
+					{ env: { NODE_DEV: "production" } }, ret.app)
 				const { exports } = module
 				if (isObject(exports)) {
 					Reflect.defineProperty(exports, Symbol.toStringTag, {
@@ -265,6 +272,7 @@ function createRequire(
 		[REQUIRE_TAG]: true,
 		aliased: new Map(),
 		aliases: new Map(),
+		app: ctx.app,
 		cache: new Map(),
 		context: { cwds: [], parents: [] } satisfies Context,
 		dependants: new Map(),
@@ -305,7 +313,7 @@ function createRequire(
 								"export let module={exports:Object.defineProperty({},Symbol.toStringTag,{configurable:!0,enumerable:!1,value:\"Module\",writable:!0})}",
 								"let{exports}=module",
 								"let{process}=self;process??={env:{NODE_DEV:\"production\"}}",
-								"",
+								`let{app}=self[${escJSStr(ctx.settings.value.requireName)}]`,
 							].join(";")
 							: "",
 						url = URL.createObjectURL(new Blob(

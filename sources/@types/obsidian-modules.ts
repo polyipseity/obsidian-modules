@@ -75,6 +75,11 @@ declare module "obsidian-modules" {
 		readonly aliases: Map<string, Set<string>>
 
 		/**
+		 * Associated {@link App}.
+		 */
+		readonly app: App
+
+		/**
 		 * Context for loading modules.
 		 */
 		readonly context: Context
@@ -252,5 +257,6 @@ declare module "obsidian-modules" {
 	}
 }
 import type { } from "obsidian-modules"
+import type { App } from "obsidian"
 import type { AsyncOrSync } from "ts-essentials"
 import type { EventEmitterLite } from "@polyipseity/obsidian-plugin-library"
