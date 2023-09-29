@@ -801,7 +801,7 @@ packages:
   /@types/workerpool@6.4.2:
     resolution: {integrity: sha512-+GLRLOAjNJzh55NsiLU/cBipunGM5vshxIPW6xRYjSNaCR6MoRH1dQzzR9OO0Gg/2vJsjs0I0HTKdA9vAxgNTg==}
     dependencies:
-      '@types/node': 20.6.3
+      '@types/node': 20.7.1
     dev: true
 
   /@typescript-eslint/eslint-plugin@6.7.3(@typescript-eslint/parser@6.7.3)(eslint@8.50.0)(typescript@5.2.2):
