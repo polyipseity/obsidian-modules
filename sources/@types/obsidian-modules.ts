@@ -55,6 +55,11 @@ declare module "obsidian-modules" {
 		readonly invalidateAll: () => AsyncOrSync<void>
 
 		/**
+		 * Module invalidation event.
+		 */
+		readonly onInvalidate: EventEmitterLite<readonly [id: string]>
+
+		/**
 		 * Object for resolving module specifiers.
 		 */
 		readonly resolve: Resolve

@@ -10,6 +10,7 @@ import {
 } from "./resolve.js"
 import {
 	type AnyObject,
+	EventEmitterLite,
 	Functions,
 	activeSelf,
 	addCommand,
@@ -97,12 +98,13 @@ function createRequire(
 	ctx: ModulesPlugin,
 	self0: typeof globalThis,
 	resolve: Resolve,
+	oldRequire?: Require,
 	sourceRoot = "",
 ): Require {
-	function invalidate(self2: Require, id: string): void {
+	async function invalidate(self2: Require, id: string): Promise<void> {
 		const { aliased, aliases, cache, dependants, dependencies } = self2,
 			id2 = aliased.get(id) ?? id,
-			seen = new Set(),
+			seen = new Set<string>(),
 			ing = [...aliases.get(id2) ?? [id2]]
 		for (let cur = ing.shift(); cur !== void 0; cur = ing.shift()) {
 			if (seen.has(cur)) { continue }
@@ -117,6 +119,8 @@ function createRequire(
 				ing.push(...aliases.get(dep) ?? [dep])
 			}
 		}
+		await Promise.all([...seen]
+			.map(async seen2 => self2.onInvalidate.emit(seen2)))
 	}
 	function resolve0(
 		self2: Require,
@@ -135,7 +139,7 @@ function createRequire(
 		})()).add(id)
 		if (oldID !== void 0 && id2 !== oldID) {
 			aliases.get(oldID)?.delete(id)
-			invalidate(self2, id)
+			invalidate(self2, id).catch(error => { self0.console.error(error) })
 		}
 		if (resolved.cache === false) { cache.delete(id2) }
 		return [
@@ -487,21 +491,25 @@ function createRequire(
 			}
 		},
 		async invalidate(id: string) {
-			invalidate(ret, id)
+			await invalidate(ret, id)
 			await resolve.invalidate(id)
 		},
 		async invalidateAll() {
-			const { aliased, aliases, cache, dependants, dependencies } = ret
+			const { aliased, aliases, cache, dependants, dependencies } = ret,
+				ids = [...cache.keys()]
 			clearProperties(cache)
 			clearProperties(dependants)
 			clearProperties(dependencies)
 			clearProperties(aliased)
 			clearProperties(aliases)
+			await Promise.all(ids.map(async id => ret.onInvalidate.emit(id)))
 			await resolve.invalidateAll()
 		},
+		onInvalidate: oldRequire?.onInvalidate ??
+			new EventEmitterLite<readonly [id: string]>(),
 		resolve,
 	})
-	resolve.onInvalidate.listen(id => { invalidate(ret, id) })
+	resolve.onInvalidate.listen(async id => invalidate(ret, id))
 	return ret
 }
 
@@ -538,7 +546,13 @@ function createAndSetRequire(
 	resolve: Resolve,
 ): () => void {
 	const { api: { requires }, manifest: { id } } = context,
-		req = createRequire(context, self0, resolve, `plugin:${id}`)
+		req = createRequire(
+			context,
+			self0,
+			resolve,
+			requires.get(self0),
+			`plugin:${id}`,
+		)
 	requires.set(self0, req)
 	if (name in self0 || name === "require") {
 		return around(self0, {
