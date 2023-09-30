@@ -44,6 +44,7 @@ import type { ModulesPlugin } from "../main.js"
 import { PRECOMPILE_SYNC_PREFIX } from "../magic.js"
 import { around } from "monkey-around"
 import type { attachSourceMap } from "../worker.js"
+import { loadStartupModules } from "./startup-modules.js"
 import { parse } from "acorn"
 
 export const REQUIRE_TAG = Symbol("require")
@@ -92,6 +93,7 @@ export async function loadRequire(context: ModulesPlugin): Promise<void> {
 		patchContextForDataview(context),
 		patchContextForTemplater(context),
 	])
+	await loadStartupModules(context)
 }
 
 function createRequire(

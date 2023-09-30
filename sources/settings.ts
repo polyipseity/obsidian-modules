@@ -325,6 +325,73 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 						() => { this.postMutate() },
 					))
 			})
+		this.newSectionWidget(() => i18n.t("settings.startup-modules"))
+		ui
+			.newSetting(containerEl, setting => {
+				const pf = "settings.startup-modules"
+				setting
+					.setName(i18n.t(pf))
+					.setDesc(i18n.t(`${pf}-description`, {
+						count: settings.value.startupModules.length,
+						interpolation: { escapeValue: false },
+					}))
+					.addButton(button => {
+						button
+							.setIcon(i18n.t(`asset:${pf}-edit-icon`))
+							.setTooltip(i18n.t(`${pf}-edit`))
+							.onClick(() => {
+								new ListModal(
+									context,
+									ListModal.stringInputter<string>({
+										back: identity,
+										forth: identity,
+									}),
+									constant(""),
+									settings.value.startupModules,
+									{
+										callback: async (value): Promise<void> => {
+											await settings.mutate(settingsM => {
+												settingsM.startupModules = value
+											})
+											this.postMutate()
+										},
+										description: () => i18n.t(`${pf}-edit-description`),
+										title: () => i18n.t(pf),
+									},
+								).open()
+							})
+					})
+					.addExtraButton(resetButton(
+						i18n.t(`asset:${pf}-icon`),
+						i18n.t("settings.reset"),
+						async () => settings.mutate(settingsM => {
+							settingsM.startupModules =
+								cloneAsWritable(Settings.DEFAULT.startupModules)
+						}),
+						() => { this.postMutate() },
+					))
+			})
+			.newSetting(containerEl, setting => {
+				setting
+					.setName(i18n.t("settings.auto-reload-startup-modules"))
+					.setDesc(i18n.t("settings.auto-reload-startup-modules-description"))
+					.addToggle(linkSetting(
+						() => settings.value.autoReloadStartupModules,
+						async value => settings.mutate(settingsM => {
+							settingsM.autoReloadStartupModules = value
+						}),
+						() => { this.postMutate() },
+					))
+					.addExtraButton(resetButton(
+						i18n.t("asset:settings.auto-reload-startup-modules-icon"),
+						i18n.t("settings.reset"),
+						async () => settings.mutate(settingsM => {
+							settingsM.autoReloadStartupModules =
+								Settings.DEFAULT.autoReloadStartupModules
+						}),
+						() => { this.postMutate() },
+					))
+			})
 		this.newSectionWidget(() => i18n.t("settings.interface"))
 		ui.newSetting(containerEl, setting => {
 			setting

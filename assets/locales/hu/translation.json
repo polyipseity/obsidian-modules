@@ -3,7 +3,12 @@
 		"clear-cache": "Clear cache",
 		"open-documentation-changelog": "$t(generic.open, capitalize) $t(generic.documentations.changelog)",
 		"open-documentation-donate": "$t(generic.open, capitalize) $t(generic.documentations.donate)",
-		"open-documentation-readme": "$t(generic.open, capitalize) $t(generic.documentations.readme)"
+		"open-documentation-readme": "$t(generic.open, capitalize) $t(generic.documentations.readme)",
+		"reload-startup-modules": "Reload $t(generic.startup-module_other)"
+	},
+	"errors": {
+		"error-loading-module": "Error loading $t(generic.module): {{id}}",
+		"no-functions-exported": "No functions exported"
 	},
 	"generic": {
 		"case-insensitive": "case-insensitive",
@@ -17,14 +22,20 @@
 		"external-link": "$t(generic.external-link_one)",
 		"external-link_one": "external link",
 		"external-link_other": "external links",
-		"name": "name"
+		"module": "module",
+		"module_other": "modules",
+		"name": "name",
+		"startup-module": "startup $t(generic.module)",
+		"startup-module_other": "startup $t(generic.module_other)"
 	},
-	"name": "Modules",
+	"name": "$t(generic.module_other, capitalize)",
 	"settings": {
 		"Markdown-code-block-languages-to-load": "Markdown code block languages to load",
 		"Markdown-code-block-languages-to-load-description": "$t(generic.list-description, capitalize)",
 		"Markdown-code-block-languages-to-load-edit": "$t(generic.edit, capitalize)",
 		"Markdown-code-block-languages-to-load-edit-description": "$t(generic.case-insensitive, capitalize).",
+		"auto-reload-startup-modules": "Auto reload $t(generic.startup-module_other)",
+		"auto-reload-startup-modules-description": "Manually reload $t(generic.startup-module_other) via the $t(generic.command-palette).",
 		"documentation": "$t(generic.documentation, capitalize)",
 		"documentations": {
 			"changelog": "$t(generic.documentations.changelog, capitalize)",
@@ -32,7 +43,7 @@
 			"readme": "$t(generic.documentations.readme, capitalize)"
 		},
 		"enable-external-links": "Enable $t(generic.external-link_other)",
-		"expose-internal-modules": "Expose internal modules",
+		"expose-internal-modules": "Expose internal $t(generic.module_other)",
 		"expose-internal-modules-description-HTML": "<code>obsidian</code>, <code>@codemirror/*</code>, <code>@lezer/*</code>…",
 		"import-timeout-HTML": "<code>import</code> $t(generic.timeout) (s)",
 		"import-timeout-description-HTML": "For avoiding <code>import</code> deadlocks. Set to 0 s for no $t(generic.timeout).",
@@ -45,6 +56,10 @@
 		"preloading-rules-description-HTML": "Required for using <code>require</code> (but not <code>require.import</code>). $t(generic.list-description, capitalize)",
 		"preloading-rules-edit": "$t(generic.edit, capitalize)",
 		"require-name": "Require $t(generic.name)",
-		"require-name-description-invalid": "Using the default as the specified $t(generic.name) is unavailable."
+		"require-name-description-invalid": "Using the default as the specified $t(generic.name) is unavailable.",
+		"startup-modules": "$t(generic.startup-module_other, capitalize)",
+		"startup-modules-description": "$t(generic.list-description, capitalize)",
+		"startup-modules-edit": "$t(generic.edit, capitalize)",
+		"startup-modules-edit-description": "Accepts all $t(generic.module) identifier formats. Loading order is random."
 	}
 }

@@ -3,7 +3,12 @@
 		"clear-cache": "清除缓存",
 		"open-documentation-changelog": "$t(generic.open)$t(generic.documentations.changelog)",
 		"open-documentation-donate": "$t(generic.open)$t(generic.documentations.donate)",
-		"open-documentation-readme": "$t(generic.open)$t(generic.documentations.readme)"
+		"open-documentation-readme": "$t(generic.open)$t(generic.documentations.readme)",
+		"reload-startup-modules": "重新加载$t(generic.startup-module)"
+	},
+	"errors": {
+		"error-loading-module": "加载$t(generic.module)时出错：{{id}}",
+		"no-functions-exported": "没有导出函数"
 	},
 	"generic": {
 		"case-insensitive": "不区分大小写",
@@ -15,14 +20,18 @@
 		},
 		"donate": "捐赠",
 		"external-link": "外部链接",
-		"name": "名称"
+		"module": "模块",
+		"name": "名称",
+		"startup-module": "启动$t(generic.module)"
 	},
-	"name": "模块",
+	"name": "$t(generic.module)",
 	"settings": {
 		"Markdown-code-block-languages-to-load": "要加载的Markdown代码块语言",
 		"Markdown-code-block-languages-to-load-description": "$t(generic.list-description)",
 		"Markdown-code-block-languages-to-load-edit": "$t(generic.edit)",
 		"Markdown-code-block-languages-to-load-edit-description": "$t(generic.case-insensitive)。",
+		"auto-reload-startup-modules": "自动重新加载$t(generic.startup-module)",
+		"auto-reload-startup-modules-description": "在$t(generic.command-palette)手动重新加载$t(generic.startup-module)。",
 		"documentation": "$t(generic.documentation)",
 		"documentations": {
 			"changelog": "$t(generic.documentations.changelog)",
@@ -30,7 +39,7 @@
 			"readme": "$t(generic.documentations.readme)"
 		},
 		"enable-external-links": "启用$t(generic.external-link)",
-		"expose-internal-modules": "公开内部模块",
+		"expose-internal-modules": "公开内部$t(generic.module)",
 		"expose-internal-modules-description-HTML": "<code>obsidian</code>、<code>@codemirror/*</code>、<code>@lezer/*</code>……",
 		"import-timeout-HTML": "<code>import</code>$t(generic.timeout)（s）",
 		"import-timeout-description-HTML": "用于避免<code>import</code>死锁。设为0 s是无$t(generic.timeout)。",
@@ -43,6 +52,10 @@
 		"preloading-rules-description-HTML": "使用<code>require</code>（但不是<code>require.import</code>）时需要。$t(generic.list-description)",
 		"preloading-rules-edit": "$t(generic.edit)",
 		"require-name": "Require$t(generic.name)",
-		"require-name-description-invalid": "使用默认$t(generic.name)，因为指定的$t(generic.name)不可用。"
+		"require-name-description-invalid": "使用默认$t(generic.name)，因为指定的$t(generic.name)不可用。",
+		"startup-modules": "$t(generic.startup-module)",
+		"startup-modules-description": "$t(generic.list-description)",
+		"startup-modules-edit": "$t(generic.edit)",
+		"startup-modules-edit-description": "接受所有$t(generic.module)标识符格式。加载顺序是随机的。"
 	}
 }

@@ -44,6 +44,9 @@ export interface Settings extends PluginContext.Settings {
 	readonly markdownCodeBlockLanguagesToLoad: readonly string[]
 	readonly importTimeout: number
 
+	readonly startupModules: readonly string[]
+	readonly autoReloadStartupModules: boolean
+
 	readonly openChangelogOnUpdate: boolean
 }
 export namespace Settings {
@@ -60,6 +63,7 @@ export namespace Settings {
 	}
 
 	export const DEFAULT: Persistent = deepFreeze({
+		autoReloadStartupModules: true,
 		enableExternalLinks: false,
 		errorNoticeTimeout: NOTICE_NO_TIMEOUT,
 		exposeInternalModules: true,
@@ -71,6 +75,7 @@ export namespace Settings {
 		preloadedExternalLinks: [],
 		preloadingRules: ["+/\\.m?[jt]s(?:\\.md)?$/iu"],
 		requireName: "require",
+		startupModules: [],
 	})
 
 	export const DEFAULTABLE_LANGUAGES =
@@ -80,6 +85,12 @@ export namespace Settings {
 		const unc = launderUnchecked<Settings>(self0)
 		return markFixed(self0, {
 			...PluginContext.Settings.fix(self0).value,
+			autoReloadStartupModules: fixTyped(
+				DEFAULT,
+				unc,
+				"autoReloadStartupModules",
+				["boolean"],
+			),
 			enableExternalLinks: fixTyped(
 				DEFAULT,
 				unc,
@@ -144,6 +155,12 @@ export namespace Settings {
 				DEFAULT,
 				unc,
 				"requireName",
+				["string"],
+			),
+			startupModules: fixArray(
+				DEFAULT,
+				unc,
+				"startupModules",
 				["string"],
 			),
 		})

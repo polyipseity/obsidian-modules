@@ -26,6 +26,7 @@ This file is automatically opened on first install. You can reopen it in setting
 ## Features
 
 - Load JavaScript and TypeScript modules from the vault and the Internet on all platforms.
+- Load modules at startup.
 - No configuration needed.
 - Resolves relative paths, vault paths, Markdown links, wikilinks, and external links.
 - Loads Markdown files as code.
@@ -125,6 +126,18 @@ module.exports.variable = "string"
 module.exports.default = 42
 exports.abbreviatedForm = {}
 ```
+- To create a startup module, export a function (supports async) to run at startup using `export default` or assigning to `module.exports` and add the module to plugin settings:
+```JavaScript
+// ES module-style
+export default function() {
+	console.log("Hello world!")
+}
+
+// CommonJS-style
+module.exports = function() {
+	console.log("Hello world!")
+}
+```
 - The full API is available from [`sources/@types/obsidian-modules.ts`](sources/%40types/obsidian-modules.ts).
 
 ## Contributing
@@ -135,7 +148,6 @@ Contributions are welcome!
 
 The todos here, ordered alphabetically, are things planned for the plugin. There are no guarantees that they will be completed. However, we are likely to accept contributions for them.
 
-- Add startup modules.
 - User-defined module aliases.
 - Add bare module transformation support for more CDNs such as <https://cdn.jsdelivr.net>.
 - Faster import analysis and transformation.
