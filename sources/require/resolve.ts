@@ -9,6 +9,7 @@ import {
 	codePoint,
 	dynamicRequire,
 	dynamicRequireSync,
+	escapeJavaScriptString as escJSStr,
 	isNonNil,
 } from "@polyipseity/obsidian-plugin-library"
 import type { Context, Resolve, Resolved } from "obsidian-modules"
@@ -696,7 +697,7 @@ export class ExternalLinkResolve
 		readonly [string, ExternalLinkResolve.Identity]> {
 		const href = await this.anormalizeURL(id, cwd)
 		if (href === null) { return [null, null] }
-		const { tsTranspile } = this
+		const { context: { settings }, tsTranspile } = this
 		let identity = this.identities.get(href)
 		if (identity === void 0 || identity === "await") {
 			const awaiting = identity === "await"
@@ -750,7 +751,14 @@ export class ExternalLinkResolve
 						const { code, requires } =
 							await (await this.workerPool).exec<typeof parseAndRewriteRequire>(
 								"parseAndRewriteRequire",
-								[{ code: ret.code, href }],
+								[
+									{
+										code: ret.code,
+										href,
+										requireExpression:
+											`self[${escJSStr(settings.value.requireName)}]`,
+									},
+								],
 							)
 						// eslint-disable-next-line require-atomic-updates
 						ret.code = code

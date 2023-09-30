@@ -57,7 +57,8 @@ export async function parseAndRewriteRequire(
 	input: parseAndRewriteRequire.Input,
 ): Promise<parseAndRewriteRequire.Output> {
 	const { importable, escapeJavaScriptString } = await library,
-		{ OPTIONS, SELF_REQUIRE_EXPRESSION } = parseAndRewriteRequire,
+		{ OPTIONS } = parseAndRewriteRequire,
+		reqExpr = parseExpressionAt(input.requireExpression, 0, OPTIONS),
 		requires: string[] = [],
 		tree = parse(input.code, OPTIONS)
 	simple(tree, {
@@ -86,7 +87,7 @@ export async function parseAndRewriteRequire(
 			}
 			const value2 = normalizeURL(`${prefix}${value}`, input.href)
 			if (value2 === null) { return }
-			node2.callee = SELF_REQUIRE_EXPRESSION
+			node2.callee = reqExpr
 			arg0.raw = escapeJavaScriptString(value2)
 			requires.push(arg0.value = value2)
 		},
@@ -110,11 +111,10 @@ export namespace parseAndRewriteRequire {
 		ranges: false,
 		sourceType: "script",
 	}
-	export const SELF_REQUIRE_EXPRESSION =
-		parseExpressionAt("self.require", 0, OPTIONS)
 	export interface Input {
 		readonly code: string
 		readonly href: string
+		readonly requireExpression: string
 	}
 	export interface Output {
 		readonly code: string
