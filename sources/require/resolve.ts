@@ -266,7 +266,7 @@ export namespace AbstractFileResolve {
 
 		public [Symbol.iterator](): IterableIterator<readonly [string, Cache
 			.Identity]> {
-			return Object.entries(this.data)[Symbol.iterator]()
+			return this.data.entries()
 		}
 
 		protected async cache(file: TFile): Promise<Cache.Identity> {
@@ -610,7 +610,7 @@ export class ExternalLinkResolve
 				await Promise.all(hrefs.map(async href => this.aresolve0(href)))
 			}
 		context.registerDomEvent(self, "online", () => {
-			for (const [key, value] of Object.entries(this.identities)) {
+			for (const [key, value] of this.identities.entries()) {
 				if (value instanceof Error) { this.identities.set(key, "await") }
 			}
 		}, { passive: true })
