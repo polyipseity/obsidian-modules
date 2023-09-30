@@ -318,6 +318,7 @@ function createRequire(
 								"let{exports}=module",
 								"let{process}=self;process??={env:{NODE_DEV:\"production\"}}",
 								`let{app}=self[${escJSStr(ctx.settings.value.requireName)}]`,
+								"",
 							].join(";")
 							: "",
 						url = URL.createObjectURL(new Blob(
