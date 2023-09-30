@@ -1,5 +1,17 @@
 # obsidian-modules
 
+## 2.4.0
+
+### Minor Changes
+
+- 45f7560: Add startup modules.
+- 24dfc8d: Add `Require#onInvalidate`.
+
+### Patch Changes
+
+- de069e6: Provide `app` to avoid using the deprecated global `app`. For users, nothing needs to be changed.
+- dbef51c: Fix importing from external links not working with custom require name.
+
 ## 2.3.0
 
 No more console spamming and unchecked `data.json` growth!
