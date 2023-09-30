@@ -84,7 +84,11 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 					req = launderUnchecked<AnyObject>(self)[settings.value.requireName],
 					req2 = isObject(req) ? req : {}
 				setting
-					.setName(i18n.t("settings.require-name"))
+					.setName(createDocumentFragment(settingEl.ownerDocument, frag => {
+						createChildElement(frag, "span", ele => {
+							ele.innerHTML = i18n.t("settings.require-name-HTML")
+						})
+					}))
 					.setDesc(REQUIRE_TAG in req2
 						? ""
 						: createDocumentFragment(settingEl.ownerDocument, frag => {

@@ -55,7 +55,7 @@
 		"preloading-rules": "Preloading $t(generic.rule_other)",
 		"preloading-rules-description-HTML": "Required for using <code>require</code> (but not <code>require.import</code>). $t(generic.list-description, capitalize)",
 		"preloading-rules-edit": "$t(generic.edit, capitalize)",
-		"require-name": "Require $t(generic.name)",
+		"require-name-HTML": "<code>require</code> $t(generic.name)",
 		"require-name-description-invalid": "Using the default as the specified $t(generic.name) is unavailable.",
 		"startup-modules": "$t(generic.startup-module_other, capitalize)",
 		"startup-modules-description": "$t(generic.list-description, capitalize)",

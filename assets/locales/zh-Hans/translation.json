@@ -51,7 +51,7 @@
 		"preloading-rules": "预加载$t(generic.rule)",
 		"preloading-rules-description-HTML": "使用<code>require</code>（但不是<code>require.import</code>）时需要。$t(generic.list-description)",
 		"preloading-rules-edit": "$t(generic.edit)",
-		"require-name": "Require$t(generic.name)",
+		"require-name-HTML": "<code>require</code>$t(generic.name)",
 		"require-name-description-invalid": "使用默认$t(generic.name)，因为指定的$t(generic.name)不可用。",
 		"startup-modules": "$t(generic.startup-module)",
 		"startup-modules-description": "$t(generic.list-description)",
