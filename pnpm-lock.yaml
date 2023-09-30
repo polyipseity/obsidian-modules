@@ -21,8 +21,8 @@ importers:
         specifier: ^6.20.0
         version: 6.20.0
       '@polyipseity/obsidian-plugin-library':
-        specifier: ^1.23.0
-        version: 1.23.0(@capacitor/core@5.2.0)(@codemirror/state@6.2.1)(@codemirror/view@6.20.0)(esbuild@0.17.19)(typescript@5.2.2)
+        specifier: ^1.23.2
+        version: 1.23.2(@capacitor/core@5.2.0)(@codemirror/state@6.2.1)(@codemirror/view@6.20.0)(esbuild@0.17.19)(typescript@5.2.2)
       '@ts-morph/bootstrap':
         specifier: ^0.21.0
         version: 0.21.0
@@ -668,8 +668,8 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
 
-  /@polyipseity/obsidian-plugin-library@1.23.0(@capacitor/core@5.2.0)(@codemirror/state@6.2.1)(@codemirror/view@6.20.0)(esbuild@0.17.19)(typescript@5.2.2):
-    resolution: {integrity: sha512-Df8deCUFPRzPJ07R0JspIHJfHwKqjOsTQiaPvD1Ne7adE3B+Q62sl+0GEHu26PqpA7lVfAmVdv/os7wmE4PTcw==}
+  /@polyipseity/obsidian-plugin-library@1.23.2(@capacitor/core@5.2.0)(@codemirror/state@6.2.1)(@codemirror/view@6.20.0)(esbuild@0.17.19)(typescript@5.2.2):
+    resolution: {integrity: sha512-UBurs16GjyWdiJ28smBm9dF47kNLDc++6jjpzMv6UAc7cpDOVa0vREbbQI1Fi0DnVmfdqyO+aXnDIiCXEh7YrQ==}
     peerDependencies:
       esbuild: '>=0.17.0'
     peerDependenciesMeta:
