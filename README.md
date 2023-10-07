@@ -63,7 +63,7 @@ This file is automatically opened on first install. You can reopen it in setting
 // Using `require.import` is recommended.
 await self.require.import("obsidian") // builtin modules such as the Obsidian API
 await self.require.import("vault/path/to/a module.md") // vault path
-// The following three require context and may not be able to infer the current directory. Please file an issue if so.
+// The following three require context and may not be able to infer the current directory. Please file an issue if so. Context inference is only available for top-level code, i.e. not inside functions or classes.
 await self.require.import("../relative/path/to/a module.js") // relative path
 await self.require.import("[omitted or whatever](markdown/link/to/a%20module.js.md)") // Markdown link
 await self.require.import("[[wikilink/to/a module|ommited or whatever]]") // wikilink
@@ -75,7 +75,7 @@ await self.require.import("../relative/path/to/a module.js", { cwd: context.curr
 // If `await` is not supported, use `require` instead. It has less support for loading modules, however.
 self.require("obsidian")
 self.require("vault/path/to/a module.md")
-// The following three require context and may not be able to infer the current directory. Please file an issue if so.
+// The following three require context and may not be able to infer the current directory. Please file an issue if so. Context inference is only available for top-level code, i.e. not inside functions or classes.
 self.require("../relative/path/to/a module.js")
 // The following three may not work in startup scripts.
 self.require("[ommited or whatever](markdown/link/to/a%20module.js.md)")
