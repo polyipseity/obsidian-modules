@@ -12,6 +12,7 @@ import { LocalSettings, Settings } from "./settings-data.js"
 import { MAX_FETCH_CONCURRENCY, PLUGIN_UNLOAD_DELAY } from "./magic.js"
 import { type WorkerPool, pool } from "workerpool"
 import type { API } from "obsidian-modules"
+// eslint-disable-next-line @typescript-eslint/naming-convention
 import PLazy from "p-lazy"
 import { PluginLocales } from "../assets/locales.js"
 import { PromisePoolExecutor } from "promise-pool-executor"
