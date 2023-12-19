@@ -14,5 +14,7 @@ declare module "acorn" {
 		options: Options,
 	): ExtendNode<estree.Expression> & Node
 }
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+// @ts-ignore
 import type { Node, Options } from "acorn"
 import type estree from "estree"
