@@ -1,4 +1,4 @@
-# obsidian-modules
+# obsidian-modules <!-- markdownlint-disable MD024 -->
 
 ## 2.4.0
 
