@@ -19,7 +19,7 @@ No more console spamming and unchecked `data.json` growth!
 ### Minor Changes
 
 - d724fef: Move settings `recovery` and `lastReadChangelogVersion` to `localStorage`. (6d612c570926387ee6b5991475cb993517a39d45)
-- 307489d: Replace some `Record`s with `Map`s. (https://2ality.com/2012/01/objects-as-maps.html)
+- 307489d: Replace some `Record`s with `Map`s. (<https://2ality.com/2012/01/objects-as-maps.html>)
 
 ### Patch Changes
 
