@@ -2,7 +2,6 @@
 
 [Buy Me a Coffee]: https://buymeacoffee.com/polyipseity
 [Buy Me a Coffee/embed]: https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=polyipseity&button_colour=40DCA5&font_colour=ffffff&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00
-[Obsidian]: https://obsidian.md/
 [changelog]: https://github.com/polyipseity/obsidian-modules/blob/main/CHANGELOG.md
 [community plugin]: https://obsidian.md/plugins?id=modules
 [latest release]: https://github.com/polyipseity/obsidian-modules/releases/latest
@@ -40,18 +39,18 @@ This file is automatically opened on first install. You can reopen it in setting
 ## Installation
 
 1. Install plugin.
-	- Community plugins
-		1. Install the [plugin][community plugin] from community plugins directly.
-	- Manual
-		1. Create directory `modules` under `.obsidian/plugins` of your vault.
-		2. Place `manifest.json`, `main.js`, and `styles.css` from the [latest release] into the directory.
-	- Building (latest)
-		1. Clone this repository, including its submodules.
-		2. Install [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
-		3. Run `npm install` in the root directory.
-		4. Run `npm run obsidian:install <vault directory>` in the root directory.
-	- [Obsidian42 - BRAT](https://obsidian.md/plugins?id=obsidian42-brat) (latest)
-		- See [their readme](https://github.com/TfTHacker/obsidian42-brat#readme).
+    - Community plugins
+        1. Install the [plugin][community plugin] from community plugins directly.
+    - Manual
+        1. Create directory `modules` under `.obsidian/plugins` of your vault.
+        2. Place `manifest.json`, `main.js`, and `styles.css` from the [latest release] into the directory.
+    - Building (latest)
+        1. Clone this repository, including its submodules.
+        2. Install [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
+        3. Run `npm install` in the root directory.
+        4. Run `npm run obsidian:install <vault directory>` in the root directory.
+    - [Obsidian42 - BRAT](https://obsidian.md/plugins?id=obsidian42-brat) (latest)
+        - See [their readme](https://github.com/TfTHacker/obsidian42-brat#readme).
 2. Enable plugin.
 3. (optional) Configure plugin settings.
 
@@ -59,6 +58,7 @@ This file is automatically opened on first install. You can reopen it in setting
 
 - Enable the plugin.
 - To import a module:
+
 ```JavaScript
 // Using `require.import` is recommended.
 await self.require.import("obsidian") // builtin modules such as the Obsidian API
@@ -85,7 +85,9 @@ self.require("https://esm.sh/scratchblocks") // external link
 // You can workaround the inability to infer the current directory.
 self.require("../relative/path/to/a module.js", { cwd: context.currentDirectory })
 ```
+
 - To use entities in a module:
+
 ```JavaScript
 const { eat, pi } = await self.require.import("[[module]]")
 eat(2 * pi)
@@ -93,16 +95,19 @@ eat(2 * pi)
 const mod = await self.require.import("[[module]]")
 mod.eat(2 * mod.pi)
 ```
+
 - To create a module, create a JavaScript or related language file or a Markdown file with JavaScript or related language code blocks.
-	- For `require` (but not `require.import`), the module file needs to be preloaded, which can be configured in settings. By default, preloaded files have the following extensions: `.js`, `.js.md`, `.mjs`, `.mjs.md`, `.ts.md`, `.mts.md`, `.ts`, `.ts.md`
-	- Modules should not have global or side effects because they are cached and thus not reloaded on every requiring.
-	- For Markdown files, code block languages that are loaded can be configured in settings.
-	- For non-JavaScript languages, ensure the module file has the correct file extension (also applies to `.xxx.md`) or prepend the following metadata:
+  - For `require` (but not `require.import`), the module file needs to be preloaded, which can be configured in settings. By default, preloaded files have the following extensions: `.js`, `.js.md`, `.mjs`, `.mjs.md`, `.ts.md`, `.mts.md`, `.ts`, `.ts.md`
+  - Modules should not have global or side effects because they are cached and thus not reloaded on every requiring.
+  - For Markdown files, code block languages that are loaded can be configured in settings.
+  - For non-JavaScript languages, ensure the module file has the correct file extension (also applies to `.xxx.md`) or prepend the following metadata:
+
 ```TypeScript
 // { "language": "TypeScript" }
 
 export const variable: string = "string"
 ```
+
 ````Markdown
 ---
 module:
@@ -113,7 +118,9 @@ module:
 export const variable: string = "string"
 ```
 ````
+
 - Module exports can be CommonJS-style or ES module-style:
+
 ```JavaScript
 // ES module-style, supported by `require.import`.
 export function fun() {}
@@ -126,18 +133,21 @@ module.exports.variable = "string"
 module.exports.default = 42
 exports.abbreviatedForm = {}
 ```
+
 - To create a startup module, export a function (supports async) to run at startup using `export default` or assigning to `module.exports` and add the module to plugin settings:
+
 ```JavaScript
 // ES module-style
 export default function() {
-	console.log("Hello world!")
+    console.log("Hello world!")
 }
 
 // CommonJS-style
 module.exports = function() {
-	console.log("Hello world!")
+    console.log("Hello world!")
 }
 ```
+
 - The full API is available from [`sources/@types/obsidian-modules.ts`](sources/%40types/obsidian-modules.ts).
 
 ## Contributing
@@ -160,35 +170,40 @@ Translation files are under [`assets/locales/`](assets/locales/). Each locale ha
 To contribute translation for an existing locale, modify the files in the corresponding directory.
 
 For a new locale, create a new directory named with its language tag and copy [`assets/locales/en/translation.json`](assets/locales/en/translation.json) into it. Then, add an entry to [`assets/locales/en/language.json`](assets/locales/en/language.json) in this format:
+
 ```JSONc
 {
-	// ...
-	"en": "English",
-	"(your-language-tag)": "(Native name of your language)",
-	"uwu": "Uwuish",
-	// ...
+    // ...
+    "en": "English",
+    "(your-language-tag)": "(Native name of your language)",
+    "uwu": "Uwuish",
+    // ...
 }
 ```
+
 Sort the list of languages by the alphabetical order of their language tags. Then modify the files in the new directory. There will be errors in [`assets/locales.ts`](assets/locales.ts), which you can ignore and we will fix them for you. You are welcome to fix them yourself if you know TypeScript.
 
 When translating, keep in mind the following things:
+
 - Do not translate anything between `{{` and `}}` (`{{example}}`). They are __interpolations__ and will be replaced by localized strings at runtime.
 - Do not translate anything between `$t(` and `)` (`$t(example)`). They refer to other localized strings. To find the localized string being referred to, follow the path of the key, which is separated by dots (`.`). For example, the key [`youtu.be./dQw4w9WgXcQ`](https://youtu.be./dQw4w9WgXcQ) refers to:
+
 ```JSONc
 {
-	// ...
-	"youtu": {
-		// ...
-		"be": {
-			// ...
-			"/dQw4w9WgXcQ": "I am 'youtu.be./dQw4w9WgXcQ'!",
-			// ...
-		},
-		// ...
-	},
-	// ...
+    // ...
+    "youtu": {
+        // ...
+        "be": {
+            // ...
+            "/dQw4w9WgXcQ": "I am 'youtu.be./dQw4w9WgXcQ'!",
+            // ...
+        },
+        // ...
+    },
+    // ...
 }
 ```
+
 - The keys under `generic` are vocabularies. They can be referred in translation strings by `$t(generic.key)`. Refer to them as much as possible to standardize translations for vocabularies that appear in different places.
 - It is okay to move interpolations and references to other localized strings around to make the translation natural. It is also okay to not use some references used in the original translation. However, it is NOT okay to not use all interpolations.
 
