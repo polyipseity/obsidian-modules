@@ -129,7 +129,7 @@ function createRequire(
 		id: string,
 		resolved: Resolved | null,
 	): readonly [Resolved, ModuleCache] {
-		if (!resolved) { throw new Error(id) }
+		if (!resolved) { throw new Error(`Could not resolve module ${id}`) }
 		const { id: id2 } = resolved,
 			{ aliased, aliases, cache } = self2,
 			oldID = aliased.get(id)
