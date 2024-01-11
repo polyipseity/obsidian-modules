@@ -7,8 +7,10 @@
 		"reload-startup-modules": "重新加载$t(generic.startup-module)"
 	},
 	"errors": {
+		"could-not-resolve-module": "无法解析$t(generic.module)：{{id}}",
 		"error-loading-module": "加载$t(generic.module)时出错：{{id}}",
-		"no-functions-exported": "没有导出函数"
+		"no-functions-exported": "没有导出函数",
+		"timeout-loading-module": "加载$t(generic.module)时$t(generic.timeout)：{{id}}"
 	},
 	"generic": {
 		"case-insensitive": "不区分大小写",
