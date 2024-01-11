@@ -116,7 +116,7 @@ export class TypeScriptTranspile
 		if (ret !== void 0) { return ret }
 		const header2 = cloneAsWritable(header ?? ContentHeader.parse(content))
 		if (header2.language === void 0 &&
-			(/m?ts$/u).test(file?.extension ?? "")) {
+			(/^\.?m?ts$/u).test(file?.extension ?? "")) {
 			header2.language = "TypeScript"
 		}
 		if (header2.language !== "TypeScript") { return null }
@@ -158,7 +158,7 @@ export class TypeScriptTranspile
 		ret = (async (): Promise<string | null> => {
 			const header2 = cloneAsWritable(header ?? ContentHeader.parse(content))
 			if (header2.language === void 0 &&
-				(/m?ts$/u).test(file?.extension ?? "")) {
+				(/^\.?m?ts$/u).test(file?.extension ?? "")) {
 				header2.language = "TypeScript"
 			}
 			if (header2.language !== "TypeScript") { return null }
