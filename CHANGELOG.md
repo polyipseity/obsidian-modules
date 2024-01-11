@@ -1,5 +1,12 @@
 # obsidian-modules <!-- markdownlint-disable MD024 -->
 
+## 2.4.1
+
+### Patch Changes
+
+- f59c264: Properly detects TypeScript extensions. Fixes [GH#7](https://github.com/polyipseity/obsidian-modules/issues/7), which is about failing to import TypeScript modules on newer versions of Obsidian. ([GH#8](https://github.com/polyipseity/obsidian-modules/pull/8) by [@mnaoumov](https://github.com/mnaoumov))
+- 976e1aa: Improve error message for unresolved module and loading timeout. ([GH#12](https://github.com/polyipseity/obsidian-modules/pull/12) by [@mnaoumov](https://github.com/mnaoumov))
+
 ## 2.4.0
 
 ### Minor Changes
