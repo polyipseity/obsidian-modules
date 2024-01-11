@@ -7,8 +7,10 @@
 		"reload-startup-modules": "Reload $t(generic.startup-module_other)"
 	},
 	"errors": {
+		"could-not-resolve-module": "Could not resolve $t(generic.module): {{id}}",
 		"error-loading-module": "Error loading $t(generic.module): {{id}}",
-		"no-functions-exported": "No functions exported"
+		"no-functions-exported": "No functions exported",
+		"timeout-loading-module": "$t(generic.timeout, capitalize) loading $t(generic.module): {{id}}"
 	},
 	"generic": {
 		"case-insensitive": "case-insensitive",

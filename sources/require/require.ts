@@ -129,7 +129,12 @@ function createRequire(
 		id: string,
 		resolved: Resolved | null,
 	): readonly [Resolved, ModuleCache] {
-		if (!resolved) { throw new Error(id) }
+		if (!resolved) {
+			throw new Error(ctx.language.value.t("errors.could-not-resolve-module", {
+				id,
+				interpolation: { escapeValue: false },
+			}))
+		}
 		const { id: id2 } = resolved,
 			{ aliased, aliases, cache } = self2,
 			oldID = aliased.get(id)
@@ -350,7 +355,13 @@ function createRequire(
 							: [
 								(async (): Promise<never> => {
 									await sleep2(self0, importTimeout)
-									throw new Error(id)
+									throw new Error(ctx.language.value.t(
+										"errors.timeout-loading-module",
+										{
+											id,
+											interpolation: { escapeValue: false },
+										},
+									))
 								})(),
 							],
 					])
