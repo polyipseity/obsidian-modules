@@ -82,7 +82,7 @@ export async function loadStartupModules(
 		startupMods.unload(...prev.filter(mod => !curSet.has(mod)))
 		if (!set.autoReloadStartupModules) { return }
 		startupMods.load(STARTUP_MODULES_LOAD_DELAY, ...cur)
-			.catch(error => { self.console.error(error) })
+			.catch((error: unknown) => { self.console.error(error) })
 	})
 	settings.onMutate(
 		set => set.autoReloadStartupModules,
@@ -95,7 +95,7 @@ export async function loadStartupModules(
 		if (!settings.value.startupModules.includes(id)) { return }
 		if (settings.value.autoReloadStartupModules) {
 			startupMods.reload(STARTUP_MODULES_LOAD_DELAY, id)
-				.catch(error => { self.console.error(error) })
+				.catch((error: unknown) => { self.console.error(error) })
 			return
 		}
 		startupMods.unload(id)

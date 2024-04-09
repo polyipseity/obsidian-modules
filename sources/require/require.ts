@@ -146,7 +146,9 @@ function createRequire(
 		})()).add(id)
 		if (oldID !== void 0 && id2 !== oldID) {
 			aliases.get(oldID)?.delete(id)
-			invalidate(self2, id).catch(error => { self0.console.error(error) })
+			invalidate(self2, id).catch((error: unknown) => {
+				self0.console.error(error)
+			})
 		}
 		if (resolved.cache === false) { cache.delete(id2) }
 		return [
@@ -399,9 +401,7 @@ function createRequire(
 							get(target, property, receiver): unknown {
 								const own = Reflect.getOwnPropertyDescriptor(target, property)
 								if (Reflect.has(target, property) ||
-									// eslint-disable-next-line @typescript-eslint/no-extra-parens
 									(!(own?.configurable ?? true) &&
-										// eslint-disable-next-line @typescript-eslint/no-extra-parens
 										(!(own?.writable ?? true) || (own?.set && !own.get)))) {
 									return Reflect.get(target, property, receiver)
 								}
@@ -480,7 +480,6 @@ function createRequire(
 							set(target, property, newValue, receiver): boolean {
 								const own = Reflect.getOwnPropertyDescriptor(target, property)
 								if (!(own?.configurable ?? true) &&
-									// eslint-disable-next-line @typescript-eslint/no-extra-parens
 									(!(own?.writable ?? true) || (own?.get && !own.set)) &&
 									!Reflect.set(target, property, newValue, receiver)) {
 									return false

@@ -17,10 +17,12 @@ import type { TFile } from "obsidian"
 import type { tsc } from "../worker.js"
 
 const
-	tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")
-	>(BUNDLE, "@ts-morph/bootstrap"),
-	tsMorphBootstrapSync = dynamicRequireLazy<typeof import("@ts-morph/bootstrap")
-	>(BUNDLE, "@ts-morph/bootstrap")
+	tsMorphBootstrap =
+		dynamicRequire<typeof import("@ts-morph/bootstrap")>(
+			BUNDLE, "@ts-morph/bootstrap"),
+	tsMorphBootstrapSync =
+		dynamicRequireLazy<typeof import("@ts-morph/bootstrap")>(
+			BUNDLE, "@ts-morph/bootstrap")
 
 export interface Transpile {
 	readonly onInvalidate: EventEmitterLite<readonly []>

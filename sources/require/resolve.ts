@@ -23,8 +23,9 @@ import { isObject } from "lodash-es"
 import { normalizeURL } from "../util.js"
 
 const
-	tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")
-	>(BUNDLE, "@ts-morph/bootstrap")
+	tsMorphBootstrap =
+		dynamicRequire<typeof import("@ts-morph/bootstrap")>(
+			BUNDLE, "@ts-morph/bootstrap")
 
 abstract class AbstractResolve implements Resolve {
 	public readonly onInvalidate = new EventEmitterLite<readonly [id: string]>()
@@ -257,7 +258,7 @@ export namespace AbstractFileResolve {
 				await this.uncache(file.path)
 			}))
 			context.register(preloadRules.onChanged.listen(preload))
-			preload().catch(error => { self.console.error(error) })
+			preload().catch((error: unknown) => { self.console.error(error) })
 		}
 
 		public get(path: string): Cache.Identity | undefined {
@@ -445,6 +446,7 @@ export class MarkdownLinkResolve
 				try {
 					resolve(this.resolvePath(...args))
 				} catch (error) {
+					// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
 					reject(error)
 				}
 			})
@@ -474,6 +476,7 @@ export class WikilinkResolve
 				try {
 					resolve(this.resolvePath(...args))
 				} catch (error) {
+					// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
 					reject(error)
 				}
 			})
@@ -629,7 +632,7 @@ export class ExternalLinkResolve
 			},
 		))
 		preload(settings.value.preloadedExternalLinks)
-			.catch(error => { self.console.error(error) })
+			.catch((error: unknown) => { self.console.error(error) })
 	}
 
 	public override async invalidate(id: string): Promise<void> {
@@ -705,8 +708,7 @@ export class ExternalLinkResolve
 				href,
 				identity = (async (): Promise<ExternalLinkResolve
 					.Identity> => {
-					const ret: Writable<ExternalLinkResolve
-						.Identity> = {
+					const ret: Writable<ExternalLinkResolve.Identity> = {
 						[ExternalLinkResolve.Identity]: true,
 						code: (await this.fetchPool.addSingleTask({
 							data: href,

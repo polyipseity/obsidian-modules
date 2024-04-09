@@ -72,7 +72,7 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 				const req = requires.get(self),
 					info = this.state.field(
 						// Typing bug
-						editorInfoField as StateField<MarkdownFileInfo>,
+						editorInfoField as unknown as StateField<MarkdownFileInfo>,
 						false,
 					)
 				let path = info?.file?.parent?.path

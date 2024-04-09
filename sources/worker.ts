@@ -1,6 +1,5 @@
 import { type Options, parse, parseExpressionAt } from "acorn"
 import { createProject, type ts } from "@ts-morph/bootstrap"
-import type { CallExpression } from "estree"
 import { generate } from "astring"
 import { normalizeURL } from "./util.js"
 import { simple } from "acorn-walk"
@@ -64,8 +63,7 @@ export async function parseAndRewriteRequire(
 	simple(tree, {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		CallExpression: node => {
-			const node2 = node as CallExpression & typeof node,
-				{ callee } = node2
+			const node2 = node, { callee } = node2
 			if (callee.type !== "Identifier" || callee.name !== "require") {
 				return
 			}

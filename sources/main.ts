@@ -10,7 +10,7 @@ import {
 } from "@polyipseity/obsidian-plugin-library"
 import { LocalSettings, Settings } from "./settings-data.js"
 import { MAX_FETCH_CONCURRENCY, PLUGIN_UNLOAD_DELAY } from "./magic.js"
-import { type WorkerPool, pool } from "workerpool"
+import { type Pool, pool } from "workerpool"
 import type { API } from "obsidian-modules"
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import PLazy from "p-lazy"
@@ -37,7 +37,7 @@ export class ModulesPlugin
 		concurrencyLimit: MAX_FETCH_CONCURRENCY,
 	})
 
-	public readonly workerPool = PLazy.from(async (): Promise<WorkerPool> => {
+	public readonly workerPool = PLazy.from(async (): Promise<Pool> => {
 		const url = toObjectURL(await worker)
 		try {
 			this.register(() => { URL.revokeObjectURL(url) })
