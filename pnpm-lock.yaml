@@ -11,9 +11,6 @@ importers:
       '@aidenlx/esbuild-plugin-inline-worker':
         specifier: ^1.0.1
         version: 1.0.1(esbuild@0.17.19)
-      '@capacitor/core':
-        specifier: ^6.0.0
-        version: 6.0.0
       '@codemirror/state':
         specifier: ^6.4.1
         version: 6.4.1
