@@ -675,7 +675,7 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
 
-  /@polyipseity/obsidian-plugin-library@1.24.0(@capacitor/core@5.2.0)(@codemirror/state@6.0.0)(@codemirror/view@6.0.0)(esbuild@0.17.19)(typescript@5.4.5):
+  /@polyipseity/obsidian-plugin-library@1.24.0(@capacitor/core@5.2.0)(@codemirror/state@6.4.1)(@codemirror/view@6.26.2)(esbuild@0.17.19)(typescript@5.4.5):
     resolution: {integrity: sha512-eQhJVwcf/bwn/bL/+Hq0ey8zd5vIj+POtDK736LMkb5HXhAWk6FHtGyud4t9ZgNxrx0nDKpd2gUdSPjWMKse7g==}
     peerDependencies:
       esbuild: '>=0.17.0'
@@ -799,12 +799,12 @@ packages:
   /@types/tern@0.23.4:
     resolution: {integrity: sha512-JAUw1iXGO1qaWwEOzxTKJZ/5JxVeON9kvGZ/osgZaJImBnyjyn0cjovPsf6FNLmyGY8Vw9DoXZCMlfMkMwHRWg==}
     dependencies:
-      '@types/estree': 1.0.5
+      '@types/estree': 1.0.1
 
   /@types/workerpool@6.4.7:
     resolution: {integrity: sha512-DI2U4obcMzFViyNjLw0xXspim++qkAJ4BWRdYPVMMFtOpTvMr6PAk3UTZEoSqnZnvgUkJ3ck97Ybk+iIfuJHMg==}
     dependencies:
-      '@types/node': 20.12.6
+      '@types/node': 20.14.2
     dev: true
 
   /@typescript-eslint/eslint-plugin@7.12.0(@typescript-eslint/parser@7.12.0)(eslint@8.57.0)(typescript@5.4.5):
