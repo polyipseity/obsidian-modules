@@ -5,6 +5,7 @@
 	},
 	"dependencies": {
 		"@aidenlx/esbuild-plugin-inline-worker": "^1.0.1",
+		"@capacitor/core": "^6.0.0",
 		"@codemirror/state": "^6.4.1",
 		"@codemirror/view": "^6.27.0",
 		"@polyipseity/obsidian-plugin-library": "^1.25.0",
