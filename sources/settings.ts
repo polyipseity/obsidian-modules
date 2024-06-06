@@ -238,7 +238,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 											})
 											this.postMutate()
 										},
-										title: () => i18n.t(pf),
+										title: (): string => i18n.t(pf),
 									},
 								).open()
 							})
@@ -281,8 +281,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 											})
 											this.postMutate()
 										},
-										description: () => i18n.t(`${pf}-edit-description`),
-										title: () => i18n.t(pf),
+										description: (): string => i18n.t(`${pf}-edit-description`),
+										title: (): string => i18n.t(pf),
 									},
 								).open()
 							})
@@ -359,8 +359,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 											})
 											this.postMutate()
 										},
-										description: () => i18n.t(`${pf}-edit-description`),
-										title: () => i18n.t(pf),
+										description: (): string => i18n.t(`${pf}-edit-description`),
+										title: (): string => i18n.t(pf),
 									},
 								).open()
 							})

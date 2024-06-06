@@ -179,7 +179,7 @@ export async function patchContextForTemplater(
 					}
 				},
 			}))
-			return () => { ret.call() }
+			return (): void => { ret.call() }
 		} catch (error) {
 			ret.call()
 			throw error
