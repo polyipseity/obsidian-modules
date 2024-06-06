@@ -1,5 +1,11 @@
 # obsidian-modules <!-- markdownlint-disable MD024 -->
 
+## 2.4.3
+
+### Patch Changes
+
+- 4dcc45d: (63711193053ae1b850d816b84244f9152b53a407) Fix requiring `@capacitor`.
+
 ## 2.4.2
 
 ### Patch Changes
