@@ -22,6 +22,7 @@ const ARGV_PRODUCTION = 2,
 		drop: [],
 		entryPoints: ["sources/main.ts", "sources/styles.css"],
 		external: [
+			"@capacitor/*",
 			"@codemirror/*",
 			"@lezer/*",
 			"electron",
