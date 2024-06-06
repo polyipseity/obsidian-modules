@@ -15,11 +15,11 @@ importers:
         specifier: ^6.4.1
         version: 6.4.1
       '@codemirror/view':
-        specifier: ^6.26.2
-        version: 6.26.2
+        specifier: ^6.27.0
+        version: 6.27.0
       '@polyipseity/obsidian-plugin-library':
         specifier: ^1.24.0
-        version: 1.24.0(@capacitor/core@5.2.0)(@codemirror/state@6.4.1)(@codemirror/view@6.26.2)(esbuild@0.17.19)(typescript@5.4.5)
+        version: 1.24.0(@capacitor/core@5.2.0)(@codemirror/state@6.4.1)(@codemirror/view@6.27.0)(esbuild@0.17.19)(typescript@5.4.5)
       '@ts-morph/bootstrap':
         specifier: ^0.23.0
         version: 0.23.0
@@ -43,7 +43,7 @@ importers:
         version: 3.0.0
       obsidian:
         specifier: ~1.2.8
-        version: 1.2.8(@codemirror/state@6.4.1)(@codemirror/view@6.26.2)
+        version: 1.2.8(@codemirror/state@6.4.1)(@codemirror/view@6.27.0)
       p-lazy:
         specifier: ^4.0.0
         version: 4.0.0
@@ -57,15 +57,15 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0(typescript@5.4.5)
       workerpool:
-        specifier: ^9.1.1
-        version: 9.1.1
+        specifier: ^9.1.2
+        version: 9.1.2
     devDependencies:
       '@changesets/cli':
         specifier: ^2.27.5
         version: 2.27.5
       '@polyipseity/obsidian':
         specifier: ~1.2.8
-        version: 1.2.8(@codemirror/state@6.4.1)(@codemirror/view@6.26.2)
+        version: 1.2.8(@codemirror/state@6.4.1)(@codemirror/view@6.27.0)
       '@tsconfig/node16':
         specifier: ^16.1.3
         version: 16.1.3
@@ -381,8 +381,8 @@ packages:
   /@codemirror/state@6.4.1:
     resolution: {integrity: sha512-QkEyUiLhsJoZkbumGZlswmAhA7CBU02Wrz7zvH4SrcifbsqwlXShVXg65f3v/ts57W3dqyamEriMhij1Z3Zz4A==}
 
-  /@codemirror/view@6.26.2:
-    resolution: {integrity: sha512-j6V48PlFC/O7ERAR5vRW5QKDdchzmyyfojDdt+zPsB0YXoWgcjlC1IWjmlYfx08aQZ3HN5BtALcgGgtSKGMe7A==}
+  /@codemirror/view@6.27.0:
+    resolution: {integrity: sha512-8kqX1sHbVW1lVzWwrjAbh4dR7eKhV8eIQ952JKaBXOoXE04WncoqCy4DMU701LSrPZ3N2Q4zsTawz7GQ+2mrUw==}
     dependencies:
       '@codemirror/state': 6.4.1
       style-mod: 4.1.0
@@ -675,7 +675,7 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
 
-  /@polyipseity/obsidian-plugin-library@1.24.0(@capacitor/core@5.2.0)(@codemirror/state@6.4.1)(@codemirror/view@6.26.2)(esbuild@0.17.19)(typescript@5.4.5):
+  /@polyipseity/obsidian-plugin-library@1.24.0(@capacitor/core@5.2.0)(@codemirror/state@6.4.1)(@codemirror/view@6.27.0)(esbuild@0.17.19)(typescript@5.4.5):
     resolution: {integrity: sha512-eQhJVwcf/bwn/bL/+Hq0ey8zd5vIj+POtDK736LMkb5HXhAWk6FHtGyud4t9ZgNxrx0nDKpd2gUdSPjWMKse7g==}
     peerDependencies:
       esbuild: '>=0.17.0'
@@ -699,7 +699,7 @@ packages:
       lz-string: 1.5.0
       moment: 2.29.4
       monkey-around: 2.3.0
-      obsidian: 1.2.8(@codemirror/state@6.4.1)(@codemirror/view@6.26.2)
+      obsidian: 1.2.8(@codemirror/state@6.4.1)(@codemirror/view@6.27.0)
       p-lazy: 4.0.0
       semver: 7.6.2
       source-map: 0.7.4
@@ -713,14 +713,14 @@ packages:
       - typescript
     dev: false
 
-  /@polyipseity/obsidian@1.2.8(@codemirror/state@6.4.1)(@codemirror/view@6.26.2):
+  /@polyipseity/obsidian@1.2.8(@codemirror/state@6.4.1)(@codemirror/view@6.27.0):
     resolution: {integrity: sha512-rlXPpSAmZwxmcxsa163vl8eQMYq7gQwB+fx76NdvG3TC5ln7AG4uVRMfCyLfoePRYc8JxeJoUNujH0bgnePymA==}
     peerDependencies:
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
     dependencies:
       '@codemirror/state': 6.4.1
-      '@codemirror/view': 6.26.2
+      '@codemirror/view': 6.27.0
       '@types/codemirror': 0.0.108
       moment: 2.29.4
     dev: true
@@ -2614,14 +2614,14 @@ packages:
       es-abstract: 1.22.3
     dev: true
 
-  /obsidian@1.2.8(@codemirror/state@6.4.1)(@codemirror/view@6.26.2):
+  /obsidian@1.2.8(@codemirror/state@6.4.1)(@codemirror/view@6.27.0):
     resolution: {integrity: sha512-HrC+feA8o0tXspj4lEAqxb1btwLwHD2oHXSwbbN+CdRHURqbCkuIDLld+nkuyJ1w1c9uvVDRVk8BoeOnWheOrQ==}
     peerDependencies:
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
     dependencies:
       '@codemirror/state': 6.4.1
-      '@codemirror/view': 6.26.2
+      '@codemirror/view': 6.27.0
       '@types/codemirror': 0.0.108
       moment: 2.29.4
     dev: false
@@ -3444,8 +3444,8 @@ packages:
       isexe: 2.0.0
     dev: true
 
-  /workerpool@9.1.1:
-    resolution: {integrity: sha512-EFoFTSEo9m4V4wNrwzVRjxnf/E/oBpOzcI/R5CIugJhl9RsCiq525rszo4AtqcjQQoqFdu2E3H82AnbtpaQHvg==}
+  /workerpool@9.1.2:
+    resolution: {integrity: sha512-5wZwyy5lcqrakQQcjaYQgVCbMR3djwIFWXuD2EGk/o/9bL3bd2kRGNwF74Bhcf1CIkAIwoOMG82EVnA5JmVVNw==}
     dev: false
 
   /wrap-ansi@6.2.0:
