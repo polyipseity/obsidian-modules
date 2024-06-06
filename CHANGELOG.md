@@ -1,5 +1,11 @@
 # obsidian-modules <!-- markdownlint-disable MD024 -->
 
+## 2.4.2
+
+### Patch Changes
+
+- 482abdb: Update dependencies.
+
 ## 2.4.1
 
 ### Patch Changes
