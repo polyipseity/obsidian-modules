@@ -84,12 +84,12 @@
 	},
 	"overrides": {
 		"@aidenlx/esbuild-plugin-inline-worker": {
-			"nanoid": "^5.0.9"
+			"nanoid": "^3.3.8"
 		}
 	},
 	"pnpm": {
 		"overrides": {
-			"@aidenlx/esbuild-plugin-inline-worker>nanoid": "^5.0.9"
+			"@aidenlx/esbuild-plugin-inline-worker>nanoid": "^3.3.8"
 		}
 	},
 	"private": true,
