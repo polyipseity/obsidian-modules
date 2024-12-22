@@ -82,9 +82,15 @@
 		"minAppVersion": "1.2.8",
 		"name": "Modules"
 	},
-	"overrides": {},
+	"overrides": {
+		"@aidenlx/esbuild-plugin-inline-worker": {
+			"nanoid": "^5.0.9"
+		}
+	},
 	"pnpm": {
-		"overrides": {}
+		"overrides": {
+			"@aidenlx/esbuild-plugin-inline-worker>nanoid": "^5.0.9"
+		}
 	},
 	"private": true,
 	"repository": {
