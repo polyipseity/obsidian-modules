@@ -24,7 +24,7 @@
 	},
 	"description": "Load JavaScript and related languages like TypeScript modules from the vault and the Internet.",
 	"devDependencies": {
-		"@changesets/cli": "^2.27.5",
+		"@changesets/cli": "^2.27.11",
 		"@polyipseity/obsidian": "~1.2.8",
 		"@tsconfig/node16": "^16.1.3",
 		"@tsconfig/recommended": "^1.0.6",
