@@ -8,7 +8,7 @@ import esbuildObsidianCompress from
 	"@polyipseity/obsidian-plugin-library/esbuild-compress"
 import esbuildPluginGlobals from "esbuild-plugin-globals"
 import esbuildPluginTextReplace from "esbuild-plugin-text-replace"
-import { inlineWorkerPlugin } from "@aidenlx/esbuild-plugin-inline-worker"
+import { inlineWorkerPlugin } from "@polyipseity/esbuild-plugin-inline-worker"
 import { writeFile } from "node:fs/promises"
 
 const ARGV_PRODUCTION = 2,

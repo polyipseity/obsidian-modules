@@ -4,9 +4,9 @@
 		"url": "https://github.com/polyipseity/obsidian-modules"
 	},
 	"dependencies": {
-		"@aidenlx/esbuild-plugin-inline-worker": "^1.0.1",
 		"@codemirror/state": "^6.4.1",
 		"@codemirror/view": "^6.27.0",
+		"@polyipseity/esbuild-plugin-inline-worker": "^1.0.3",
 		"@polyipseity/obsidian-plugin-library": "^1.25.1",
 		"@ts-morph/bootstrap": "^0.23.0",
 		"acorn": "^8.11.3",
@@ -82,15 +82,9 @@
 		"minAppVersion": "1.2.8",
 		"name": "Modules"
 	},
-	"overrides": {
-		"@aidenlx/esbuild-plugin-inline-worker": {
-			"nanoid": "^3.3.8"
-		}
-	},
+	"overrides": {},
 	"pnpm": {
-		"overrides": {
-			"@aidenlx/esbuild-plugin-inline-worker>nanoid": "^3.3.8"
-		}
+		"overrides": {}
 	},
 	"private": true,
 	"repository": {
