@@ -72,7 +72,7 @@
 		"obsidian-plugin",
 		"plugin"
 	],
-	"license": "MIT",
+	"license": "AGPL-3.0-or-later",
 	"main": "main.js",
 	"name": "obsidian-modules",
 	"obsidian": {
