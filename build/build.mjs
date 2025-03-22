@@ -2,10 +2,8 @@ import { analyzeMetafile, context, formatMessages } from "esbuild"
 import { constant, isEmpty } from "lodash-es"
 import { PATHS } from "./util.mjs"
 import { argv } from "node:process"
-import builtinModules from "builtin-modules" // eslint-disable-line import/default, import/namespace, import/no-named-as-default, import/no-named-as-default-member
+import builtinModules from "builtin-modules"
 import esbuildCompress from "esbuild-compress"
-import esbuildObsidianCompress from
-	"@polyipseity/obsidian-plugin-library/esbuild-compress"
 import esbuildPluginGlobals from "esbuild-plugin-globals"
 import esbuildPluginTextReplace from "esbuild-plugin-text-replace"
 import { inlineWorkerPlugin } from "@polyipseity/esbuild-plugin-inline-worker"
@@ -117,9 +115,6 @@ const ARGV_PRODUCTION = 2,
 						"?.[Symbol()]??(()=>{})",
 					],
 				],
-			}),
-			esbuildObsidianCompress({
-				enable: false,
 			}),
 		],
 		sourcemap: DEV && "inline",
