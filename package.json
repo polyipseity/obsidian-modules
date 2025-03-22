@@ -7,7 +7,7 @@
 		"@codemirror/state": "^6.5.2",
 		"@codemirror/view": "^6.36.4",
 		"@polyipseity/esbuild-plugin-inline-worker": "^1.0.3",
-		"@polyipseity/obsidian-plugin-library": "^1.26.0",
+		"@polyipseity/obsidian-plugin-library": "^1.27.0",
 		"espree": "^10.3.0",
 		"@ts-morph/bootstrap": "^0.26.1",
 		"acorn": "^8.14.1",
@@ -85,7 +85,7 @@
 		"authorUrl": "https://github.com/polyipseity",
 		"id": "modules",
 		"isDesktopOnly": false,
-		"minAppVersion": "1.2.8",
+		"minAppVersion": "1.4.11",
 		"name": "Modules"
 	},
 	"overrides": {},
