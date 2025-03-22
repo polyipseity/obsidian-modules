@@ -1,5 +1,19 @@
 # obsidian-modules <!-- markdownlint-disable MD024 -->
 
+## 2.5.0
+
+### Minor Changes
+
+- 9ef1a1b: Update template, and Obsidian API to 1.4.11.
+
+### Patch Changes
+
+- 731886d: Update dependencies.
+- 2e63a20: (2ed04b4436eebc82b2d81029e0660fe8e3335e46) Bump micromatch from 4.0.5 to 4.0.8 ([GH#17](https://github.com/polyipseity/obsidian-modules/pull/17))
+- 803aebf: Bump `nanoid`
+- 9aae9c1: (5fa86c77bce6a5cf2685e6756620f5464abe164c) Bump cross-spawn and @changesets/cli ([GH#18](https://github.com/polyipseity/obsidian-modules/pull/18))
+- 8ceb8a1: Fix `package.json` license. Addresses [GH#20](https://github.com/polyipseity/obsidian-modules/issues/20).
+
 ## 2.4.4
 
 ### Patch Changes
