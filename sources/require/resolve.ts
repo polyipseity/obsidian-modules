@@ -63,6 +63,7 @@ abstract class AbstractResolve implements Resolve {
 		...args: Parameters<typeof this.resolve>
 		// eslint-disable-next-line @typescript-eslint/no-invalid-this
 	): AsyncOrSync<ReturnType<typeof this.resolve>>
+
 	public abstract resolve(id: string, context: Context): Resolved | null
 }
 
@@ -219,6 +220,7 @@ export abstract class AbstractFileResolve
 		...args: Parameters<typeof this.resolvePath>
 		// eslint-disable-next-line @typescript-eslint/no-invalid-this
 	): AsyncOrSync<ReturnType<typeof this.resolvePath>>
+
 	protected abstract resolvePath(id: string, context: Context): string | null
 }
 export namespace AbstractFileResolve {
@@ -368,6 +370,7 @@ export class InternalModulesResolve
 		this.validate0(id, context)
 		const { context: { settings } } = this
 		if (!settings.value.exposeInternalModules) { return null }
+		// eslint-disable-next-line no-useless-assignment
 		let value = null
 		try {
 			value = dynamicRequireSync(new Map(), id)
@@ -385,6 +388,7 @@ export class InternalModulesResolve
 		this.validate0(id, context)
 		const { context: { settings } } = this
 		if (!settings.value.exposeInternalModules) { return null }
+		// eslint-disable-next-line no-useless-assignment
 		let value = null
 		try {
 			value = await dynamicRequire(new Map(), id)
@@ -399,6 +403,7 @@ export class InternalModulesResolve
 export class VaultPathResolve
 	extends AbstractFileResolve
 	implements Resolve {
+	// eslint-disable-next-line @typescript-eslint/class-methods-use-this
 	protected override resolvePath(id: string, _1: Context): string | null {
 		return parsePath(id)
 	}
@@ -413,6 +418,7 @@ export class VaultPathResolve
 export class RelativePathResolve
 	extends AbstractFileResolve
 	implements Resolve {
+	// eslint-disable-next-line @typescript-eslint/class-methods-use-this
 	protected override resolvePath(id: string, context: Context): string | null {
 		return parsePath(`${context.cwds.at(-1) ?? ""}/${id}`)
 	}

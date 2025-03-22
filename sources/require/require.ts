@@ -159,7 +159,8 @@ function createRequire(
 				return val
 			})(),
 		]
-	}
+	} 
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 	function cache0<T>(
 		cache: ModuleCache,
 		key: keyof ModuleCache,
@@ -252,7 +253,7 @@ function createRequire(
 						self0.Function,
 						`${PRECOMPILE_SYNC_PREFIX}${code}`,
 						{
-							deletions: [...PRECOMPILE_SYNC_PREFIX].map((_0, idx) => ({
+							deletions: PRECOMPILE_SYNC_PREFIX.split("").map((_0, idx) => ({
 								column: idx,
 								line: 1,
 							})),
@@ -570,6 +571,7 @@ function createAndSetRequire(
 	if (name in self0 || name === "require") {
 		return around(self0, {
 			require(next) {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				return Object.assign(function fn(
 					this: typeof self0 | undefined,
 					...args: Parameters<typeof next>
@@ -583,7 +585,7 @@ function createAndSetRequire(
 						/* @__PURE__ */ self0.console.debug(error)
 						return req(...args)
 					}
-				}, req) as unknown as NodeRequire
+				}, req) as unknown as NodeJS.Require
 			},
 			toString: aroundIdentityFactory(),
 		})

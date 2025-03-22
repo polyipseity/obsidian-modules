@@ -20,7 +20,7 @@ import { isNil } from "lodash-es"
 import { loadDocumentations } from "./documentations.js"
 import { loadRequire } from "./require/require.js"
 import { loadSettings } from "./settings.js"
-import { toObjectURL } from "@polyipseity/esbuild-plugin-inline-worker"
+import { toObjectURL } from "@polyipseity/esbuild-plugin-inline-worker/utils"
 // eslint-disable-next-line import/no-unresolved
 import worker from "worker:./worker.js"
 

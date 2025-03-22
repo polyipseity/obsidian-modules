@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 declare module "obsidian" {
 	interface Canvas extends Private<$Canvas, PrivateKey> { }
 	interface CanvasNode extends Private<$CanvasNode, PrivateKey> { }

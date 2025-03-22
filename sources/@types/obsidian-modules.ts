@@ -119,7 +119,7 @@ declare module "obsidian-modules" {
 	/**
 	 * Options for {@link Require}.
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+	// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 	interface RequireOptions extends CommonOptions { }
 
 	/**

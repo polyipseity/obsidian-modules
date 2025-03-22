@@ -10,7 +10,6 @@ import {
 } from "@polyipseity/obsidian-plugin-library"
 import type { ModulesPlugin } from "../main.js"
 import { STARTUP_MODULES_LOAD_DELAY } from "../magic.js"
-import { identity } from "lodash-es"
 
 class StartupModules {
 	readonly #requested = new Set<string>()
@@ -50,7 +49,7 @@ class StartupModules {
 			const ret2 = this.#requested.has(id)
 			this.#requested.add(id)
 			return ret2
-		}).every(identity)
+		}).every(Boolean)
 		await this.#load(delay)
 		return ret
 	}
@@ -65,7 +64,7 @@ class StartupModules {
 			const ret = this.#requested.delete(id)
 			this.#loaded.delete(id)
 			return ret
-		}).some(identity)
+		}).some(Boolean)
 	}
 }
 
@@ -142,5 +141,6 @@ async function loadModule(context: ModulesPlugin, id: string): Promise<void> {
 	if (typeof func !== "function") {
 		throw new Error(i18n.t("errors.no-functions-exported"))
 	}
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	await func()
 }

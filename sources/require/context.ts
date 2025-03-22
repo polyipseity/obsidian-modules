@@ -26,7 +26,8 @@ export async function patchContextForDataview(
 		try {
 			const dv = plugin.localApi("", comp, self.document.createElement("div"))
 			return around(
-				Object.getPrototypeOf(dv) as typeof dv,
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+				Object.getPrototypeOf(dv) as unknown as typeof dv,
 				{
 					view(next) {
 						return async function fn(
@@ -72,6 +73,7 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 				const req = requires.get(self),
 					info = this.state.field(
 						// Typing bug
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 						editorInfoField as unknown as StateField<MarkdownFileInfo>,
 						false,
 					)
@@ -80,7 +82,7 @@ export function patchContextForEditor(context: ModulesPlugin): void {
 					const info2 = info as CanvasNodeInfo | typeof info
 					path = revealPrivate(context, [info2], info3 => {
 						if ("node" in info3) {
-							return info3.node.canvas.view.file.parent?.path
+							return info3.node.canvas.view.file?.parent?.path
 						}
 						return path
 					}, constant(path))
@@ -112,7 +114,7 @@ export function patchContextForPreview(context: ModulesPlugin): void {
 					if (path === void 0 && "owner" in owner) {
 						const { owner: owner2 } = owner
 						if ("node" in owner2) {
-							path = owner2.node.canvas.view.file.parent?.path
+							path = owner2.node.canvas.view.file?.parent?.path
 						}
 					}
 					req?.context.cwds.push(path ?? null)

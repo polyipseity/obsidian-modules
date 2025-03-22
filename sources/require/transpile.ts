@@ -84,11 +84,13 @@ abstract class AbstractTranspile implements Transpile {
 		...args: Parameters<typeof this.transpile>
 		// eslint-disable-next-line @typescript-eslint/no-invalid-this
 	): AsyncOrSync<ReturnType<typeof this.transpile>>
+
 	public abstract transpile(
 		id: object,
 		content: string,
 		file?: TFile,
 	): string | null
+	
 	public abstract invalidate(id: object): AsyncOrSync<void>
 }
 

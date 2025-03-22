@@ -11,15 +11,15 @@ const obsidian = new Proxy<Record<keyof any, unknown>>({}, {
 		return target[property] ??= class { }
 	},
 })
-// eslint-disable-next-line no-global-assign
+// eslint-disable-next-line no-global-assign, @typescript-eslint/no-unsafe-type-assertion
 require = function fn(
 	this: typeof self,
-	...args: Parameters<NodeRequire>
+	...args: Parameters<NodeJS.Require>
 ): ReturnType<typeof require> {
 	const [id] = args
 	if (id === "obsidian") { return obsidian }
 	return null
-} as NodeRequire
+} as NodeJS.Require
 const library = import("@polyipseity/obsidian-plugin-library")
 
 worker({ attachSourceMap, parseAndRewriteRequire, tsc }, {})
@@ -32,7 +32,7 @@ export async function attachSourceMap(
 	return { module: asm, script: afsm.bind(null, self.Function) }[type](
 		`${prefix}${code}`,
 		{
-			deletions: [...prefix].map((_0, idx) => ({
+			deletions:prefix.split("").map((_0, idx) => ({
 				column: idx,
 				line: 1,
 			})),
