@@ -9,10 +9,10 @@ importers:
   .:
     dependencies:
       '@codemirror/state':
-        specifier: ^6.4.1
+        specifier: ^6.5.2
         version: 6.5.2
       '@codemirror/view':
-        specifier: ^6.27.0
+        specifier: ^6.36.4
         version: 6.36.4
       '@polyipseity/esbuild-plugin-inline-worker':
         specifier: ^1.0.3
@@ -21,16 +21,16 @@ importers:
         specifier: ^1.26.0
         version: 1.26.0(@codemirror/state@6.5.2)(@codemirror/view@6.36.4)(esbuild@0.25.1)(typescript@5.8.2)
       '@ts-morph/bootstrap':
-        specifier: ^0.23.0
-        version: 0.23.0
+        specifier: ^0.26.1
+        version: 0.26.1
       acorn:
-        specifier: ^8.11.3
+        specifier: ^8.14.1
         version: 8.14.1
       acorn-walk:
-        specifier: ^8.3.2
+        specifier: ^8.3.4
         version: 8.3.4
       astring:
-        specifier: ^1.8.6
+        specifier: ^1.9.0
         version: 1.9.0
       espree:
         specifier: ^10.3.0
@@ -48,8 +48,8 @@ importers:
         specifier: ~1.4.11
         version: 1.4.11(@codemirror/state@6.5.2)(@codemirror/view@6.36.4)
       p-lazy:
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: ^5.0.0
+        version: 5.0.0
       promise-pool-executor:
         specifier: ^1.1.1
         version: 1.1.1
@@ -60,7 +60,7 @@ importers:
         specifier: ^10.0.4
         version: 10.0.4(typescript@5.8.2)
       workerpool:
-        specifier: ^9.1.2
+        specifier: ^9.2.0
         version: 9.2.0
     devDependencies:
       '@changesets/cli':
@@ -856,18 +856,17 @@ packages:
       acorn: 8.14.1
     dev: false
 
-  /@ts-morph/bootstrap@0.23.0:
-    resolution: {integrity: sha512-ymJv4mgtELz7hMrm8ZBdONW2GaAjO3EcdS3Edc/91t0wiBsl6v4ge67nPAJrGZo75kM2loQfyYwHl864PdPbTw==}
+  /@ts-morph/bootstrap@0.26.1:
+    resolution: {integrity: sha512-0EddUN06X1RuauaPUinyZ2TKThhM5fYaeTcc5CtTB90ERdO/qpCqojHQq1MklJCbgL7gCeBhroB85K6mBIgHwQ==}
     dependencies:
-      '@ts-morph/common': 0.23.0
+      '@ts-morph/common': 0.26.1
     dev: false
 
-  /@ts-morph/common@0.23.0:
-    resolution: {integrity: sha512-m7Lllj9n/S6sOkCkRftpM7L24uvmfXQFedlW/4hENcuJH1HHm9u5EgxZb9uVjQSCGrbBWBkOGgcTxNg36r6ywA==}
+  /@ts-morph/common@0.26.1:
+    resolution: {integrity: sha512-Sn28TGl/4cFpcM+jwsH1wLncYq3FtN/BIpem+HOygfBWPT5pAeS5dB4VFVzV8FbnOKHpDLZmvAl4AjPEev5idA==}
     dependencies:
       fast-glob: 3.3.3
       minimatch: 9.0.5
-      mkdirp: 3.0.1
       path-browserify: 1.0.1
     dev: false
 
@@ -2641,12 +2640,6 @@ packages:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
     dev: true
 
-  /mkdirp@3.0.1:
-    resolution: {integrity: sha512-+NsyUUAZDmo6YVHzL/stxSu3t9YS1iljliy3BSDrXJ/dkn1KYdmtZODGGjLcc9XLgVVpH4KshHB8XmZgMhaBXg==}
-    engines: {node: '>=10'}
-    hasBin: true
-    dev: false
-
   /moment@2.29.4:
     resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
 
@@ -2800,11 +2793,6 @@ packages:
     dependencies:
       p-map: 2.1.0
     dev: true
-
-  /p-lazy@4.0.0:
-    resolution: {integrity: sha512-8lIogVWwqBkiBy4FpylVHLalB9dZ25B2zBdY4OGGknDPWB7ehf2jyxmbh8z3MZsfbERLNU266h9Yx3cxHn3lFg==}
-    engines: {node: '>=12'}
-    dev: false
 
   /p-lazy@5.0.0:
     resolution: {integrity: sha512-C4xW5/wLGqswBx1xgu/t7fBaHMDKm7SXycgc0MEQvQ5KwzjT1E4MmE9cg0RXn9d0MTgUGJLUCb2EkLBevXi6eA==}

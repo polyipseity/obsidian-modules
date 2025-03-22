@@ -4,24 +4,24 @@
 		"url": "https://github.com/polyipseity/obsidian-modules"
 	},
 	"dependencies": {
-		"@codemirror/state": "^6.4.1",
-		"@codemirror/view": "^6.27.0",
+		"@codemirror/state": "^6.5.2",
+		"@codemirror/view": "^6.36.4",
 		"@polyipseity/esbuild-plugin-inline-worker": "^1.0.3",
 		"@polyipseity/obsidian-plugin-library": "^1.26.0",
 		"espree": "^10.3.0",
-		"@ts-morph/bootstrap": "^0.23.0",
-		"acorn": "^8.11.3",
-		"acorn-walk": "^8.3.2",
-		"astring": "^1.8.6",
+		"@ts-morph/bootstrap": "^0.26.1",
+		"acorn": "^8.14.1",
+		"acorn-walk": "^8.3.4",
+		"astring": "^1.9.0",
 		"i18next": "^24.2.3",
 		"lodash-es": "^4.17.21",
 		"monkey-around": "^3.0.0",
 		"obsidian": "~1.4.11",
-		"p-lazy": "^4.0.0",
+		"p-lazy": "^5.0.0",
 		"promise-pool-executor": "^1.1.1",
 		"semver": "^7.7.1",
 		"ts-essentials": "^10.0.4",
-		"workerpool": "^9.1.2"
+		"workerpool": "^9.2.0"
 	},
 	"description": "Load JavaScript and related languages like TypeScript modules from the vault and the Internet.",
 	"devDependencies": {
