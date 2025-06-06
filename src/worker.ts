@@ -11,7 +11,7 @@ const obsidian = new Proxy<Record<keyof any, unknown>>({}, {
 		return target[property] ??= class { }
 	},
 })
-// eslint-disable-next-line no-global-assign, @typescript-eslint/no-unsafe-type-assertion
+// eslint-disable-next-line no-global-assign, no-implicit-globals, @typescript-eslint/no-unsafe-type-assertion
 require = function fn(
 	this: typeof self,
 	...args: Parameters<NodeJS.Require>
@@ -32,7 +32,7 @@ export async function attachSourceMap(
 	return { module: asm, script: afsm.bind(null, self.Function) }[type](
 		`${prefix}${code}`,
 		{
-			deletions:prefix.split("").map((_0, idx) => ({
+			deletions: prefix.split("").map((_0, idx) => ({
 				column: idx,
 				line: 1,
 			})),
