@@ -68,7 +68,7 @@ const ARGV_PRODUCTION = 2,
 						esbuildCompress({
 							compressors: [
 								{
-									filter: /(?:)/u,
+									filter: /(?:)/, // eslint-disable-line require-unicode-regexp
 									lazy: true,
 									loader: "text",
 									onEnd: true,
@@ -108,7 +108,7 @@ const ARGV_PRODUCTION = 2,
 				],
 			}),
 			esbuildPluginTextReplace({
-				include: /promise-batcher.*\.js$/u,
+				include: /promise-batcher.*\.js$/, // eslint-disable-line require-unicode-regexp
 				pattern: [
 					[
 						".debuglog(\"promise-batcher\")",
