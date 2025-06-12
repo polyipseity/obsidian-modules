@@ -159,7 +159,7 @@ function createRequire(
 				return val
 			})(),
 		]
-	} 
+	}
 	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 	function cache0<T>(
 		cache: ModuleCache,
@@ -175,7 +175,7 @@ function createRequire(
 	function depends(self1: Require, id: string, context: Context): void {
 		const { dependencies, dependants } = self1,
 			{ parents } = context,
-			parent = parents.at(-1)
+			parent = parents[parents.length - 1]
 		if (parent === void 0) { return }
 		(dependencies.get(parent) ?? ((): typeof val => {
 			const val = new Set<string>()

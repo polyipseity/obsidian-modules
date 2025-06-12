@@ -420,7 +420,7 @@ export class RelativePathResolve
 	implements Resolve {
 	// eslint-disable-next-line @typescript-eslint/class-methods-use-this
 	protected override resolvePath(id: string, context: Context): string | null {
-		return parsePath(`${context.cwds.at(-1) ?? ""}/${id}`)
+		return parsePath(`${context.cwds[context.cwds.length - 1] ?? ""}/${id}`)
 	}
 
 	protected override aresolvePath(
@@ -439,7 +439,7 @@ export class MarkdownLinkResolve
 		if (!link) { return null }
 		return metadataCache.getFirstLinkpathDest(
 			getLinkpath(link.path),
-			context.cwds.at(-1) ?? "",
+			context.cwds[context.cwds.length - 1] ?? "",
 		)?.path ?? null
 	}
 
@@ -469,7 +469,7 @@ export class WikilinkResolve
 		if (!link) { return null }
 		return metadataCache.getFirstLinkpathDest(
 			getLinkpath(link.path),
-			context.cwds.at(-1) ?? "",
+			context.cwds[context.cwds.length - 1] ?? "",
 		)?.path ?? null
 	}
 
@@ -665,7 +665,7 @@ export class ExternalLinkResolve
 	}
 
 	public override resolve(id: string, context: Context): Resolved | null {
-		const cwd = context.cwds.at(-1) ?? void 0,
+		const cwd = context.cwds[context.cwds.length - 1] ?? void 0,
 			href = this.normalizeURL(id, cwd)
 		if (href === null) { return null }
 		this.validate0(href, context)
@@ -687,7 +687,7 @@ export class ExternalLinkResolve
 		id: string,
 		context: Context,
 	): Promise<Resolved | null> {
-		const cwd = context.cwds.at(-1) ?? void 0,
+		const cwd = context.cwds[context.cwds.length - 1] ?? void 0,
 			href0 = this.normalizeURL(id, cwd)
 		if (href0 === null) { return null }
 		this.validate0(href0, context)
