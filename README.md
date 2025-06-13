@@ -66,7 +66,7 @@ await self.require.import("vault/path/to/a module.md") // vault path
 // The following three require context and may not be able to infer the current directory. Please file an issue if so. Context inference is only available for top-level code, i.e. not inside functions or classes.
 await self.require.import("../relative/path/to/a module.js") // relative path
 await self.require.import("[omitted or whatever](markdown/link/to/a%20module.js.md)") // Markdown link
-await self.require.import("[[wikilink/to/a module|ommited or whatever]]") // wikilink
+await self.require.import("[[wikilink/to/a module|omitted or whatever]]") // wikilink
 // The following one requires enabling external links in settings.
 await self.require.import("https://esm.sh/scratchblocks") // external link
 // You can workaround the inability to infer the current directory.
@@ -78,7 +78,7 @@ self.require("vault/path/to/a module.md")
 // The following three require context and may not be able to infer the current directory. Please file an issue if so. Context inference is only available for top-level code, i.e. not inside functions or classes.
 self.require("../relative/path/to/a module.js")
 // The following three may not work in startup scripts.
-self.require("[ommited or whatever](markdown/link/to/a%20module.js.md)")
+self.require("[omitted or whatever](markdown/link/to/a%20module.js.md)")
 self.require("[[wikilink/to/a module|omitted or whatever]]")
 // The following one requires enabling external links and adding the link to preloaded external links in settings.
 self.require("https://esm.sh/scratchblocks") // external link
@@ -230,4 +230,4 @@ We hope that there will never be any security vulnerabilities, but unfortunately
 
 ### Reporting a vulnerability
 
-Please report a vulerability by opening an new issue. We will get back to you as soon as possible.
+Please report a vulnerability by opening an new issue. We will get back to you as soon as possible.
