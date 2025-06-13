@@ -148,7 +148,7 @@ module.exports = function() {
 }
 ```
 
-- The full API is available from [`sources/@types/obsidian-modules.ts`](sources/%40types/obsidian-modules.ts).
+- The full API is available from [`src/@types/obsidian-modules.ts`](src/%40types/obsidian-modules.ts).
 
 ## Contributing
 
