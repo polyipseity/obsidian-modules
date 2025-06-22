@@ -41,7 +41,7 @@
 			"readme": "$t(generic.documentations.readme)"
 		},
 		"enable-external-links": "啟用$t(generic.external-link)",
-		"expose-internal-modules": "公開內部$t(generic.module)",
+		"expose-internal-modules": "顯示內部$t(generic.module)",
 		"expose-internal-modules-description-HTML": "<code>obsidian</code>、<code>@codemirror/*</code>、<code>@lezer/*</code>……",
 		"import-timeout-HTML": "<code>import</code>$t(generic.timeout)（s）",
 		"import-timeout-description-HTML": "用於避免<code>import</code>死鎖。設為0 s是無$t(generic.timeout)。",
