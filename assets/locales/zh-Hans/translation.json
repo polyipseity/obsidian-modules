@@ -16,9 +16,9 @@
 		"case-insensitive": "不区分大小写",
 		"documentation": "文档",
 		"documentations": {
-			"changelog": "更改日志",
+			"changelog": "更新日志",
 			"donate": "$t(generic.donate)",
-			"readme": "自述文件"
+			"readme": "readme"
 		},
 		"donate": "捐赠",
 		"external-link": "外部链接",
@@ -46,7 +46,7 @@
 		"import-timeout-HTML": "<code>import</code>$t(generic.timeout)（s）",
 		"import-timeout-description-HTML": "用于避免<code>import</code>死锁。设为0\u00a0s是无$t(generic.timeout)。",
 		"interface": "界面",
-		"open-changelog-on-update": "更新时$t(generic.open)$t(generic.documentations.changelog)",
+		"open-changelog-on-update": "$t(generic.open)$t(generic.documentations.changelog)更新中",
 		"preloaded-external-links": "预加载的$t(generic.external-link)",
 		"preloaded-external-links-description-HTML": "$t(settings.preloading-rules-description-HTML)",
 		"preloaded-external-links-edit": "$t(generic.edit)",
