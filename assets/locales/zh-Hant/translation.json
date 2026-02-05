@@ -1,63 +1,63 @@
 {
-	"commands": {
-		"clear-cache": "清除緩存",
-		"open-documentation-changelog": "$t(generic.open)$t(generic.documentations.changelog)",
-		"open-documentation-donate": "$t(generic.open)$t(generic.documentations.donate)",
-		"open-documentation-readme": "$t(generic.open)$t(generic.documentations.readme)",
-		"reload-startup-modules": "重新載入$t(generic.startup-module)"
-	},
-	"errors": {
-		"could-not-resolve-module": "無法解析$t(generic.module)：{{id}}",
-		"error-loading-module": "載入$t(generic.module)時出錯：{{id}}",
-		"no-functions-exported": "沒有導出函數",
-		"timeout-loading-module": "載入$t(generic.module)時$t(generic.timeout)：{{id}}"
-	},
-	"generic": {
-		"case-insensitive": "不區分大小寫",
-		"documentation": "文檔",
-		"documentations": {
-			"changelog": "更新日誌",
-			"donate": "$t(generic.donate)",
-			"readme": "readme"
-		},
-		"donate": "贊助",
-		"external-link": "外部鏈接",
-		"module": "模組",
-		"name": "名稱",
-		"startup-module": "啟動$t(generic.module)"
-	},
-	"name": "$t(generic.module)",
-	"settings": {
-		"Markdown-code-block-languages-to-load": "要加載的Markdown代碼塊語言",
-		"Markdown-code-block-languages-to-load-description": "$t(generic.list-description)",
-		"Markdown-code-block-languages-to-load-edit": "$t(generic.edit)",
-		"Markdown-code-block-languages-to-load-edit-description": "$t(generic.case-insensitive)。",
-		"auto-reload-startup-modules": "自動重新載入$t(generic.startup-module)",
-		"auto-reload-startup-modules-description": "在$t(generic.command-palette)手動重新加載$t(generic.startup-module)。",
-		"documentation": "$t(generic.documentation)",
-		"documentations": {
-			"changelog": "$t(generic.documentations.changelog)",
-			"donate": "$t(generic.documentations.donate)",
-			"readme": "$t(generic.documentations.readme)"
-		},
-		"enable-external-links": "啟用$t(generic.external-link)",
-		"expose-internal-modules": "顯示內部$t(generic.module)",
-		"expose-internal-modules-description-HTML": "<code>obsidian</code>、<code>@codemirror/*</code>、<code>@lezer/*</code>……",
-		"import-timeout-HTML": "<code>import</code>$t(generic.timeout)（s）",
-		"import-timeout-description-HTML": "用於避免<code>import</code>死鎖。設為0\u00a0s是無$t(generic.timeout)。",
-		"interface": "界面",
-		"open-changelog-on-update": "更新時$t(generic.open)$t(generic.documentations.changelog)",
-		"preloaded-external-links": "預加載的$t(generic.external-link)",
-		"preloaded-external-links-description-HTML": "$t(settings.preloading-rules-description-HTML)",
-		"preloaded-external-links-edit": "$t(generic.edit)",
-		"preloading-rules": "預加載$t(generic.rule)",
-		"preloading-rules-description-HTML": "使用<code>require</code>（但不是<code>require.import</code>）時需要。$t(generic.list-description)",
-		"preloading-rules-edit": "$t(generic.edit)",
-		"require-name-HTML": "<code>require</code>$t(generic.name)",
-		"require-name-description-invalid": "使用默認$t(generic.name)，因為指定的$t(generic.name)不可用。",
-		"startup-modules": "$t(generic.startup-module)",
-		"startup-modules-description": "$t(generic.list-description)",
-		"startup-modules-edit": "$t(generic.edit)",
-		"startup-modules-edit-description": "接受所有$t(generic.module)標識符格式。載入順序是隨機的。"
-	}
+  "commands": {
+    "clear-cache": "清除緩存",
+    "open-documentation-changelog": "$t(generic.open)$t(generic.documentations.changelog)",
+    "open-documentation-donate": "$t(generic.open)$t(generic.documentations.donate)",
+    "open-documentation-readme": "$t(generic.open)$t(generic.documentations.readme)",
+    "reload-startup-modules": "重新載入$t(generic.startup-module)"
+  },
+  "errors": {
+    "could-not-resolve-module": "無法解析$t(generic.module)：{{id}}",
+    "error-loading-module": "載入$t(generic.module)時出錯：{{id}}",
+    "no-functions-exported": "沒有導出函數",
+    "timeout-loading-module": "載入$t(generic.module)時$t(generic.timeout)：{{id}}"
+  },
+  "generic": {
+    "case-insensitive": "不區分大小寫",
+    "documentation": "文檔",
+    "documentations": {
+      "changelog": "更新日誌",
+      "donate": "$t(generic.donate)",
+      "readme": "readme"
+    },
+    "donate": "贊助",
+    "external-link": "外部鏈接",
+    "module": "模組",
+    "name": "名稱",
+    "startup-module": "啟動$t(generic.module)"
+  },
+  "name": "$t(generic.module)",
+  "settings": {
+    "Markdown-code-block-languages-to-load": "要加載的Markdown代碼塊語言",
+    "Markdown-code-block-languages-to-load-description": "$t(generic.list-description)",
+    "Markdown-code-block-languages-to-load-edit": "$t(generic.edit)",
+    "Markdown-code-block-languages-to-load-edit-description": "$t(generic.case-insensitive)。",
+    "auto-reload-startup-modules": "自動重新載入$t(generic.startup-module)",
+    "auto-reload-startup-modules-description": "在$t(generic.command-palette)手動重新加載$t(generic.startup-module)。",
+    "documentation": "$t(generic.documentation)",
+    "documentations": {
+      "changelog": "$t(generic.documentations.changelog)",
+      "donate": "$t(generic.documentations.donate)",
+      "readme": "$t(generic.documentations.readme)"
+    },
+    "enable-external-links": "啟用$t(generic.external-link)",
+    "expose-internal-modules": "顯示內部$t(generic.module)",
+    "expose-internal-modules-description-HTML": "<code>obsidian</code>、<code>@codemirror/*</code>、<code>@lezer/*</code>……",
+    "import-timeout-HTML": "<code>import</code>$t(generic.timeout)（s）",
+    "import-timeout-description-HTML": "用於避免<code>import</code>死鎖。設為0\u00a0s是無$t(generic.timeout)。",
+    "interface": "界面",
+    "open-changelog-on-update": "更新時$t(generic.open)$t(generic.documentations.changelog)",
+    "preloaded-external-links": "預加載的$t(generic.external-link)",
+    "preloaded-external-links-description-HTML": "$t(settings.preloading-rules-description-HTML)",
+    "preloaded-external-links-edit": "$t(generic.edit)",
+    "preloading-rules": "預加載$t(generic.rule)",
+    "preloading-rules-description-HTML": "使用<code>require</code>（但不是<code>require.import</code>）時需要。$t(generic.list-description)",
+    "preloading-rules-edit": "$t(generic.edit)",
+    "require-name-HTML": "<code>require</code>$t(generic.name)",
+    "require-name-description-invalid": "使用默認$t(generic.name)，因為指定的$t(generic.name)不可用。",
+    "startup-modules": "$t(generic.startup-module)",
+    "startup-modules-description": "$t(generic.list-description)",
+    "startup-modules-edit": "$t(generic.edit)",
+    "startup-modules-edit-description": "接受所有$t(generic.module)標識符格式。載入順序是隨機的。"
+  }
 }

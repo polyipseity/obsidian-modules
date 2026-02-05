@@ -1,31 +1,33 @@
 import {
-	AdvancedSettingTab,
+  AdvancedSettingTab,
 	type AnyObject,
 	DOMClasses,
 	ListModal,
 	cloneAsWritable,
-	closeSetting,
+  closeSetting,
 	createChildElement,
 	createDocumentFragment,
 	launderUnchecked,
-	linkSetting,
-	registerSettingsCommands,
-	resetButton,
+  linkSetting,
+  registerSettingsCommands,
+  resetButton,
 	rulesList,
 	setTextToNumber,
-} from "@polyipseity/obsidian-plugin-library"
+} from "@polyipseity/obsidian-plugin-library";
 import { constant, identity, isObject } from "lodash-es"
-import type { ModulesPlugin } from "./main.js"
+import type { ModulesPlugin } from "./main.js";
 import { REQUIRE_TAG } from "./require/require.js"
-import { Settings } from "./settings-data.js"
-import type { loadDocumentations } from "./documentations.js"
-import semverLt from "semver/functions/lt.js"
+import { Settings } from "./settings-data.js";
+import type { loadDocumentations } from "./documentations.js";
+import semverLt from "semver/functions/lt.js";
 
 export class SettingTab extends AdvancedSettingTab<Settings> {
-	public constructor(
-		protected override readonly context: ModulesPlugin,
-		protected readonly docs: loadDocumentations.Loaded,
-	) { super(context) }
+  public constructor(
+    protected override readonly context: ModulesPlugin,
+    protected readonly docs: loadDocumentations.Loaded,
+  ) {
+    super(context);
+  }
 
 	protected override onLoad(): void {
 		super.onLoad()
@@ -420,15 +422,15 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 		this.newNoticeTimeoutWidget(Settings.DEFAULT)
 	}
 
-	protected override snapshot0(): Partial<Settings> {
-		return Settings.persistent(this.context.settings.value)
-	}
+  protected override snapshot0(): Partial<Settings> {
+    return Settings.persistent(this.context.settings.value);
+  }
 }
 
 export function loadSettings(
-	context: ModulesPlugin,
-	docs: loadDocumentations.Loaded,
+  context: ModulesPlugin,
+  docs: loadDocumentations.Loaded,
 ): void {
-	context.addSettingTab(new SettingTab(context, docs))
-	registerSettingsCommands(context)
+  context.addSettingTab(new SettingTab(context, docs));
+  registerSettingsCommands(context);
 }

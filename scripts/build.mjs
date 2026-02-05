@@ -68,7 +68,7 @@ const ARGV_PRODUCTION = 2,
 						esbuildCompress({
 							compressors: [
 								{
-									filter: /(?:)/, // eslint-disable-line require-unicode-regexp
+									filter: /(?:)/,  
 									lazy: true,
 									loader: "text",
 									onEnd: true,
@@ -88,18 +88,18 @@ const ARGV_PRODUCTION = 2,
 			esbuildCompress({
 				compressors: [
 					{
-						filter: /\.json$/, // eslint-disable-line require-unicode-regexp
+						filter: /\.json$/,
 						loader: "json",
 					},
 					{
-						filter: /\.md$/, // eslint-disable-line require-unicode-regexp
+						filter: /\.md$/,
 						lazy: true,
 						loader: "text",
 					},
 				],
 			}),
 			esbuildPluginTextReplace({
-				include: /obsidian-plugin-library.*\.js$/, // eslint-disable-line require-unicode-regexp
+				include: /obsidian-plugin-library.*\.js$/,
 				pattern: [
 					[
 						/\/\/(?<c>[@#]) sourceMappingURL=/gu,
@@ -108,7 +108,7 @@ const ARGV_PRODUCTION = 2,
 				],
 			}),
 			esbuildPluginTextReplace({
-				include: /promise-batcher.*\.js$/, // eslint-disable-line require-unicode-regexp
+				include: /promise-batcher.*\.js$/,
 				pattern: [
 					[
 						".debuglog(\"promise-batcher\")",
