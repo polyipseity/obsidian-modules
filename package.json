@@ -4,11 +4,11 @@
     "url": "https://github.com/polyipseity/obsidian-modules"
   },
   "dependencies": {
-    "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.37.1",
+    "@codemirror/state": "^6.5.4",
+    "@codemirror/view": "^6.39.12",
     "@polyipseity/esbuild-plugin-inline-worker": "^1.0.3",
     "@polyipseity/obsidian-plugin-library": "^1.33.0",
-    "@ts-morph/bootstrap": "^0.27.0",
+    "@ts-morph/bootstrap": "^0.28.1",
     "acorn": "^8.15.0",
     "acorn-walk": "^8.3.4",
     "astring": "^1.9.0",
@@ -16,12 +16,12 @@
     "i18next": "^25.8.1",
     "lodash-es": "^4.17.23",
     "monkey-around": "^3.0.0",
-    "obsidian": "~1.4.11",
+    "obsidian": "~1.11.4",
     "p-lazy": "^5.0.0",
-    "promise-pool-executor": "^1.1.1",
+    "promise-pool-executor": "^2.0.0",
     "semver": "^7.7.3",
     "ts-essentials": "^10.1.1",
-    "workerpool": "^9.3.2"
+    "workerpool": "^10.0.1"
   },
   "description": "Load JavaScript and related languages like TypeScript modules from the vault and the Internet.",
   "devDependencies": {
@@ -30,7 +30,7 @@
     "@commitlint/config-conventional": "^20.4.1",
     "@eslint/compat": "^2.0.2",
     "@eslint/js": "^9.39.2",
-    "@polyipseity/obsidian": "~1.4.11",
+    "@polyipseity/obsidian": "~1.8.7",
     "@tsconfig/node16": "^16.1.8",
     "@tsconfig/recommended": "^1.0.13",
     "@tsconfig/strictest": "^2.0.8",
