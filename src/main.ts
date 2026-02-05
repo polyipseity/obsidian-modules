@@ -66,7 +66,7 @@ export class ModulesPlugin
         defaultNS: PluginLocales.DEFAULT_NAMESPACE,
         fallbackLng: PluginLocales.FALLBACK_LANGUAGES,
         returnNull: PluginLocales.RETURN_NULL,
-      })
+      }),
     );
     this.localSettings = new StorageSettingsManager(this, LocalSettings.fix);
     this.settings = new SettingsManager(this, Settings.fix);

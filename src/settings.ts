@@ -24,7 +24,7 @@ import semverLt from "semver/functions/lt.js";
 export class SettingTab extends AdvancedSettingTab<Settings> {
   public constructor(
     protected override readonly context: ModulesPlugin,
-    protected readonly docs: loadDocumentations.Loaded
+    protected readonly docs: loadDocumentations.Loaded,
   ) {
     super(context);
   }
@@ -50,7 +50,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
         language
           ? i18n.t(`language:${language}`)
           : i18n.t("settings.language-default"),
-      Settings.DEFAULT
+      Settings.DEFAULT,
     );
     ui.newSetting(containerEl, (setting) => {
       setting
@@ -62,7 +62,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
             .setCta()
             .onClick(() => {
               docs.open("donate");
-            })
+            }),
         )
         .addButton((button) =>
           button
@@ -72,7 +72,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
             .onClick(() => {
               docs.open("readme");
               closeSetting(containerEl);
-            })
+            }),
         )
         .addButton((button) => {
           button
@@ -101,7 +101,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
             createChildElement(frag, "span", (ele) => {
               ele.innerHTML = i18n.t("settings.require-name-HTML");
             });
-          })
+          }),
         )
         .setDesc(
           REQUIRE_TAG in req2
@@ -110,10 +110,10 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                 createChildElement(frag, "span", (ele) => {
                   ele.classList.add(DOMClasses.MOD_WARNING);
                   ele.textContent = i18n.t(
-                    "settings.require-name-description-invalid"
+                    "settings.require-name-description-invalid",
                   );
                 });
-              })
+              }),
         )
         .addText(
           linkSetting(
@@ -124,8 +124,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
               }),
             () => {
               this.postMutate();
-            }
-          )
+            },
+          ),
         )
         .addExtraButton(
           resetButton(
@@ -137,8 +137,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
               }),
             () => {
               this.postMutate();
-            }
-          )
+            },
+          ),
         );
     })
       .newSetting(containerEl, (setting) => {
@@ -149,10 +149,10 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
             createDocumentFragment(settingEl.ownerDocument, (frag) => {
               createChildElement(frag, "span", (ele) => {
                 ele.innerHTML = i18n.t(
-                  "settings.expose-internal-modules-description-HTML"
+                  "settings.expose-internal-modules-description-HTML",
                 );
               });
-            })
+            }),
           )
           .addToggle(
             linkSetting(
@@ -163,8 +163,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                 }),
               () => {
                 this.postMutate();
-              }
-            )
+              },
+            ),
           )
           .addExtraButton(
             resetButton(
@@ -177,8 +177,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                 }),
               () => {
                 this.postMutate();
-              }
-            )
+              },
+            ),
           );
       })
       .newSetting(containerEl, (setting) => {
@@ -193,8 +193,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                 }),
               () => {
                 this.postMutate();
-              }
-            )
+              },
+            ),
           )
           .addExtraButton(
             resetButton(
@@ -207,8 +207,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                 }),
               () => {
                 this.postMutate();
-              }
-            )
+              },
+            ),
           );
       })
       .newSetting(containerEl, (setting) => {
@@ -223,10 +223,10 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                   {
                     count: settings.value.preloadingRules.length,
                     interpolation: { escapeValue: false },
-                  }
+                  },
                 );
               });
-            })
+            }),
           )
           .addButton((button) => {
             button
@@ -251,13 +251,13 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
               async () =>
                 settings.mutate((settingsM) => {
                   settingsM.preloadingRules = cloneAsWritable(
-                    Settings.DEFAULT.preloadingRules
+                    Settings.DEFAULT.preloadingRules,
                   );
                 }),
               () => {
                 this.postMutate();
-              }
-            )
+              },
+            ),
           );
       })
       .newSetting(containerEl, (setting) => {
@@ -273,7 +273,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                   interpolation: { escapeValue: false },
                 });
               });
-            })
+            }),
           )
           .addButton((button) => {
             button
@@ -296,7 +296,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                       this.postMutate();
                     },
                     title: (): string => i18n.t(pf),
-                  }
+                  },
                 ).open();
               });
           })
@@ -307,13 +307,13 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
               async () =>
                 settings.mutate((settingsM) => {
                   settingsM.preloadedExternalLinks = cloneAsWritable(
-                    Settings.DEFAULT.preloadedExternalLinks
+                    Settings.DEFAULT.preloadedExternalLinks,
                   );
                 }),
               () => {
                 this.postMutate();
-              }
-            )
+              },
+            ),
           );
       })
       .newSetting(containerEl, (setting) => {
@@ -324,7 +324,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
             i18n.t(`${pf}-description`, {
               count: settings.value.markdownCodeBlockLanguagesToLoad.length,
               interpolation: { escapeValue: false },
-            })
+            }),
           )
           .addButton((button) => {
             button
@@ -348,7 +348,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                     },
                     description: (): string => i18n.t(`${pf}-edit-description`),
                     title: (): string => i18n.t(pf),
-                  }
+                  },
                 ).open();
               });
           })
@@ -359,13 +359,13 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
               async () =>
                 settings.mutate((settingsM) => {
                   settingsM.markdownCodeBlockLanguagesToLoad = cloneAsWritable(
-                    Settings.DEFAULT.markdownCodeBlockLanguagesToLoad
+                    Settings.DEFAULT.markdownCodeBlockLanguagesToLoad,
                   );
                 }),
               () => {
                 this.postMutate();
-              }
-            )
+              },
+            ),
           );
       })
       .newSetting(containerEl, (setting) => {
@@ -377,14 +377,14 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
               createChildElement(frag, "span", (ele) => {
                 ele.innerHTML = i18n.t(`${pf}-HTML`);
               });
-            })
+            }),
           )
           .setDesc(
             createDocumentFragment(settingEl.ownerDocument, (frag) => {
               createChildElement(frag, "span", (ele) => {
                 ele.innerHTML = i18n.t(`${pf}-description-HTML`);
               });
-            })
+            }),
           )
           .addText(
             linkSetting(
@@ -392,12 +392,12 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
               setTextToNumber(async (value) =>
                 settings.mutate((settingsM) => {
                   settingsM.importTimeout = value;
-                })
+                }),
               ),
               () => {
                 this.postMutate();
-              }
-            )
+              },
+            ),
           )
           .addExtraButton(
             resetButton(
@@ -409,8 +409,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                 }),
               () => {
                 this.postMutate();
-              }
-            )
+              },
+            ),
           );
       });
     this.newSectionWidget(() => i18n.t("settings.startup-modules"));
@@ -422,7 +422,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
           i18n.t(`${pf}-description`, {
             count: settings.value.startupModules.length,
             interpolation: { escapeValue: false },
-          })
+          }),
         )
         .addButton((button) => {
           button
@@ -446,7 +446,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                   },
                   description: (): string => i18n.t(`${pf}-edit-description`),
                   title: (): string => i18n.t(pf),
-                }
+                },
               ).open();
             });
         })
@@ -457,13 +457,13 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
             async () =>
               settings.mutate((settingsM) => {
                 settingsM.startupModules = cloneAsWritable(
-                  Settings.DEFAULT.startupModules
+                  Settings.DEFAULT.startupModules,
                 );
               }),
             () => {
               this.postMutate();
-            }
-          )
+            },
+          ),
         );
     }).newSetting(containerEl, (setting) => {
       setting
@@ -478,8 +478,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
               }),
             () => {
               this.postMutate();
-            }
-          )
+            },
+          ),
         )
         .addExtraButton(
           resetButton(
@@ -492,8 +492,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
               }),
             () => {
               this.postMutate();
-            }
-          )
+            },
+          ),
         );
     });
     this.newSectionWidget(() => i18n.t("settings.interface"));
@@ -509,8 +509,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
               }),
             () => {
               this.postMutate();
-            }
-          )
+            },
+          ),
         )
         .addExtraButton(
           resetButton(
@@ -523,8 +523,8 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
               }),
             () => {
               this.postMutate();
-            }
-          )
+            },
+          ),
         );
     });
     this.newNoticeTimeoutWidget(Settings.DEFAULT);
@@ -537,7 +537,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
 
 export function loadSettings(
   context: ModulesPlugin,
-  docs: loadDocumentations.Loaded
+  docs: loadDocumentations.Loaded,
 ): void {
   context.addSettingTab(new SettingTab(context, docs));
   registerSettingsCommands(context);

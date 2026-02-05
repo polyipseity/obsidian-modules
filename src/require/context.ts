@@ -18,7 +18,7 @@ import type { StateField } from "@codemirror/state";
 import { around } from "monkey-around";
 
 export async function patchContextForDataview(
-  context: ModulesPlugin
+  context: ModulesPlugin,
 ): Promise<void> {
   const {
     app: { metadataCache },
@@ -31,7 +31,7 @@ export async function patchContextForDataview(
         const dv = plugin.localApi(
           "",
           comp,
-          self.document.createElement("div")
+          self.document.createElement("div"),
         );
         return around(Object.getPrototypeOf(dv) as unknown as typeof dv, {
           view(next) {
@@ -45,11 +45,11 @@ export async function patchContextForDataview(
                 file =
                   metadataCache.getFirstLinkpathDest(
                     `${viewName}.js`,
-                    currentFilePath
+                    currentFilePath,
                   ) ??
                   metadataCache.getFirstLinkpathDest(
                     `${viewName}/view.js`,
-                    currentFilePath
+                    currentFilePath,
                   );
               await sleep2(self, 0);
               await sleep2(self, 0);
@@ -65,7 +65,7 @@ export async function patchContextForDataview(
       } finally {
         comp.unload();
       }
-    })
+    }),
   );
 }
 
@@ -85,7 +85,7 @@ export function patchContextForEditor(context: ModulesPlugin): void {
               // Typing bug
 
               editorInfoField as unknown as StateField<MarkdownFileInfo>,
-              false
+              false,
             );
           let path = info?.file?.parent?.path;
           if (path === void 0 && info) {
@@ -99,7 +99,7 @@ export function patchContextForEditor(context: ModulesPlugin): void {
                 }
                 return path;
               },
-              constant(path)
+              constant(path),
             );
           }
           req?.context.cwds.push(path ?? null);
@@ -113,7 +113,7 @@ export function patchContextForEditor(context: ModulesPlugin): void {
           }
         };
       },
-    })
+    }),
   );
 }
 
@@ -152,15 +152,15 @@ export function patchContextForPreview(context: ModulesPlugin): void {
               }
             };
           },
-        })
+        }),
       );
     },
-    noop
+    noop,
   );
 }
 
 export async function patchContextForTemplater(
-  context: ModulesPlugin
+  context: ModulesPlugin,
 ): Promise<void> {
   const {
     api: { requires },
@@ -187,7 +187,7 @@ export async function patchContextForTemplater(
                 const req = requires.get(self),
                   [, tp] = args;
                 req?.context.cwds.push(
-                  tp.config.template_file?.parent?.path ?? null
+                  tp.config.template_file?.parent?.path ?? null,
                 );
                 try {
                   return await next.apply(this, args);
@@ -196,7 +196,7 @@ export async function patchContextForTemplater(
                 }
               };
             },
-          })
+          }),
         );
         ret.push(
           around(user_script_functions, {
@@ -215,7 +215,7 @@ export async function patchContextForTemplater(
                 }
               };
             },
-          })
+          }),
         );
         return (): void => {
           ret.call();
@@ -224,6 +224,6 @@ export async function patchContextForTemplater(
         ret.call();
         throw error;
       }
-    })
+    }),
   );
 }

@@ -69,7 +69,7 @@ export async function loadRequire(context: ModulesPlugin): Promise<void> {
       new ExternalLinkResolve(context, tsTranspile, `plugin:${id}`),
     ]);
   context.register(
-    patchWindows(workspace, (self0) => patchRequire(context, self0, resolve))
+    patchWindows(workspace, (self0) => patchRequire(context, self0, resolve)),
   );
   addCommand(context, () => i18n.t("commands.clear-cache"), {
     callback() {
@@ -99,7 +99,7 @@ function createRequire(
   self0: typeof globalThis,
   resolve: Resolve,
   oldRequire?: Require,
-  sourceRoot = ""
+  sourceRoot = "",
 ): Require {
   async function invalidate(self2: Require, id: string): Promise<void> {
     const { aliased, aliases, cache, dependants, dependencies } = self2,
@@ -122,20 +122,20 @@ function createRequire(
       }
     }
     await Promise.all(
-      [...seen].map(async (seen2) => self2.onInvalidate.emit(seen2))
+      [...seen].map(async (seen2) => self2.onInvalidate.emit(seen2)),
     );
   }
   function resolve0(
     self2: Require,
     id: string,
-    resolved: Resolved | null
+    resolved: Resolved | null,
   ): readonly [Resolved, ModuleCache] {
     if (!resolved) {
       throw new Error(
         ctx.language.value.t("errors.could-not-resolve-module", {
           id,
           interpolation: { escapeValue: false },
-        })
+        }),
       );
     }
     const { id: id2 } = resolved,
@@ -173,7 +173,7 @@ function createRequire(
   function cache0<T>(
     cache: ModuleCache,
     key: keyof ModuleCache,
-    get: () => T
+    get: () => T,
   ): void {
     Object.defineProperty(cache, key, {
       configurable: true,
@@ -208,7 +208,7 @@ function createRequire(
   function preload(
     cleanup: Functions,
     resolved: Resolved,
-    context: Context
+    context: Context,
   ): void {
     const { cwd, id } = resolved,
       { cwds, parents } = context;
@@ -287,17 +287,17 @@ function createRequire(
                     (_0, idx) => ({
                       column: idx,
                       line: 1,
-                    })
+                    }),
                   ),
                   file: id,
                   sourceRoot: `${sourceRoot}${sourceRoot && "/"}${id}`,
-                }
-              )
+                },
+              ),
           )(
             module,
             module.exports,
             self0.process ?? { env: { NODE_DEV: "production" } },
-            ret.app
+            ret.app,
           );
           const { exports } = module;
           if (isObject(exports)) {
@@ -347,11 +347,11 @@ function createRequire(
           const [rd, cache] = resolve0(
               ret,
               id0,
-              await resolve1.aresolve(id0, context)
+              await resolve1.aresolve(id0, context),
             ),
             { code, id, value } = rd,
             key =
-              opts?.commonJSInterop ?? true
+              (opts?.commonJSInterop ?? true)
                 ? "esModuleWithCommonJS"
                 : "esModule";
           if (key in cache) {
@@ -373,7 +373,7 @@ function createRequire(
                         "let{exports}=module",
                         'let{process}=self;process??={env:{NODE_DEV:"production"}}',
                         `let{app}=self[${escJSStr(
-                          ctx.settings.value.requireName
+                          ctx.settings.value.requireName,
                         )}]`,
                         "",
                       ].join(";")
@@ -393,8 +393,8 @@ function createRequire(
                         },
                       ]),
                     ],
-                    { type: "text/javascript" }
-                  )
+                    { type: "text/javascript" },
+                  ),
                 );
               cleanup.push(() => {
                 URL.revokeObjectURL(url);
@@ -414,8 +414,8 @@ function createRequire(
                             {
                               id,
                               interpolation: { escapeValue: false },
-                            }
-                          )
+                            },
+                          ),
                         );
                       })(),
                     ]),
@@ -423,7 +423,7 @@ function createRequire(
               if (key === "esModuleWithCommonJS") {
                 const mod = isObject(ret2) ? ret2 : { ...(ret2 ?? {}) },
                   { exports: exports0 } = launderUnchecked<AnyObject>(
-                    launderUnchecked<AnyObject>(mod)["module"]
+                    launderUnchecked<AnyObject>(mod)["module"],
                   ),
                   exports = isObject(exports0)
                     ? exports0
@@ -450,7 +450,7 @@ function createRequire(
                   deleteProperty(target, property): boolean {
                     const own = Reflect.getOwnPropertyDescriptor(
                       target,
-                      property
+                      property,
                     );
                     if (
                       !(own?.configurable ?? true) &&
@@ -463,7 +463,7 @@ function createRequire(
                   get(target, property, receiver): unknown {
                     const own = Reflect.getOwnPropertyDescriptor(
                       target,
-                      property
+                      property,
                     );
                     if (
                       Reflect.has(target, property) ||
@@ -475,7 +475,7 @@ function createRequire(
                     const ret3: unknown = Reflect.get(
                       mod,
                       property,
-                      receiver === target ? mod : receiver
+                      receiver === target ? mod : receiver,
                     );
                     if (typeof ret3 === "function") {
                       const ret4 = ret3;
@@ -491,13 +491,13 @@ function createRequire(
                               return Reflect.construct(
                                 ret4,
                                 args,
-                                new.target === fn ? ret4 : new.target
+                                new.target === fn ? ret4 : new.target,
                               );
                             }
                             return Reflect.apply(
                               ret4,
                               this === ret2 ? mod : this,
-                              args
+                              args,
                             );
                           }
                           functions.set(ret3, fn);
@@ -509,7 +509,7 @@ function createRequire(
                   },
                   getOwnPropertyDescriptor(
                     target,
-                    property
+                    property,
                   ): PropertyDescriptor | undefined {
                     let ret3 = Reflect.getOwnPropertyDescriptor(mod, property);
                     if (
@@ -528,8 +528,8 @@ function createRequire(
                     return Reflect.getPrototypeOf(mod);
                   },
                   has(target, property): boolean {
-                    return Reflect.getOwnPropertyDescriptor(target, property)
-                      ?.configurable ?? true
+                    return (Reflect.getOwnPropertyDescriptor(target, property)
+                      ?.configurable ?? true)
                       ? Reflect.has(mod, property) ||
                           Reflect.has(target, property)
                       : Reflect.has(target, property);
@@ -548,9 +548,9 @@ function createRequire(
                               !(
                                 Reflect.getOwnPropertyDescriptor(target, key2)
                                   ?.configurable ?? true
-                              )
+                              ),
                           ),
-                        ].flat()
+                        ].flat(),
                       ),
                     ];
                   },
@@ -560,7 +560,7 @@ function createRequire(
                   set(target, property, newValue, receiver): boolean {
                     const own = Reflect.getOwnPropertyDescriptor(
                       target,
-                      property
+                      property,
                     );
                     if (
                       !(own?.configurable ?? true) &&
@@ -573,16 +573,18 @@ function createRequire(
                       mod,
                       property,
                       newValue,
-                      receiver === target ? mod : receiver
+                      receiver === target ? mod : receiver,
                     );
                   },
                   setPrototypeOf(_0, proto): boolean {
                     return Reflect.setPrototypeOf(mod, proto);
                   },
-                } satisfies Required<Omit<ProxyHandler<typeof exports>, "apply" | "construct">>);
+                } satisfies Required<
+                  Omit<ProxyHandler<typeof exports>, "apply" | "construct">
+                >);
               }
               return ret2;
-            })()
+            })(),
           );
           return await loader.promise;
         } finally {
@@ -608,7 +610,7 @@ function createRequire(
         oldRequire?.onInvalidate ??
         new EventEmitterLite<readonly [id: string]>(),
       resolve,
-    }
+    },
   );
   resolve.onInvalidate.listen(async (id) => invalidate(ret, id));
   return ret;
@@ -617,7 +619,7 @@ function createRequire(
 function patchRequire(
   context: ModulesPlugin,
   self0: typeof globalThis,
-  resolve: Resolve
+  resolve: Resolve,
 ): () => void {
   const { settings } = context;
   let destroyer = noop;
@@ -630,7 +632,7 @@ function patchRequire(
       context,
       self0,
       settings.value.requireName,
-      resolve
+      resolve,
     );
     functions.push(
       settings.onMutate(
@@ -638,8 +640,8 @@ function patchRequire(
         (cur) => {
           destroyer();
           destroyer = createAndSetRequire(context, self0, cur, resolve);
-        }
-      )
+        },
+      ),
     );
     return () => {
       functions.call();
@@ -654,7 +656,7 @@ function createAndSetRequire(
   context: ModulesPlugin,
   self0: typeof globalThis,
   name: string,
-  resolve: Resolve
+  resolve: Resolve,
 ): () => void {
   const {
       api: { requires },
@@ -665,7 +667,7 @@ function createAndSetRequire(
       self0,
       resolve,
       requires.get(self0),
-      `plugin:${id}`
+      `plugin:${id}`,
     );
   requires.set(self0, req);
   if (name in self0 || name === "require") {
@@ -686,8 +688,7 @@ function createAndSetRequire(
             /* @__PURE__ */ self0.console.debug(error);
             return req(...args);
           }
-        },
-        req) as unknown as NodeJS.Require;
+        }, req) as unknown as NodeJS.Require;
       },
       toString: aroundIdentityFactory(),
     });

@@ -12,7 +12,7 @@ const obsidian = new Proxy<Record<string | number | symbol, unknown>>(
     get(target, property, _receiver): unknown {
       return (target[property] ??= class {});
     },
-  }
+  },
 );
 
 require = function fn(
@@ -30,7 +30,7 @@ const library = import("@polyipseity/obsidian-plugin-library");
 worker({ attachSourceMap, parseAndRewriteRequire, tsc }, {});
 
 export async function attachSourceMap(
-  input: attachSourceMap.Input
+  input: attachSourceMap.Input,
 ): Promise<attachSourceMap.Output> {
   const { attachSourceMap: asm, attachFunctionSourceMap: afsm } = await library,
     { code, prefix, id, sourceRoot, type } = input;
@@ -43,7 +43,7 @@ export async function attachSourceMap(
       })),
       file: id,
       sourceRoot: `${sourceRoot}${sourceRoot && "/"}${id}`,
-    }
+    },
   );
 }
 export namespace attachSourceMap {
@@ -58,7 +58,7 @@ export namespace attachSourceMap {
 }
 
 export async function parseAndRewriteRequire(
-  input: parseAndRewriteRequire.Input
+  input: parseAndRewriteRequire.Input,
 ): Promise<parseAndRewriteRequire.Output> {
   const { importable, escapeJavaScriptString } = await library,
     { OPTIONS } = parseAndRewriteRequire,

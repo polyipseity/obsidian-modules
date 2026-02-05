@@ -15,7 +15,7 @@ declare module "templater-obsidian" {
   interface Parser {
     readonly parse_commands: (
       content: string,
-      context: FunctionsObject
+      context: FunctionsObject,
     ) => PromiseLike<string>;
   }
   // https://github.com/SilentVoid13/Templater/blob/487805b5ad1fd7fbc145040ed82b4c41fc2c48e2/src/core/Templater.ts#L39
@@ -37,7 +37,7 @@ declare module "templater-obsidian" {
 
     readonly load_user_script_function: (
       file: TFile,
-      user_script_functions: Map<string, () => unknown>
+      user_script_functions: Map<string, () => unknown>,
     ) => PromiseLike<void>;
   }
 }

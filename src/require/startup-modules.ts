@@ -26,8 +26,8 @@ class StartupModules {
                 .map(async (requested) => {
                   await tryLoadModule(this.context, requested);
                   this.#loaded.add(requested);
-                })
-            )
+                }),
+            ),
           );
         } catch (error) {
           reject(error);
@@ -81,7 +81,7 @@ class StartupModules {
 }
 
 export async function loadStartupModules(
-  context: ModulesPlugin
+  context: ModulesPlugin,
 ): Promise<void> {
   const {
       api: { requires },
@@ -107,7 +107,7 @@ export async function loadStartupModules(
         .catch((error: unknown) => {
           self.console.error(error);
         });
-    }
+    },
   );
   settings.onMutate(
     (set) => set.autoReloadStartupModules,
@@ -116,7 +116,7 @@ export async function loadStartupModules(
         return;
       }
       await startupMods.load(0, ...set.startupModules);
-    }
+    },
   );
   req.onInvalidate.listen((id) => {
     if (!settings.value.startupModules.includes(id)) {
@@ -151,7 +151,7 @@ export async function loadStartupModules(
 
 async function tryLoadModule(
   context: ModulesPlugin,
-  id: string
+  id: string,
 ): Promise<void> {
   const {
     language: { value: i18n },
@@ -166,7 +166,7 @@ async function tryLoadModule(
           id,
           interpolation: { escapeValue: false },
         }),
-      context
+      context,
     );
   }
 }

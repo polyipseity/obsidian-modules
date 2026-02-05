@@ -12,7 +12,7 @@ declare module "dataview" {
     readonly localApi: (
       path: string,
       component: Component,
-      el: HTMLElement
+      el: HTMLElement,
     ) => DataviewInlineApi;
   }
 }

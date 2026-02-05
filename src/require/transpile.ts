@@ -18,7 +18,7 @@ import type { tsc } from "../worker.js";
 
 const tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")>(
     BUNDLE,
-    "@ts-morph/bootstrap"
+    "@ts-morph/bootstrap",
   ),
   tsMorphBootstrapSync = dynamicRequireLazy<
     typeof import("@ts-morph/bootstrap")
@@ -32,7 +32,7 @@ export interface Transpile {
   readonly transpile: (
     id: object,
     content: string,
-    file?: TFile
+    file?: TFile,
   ) => string | null;
   readonly invalidate: (id: object) => AsyncOrSync<void>;
 }
@@ -77,7 +77,7 @@ abstract class AbstractTranspile implements Transpile {
   public abstract transpile(
     id: object,
     content: string,
-    file?: TFile
+    file?: TFile,
   ): string | null;
 
   public abstract invalidate(id: object): AsyncOrSync<void>;
@@ -92,7 +92,7 @@ export class TypeScriptTranspile
 
   public constructor(
     context: ModulesPlugin,
-    protected readonly workerPool = context.workerPool
+    protected readonly workerPool = context.workerPool,
   ) {
     super(context);
   }
@@ -106,7 +106,7 @@ export class TypeScriptTranspile
     id: object,
     content: string,
     file?: TFile,
-    header?: ContentHeader
+    header?: ContentHeader,
   ): string | null {
     const ret = this.cache.get(id);
     if (ret !== void 0) {
@@ -144,7 +144,7 @@ export class TypeScriptTranspile
 
     if (ret2 === null) {
       throw new Error(
-        project.formatDiagnosticsWithColorAndContext(diagnostics)
+        project.formatDiagnosticsWithColorAndContext(diagnostics),
       );
     }
     this.cache.set(id, ret2);
@@ -155,7 +155,7 @@ export class TypeScriptTranspile
     id: object,
     content: string,
     file?: TFile,
-    header?: ContentHeader
+    header?: ContentHeader,
   ): AsyncOrSync<ReturnType<typeof this.transpile>> {
     let ret = this.acache.get(id);
     if (ret !== void 0) {
@@ -194,7 +194,7 @@ export class TypeScriptTranspile
 export class MarkdownTranspile extends AbstractTranspile implements Transpile {
   public constructor(
     context: ModulesPlugin,
-    protected readonly tsTranspile: TypeScriptTranspile
+    protected readonly tsTranspile: TypeScriptTranspile,
   ) {
     super(context);
     const {
@@ -203,8 +203,8 @@ export class MarkdownTranspile extends AbstractTranspile implements Transpile {
     context.register(
       settings.onMutate(
         (set) => set.markdownCodeBlockLanguagesToLoad,
-        async () => this.onInvalidate.emit()
-      )
+        async () => this.onInvalidate.emit(),
+      ),
     );
   }
 
@@ -215,7 +215,7 @@ export class MarkdownTranspile extends AbstractTranspile implements Transpile {
   public override transpile(
     id: object,
     content: string,
-    file?: TFile
+    file?: TFile,
   ): string | null {
     if (file?.extension !== "md") {
       return null;
@@ -228,7 +228,7 @@ export class MarkdownTranspile extends AbstractTranspile implements Transpile {
   public override async atranspile(
     id: object,
     content: string,
-    file?: TFile
+    file?: TFile,
   ): Promise<ReturnType<typeof this.transpile>> {
     if (file?.extension !== "md") {
       return null;
@@ -247,7 +247,7 @@ export class MarkdownTranspile extends AbstractTranspile implements Transpile {
         },
       } = this,
       ret = ContentHeader.fix(
-        metadataCache.getFileCache(file)?.frontmatter?.["module"]
+        metadataCache.getFileCache(file)?.frontmatter?.["module"],
       ).value;
     if (ret.language === void 0 && /\.m?ts$/u.test(file.basename)) {
       ret.language = "TypeScript";

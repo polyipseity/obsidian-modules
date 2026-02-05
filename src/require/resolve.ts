@@ -24,7 +24,7 @@ import { normalizeURL } from "../util.js";
 
 const tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")>(
   BUNDLE,
-  "@ts-morph/bootstrap"
+  "@ts-morph/bootstrap",
 );
 
 abstract class AbstractResolve implements Resolve {
@@ -57,7 +57,7 @@ abstract class AbstractResolve implements Resolve {
 
   protected async invalidateAll0(emit = true): Promise<void> {
     await Promise.all(
-      [...this.ids].map(async (id) => this.invalidate0(id, emit))
+      [...this.ids].map(async (id) => this.invalidate0(id, emit)),
     );
   }
 
@@ -81,7 +81,7 @@ export abstract class AbstractFileResolve
   public constructor(
     context: ModulesPlugin,
     transpiles: readonly Transpile[],
-    protected readonly cache = new AbstractFileResolve.Cache(context)
+    protected readonly cache = new AbstractFileResolve.Cache(context),
   ) {
     super(context);
     this.transpiles = Object.freeze([...transpiles]);
@@ -96,7 +96,7 @@ export abstract class AbstractFileResolve
         await Promise.all(
           [...cache]
             .filter(([, id]) => transed.has(id))
-            .map(async ([path]) => this.invalidate0(path))
+            .map(async ([path]) => this.invalidate0(path)),
         );
       });
     }
@@ -113,7 +113,7 @@ export abstract class AbstractFileResolve
       this.transpiles.map(async (tr) => {
         transpiled.get(tr)?.delete(id2);
         return tr.invalidate(id2);
-      })
+      }),
     );
   }
 
@@ -125,7 +125,7 @@ export abstract class AbstractFileResolve
       this.transpiles.map(async (tr) => {
         transpiled.delete(tr);
         return Promise.all(ids2.map(async (id) => tr.invalidate(id)));
-      })
+      }),
     );
   }
 
@@ -153,7 +153,7 @@ export abstract class AbstractFileResolve
 
   public override async aresolve(
     id: string,
-    context: Context
+    context: Context,
   ): Promise<Resolved | null> {
     this.validate0(id, context);
     const {
@@ -177,7 +177,7 @@ export abstract class AbstractFileResolve
         return {
           code: await this.atranspile(
             content ?? (await vault.cachedRead(file)),
-            identity
+            identity,
           ),
           cwd: getWD(id0),
           id: id0,
@@ -197,7 +197,7 @@ export abstract class AbstractFileResolve
 
   protected transpile(
     content: string,
-    id?: AbstractFileResolve.Cache.Identity
+    id?: AbstractFileResolve.Cache.Identity,
   ): string {
     const { transpiled, transpiles } = this;
     for (const trans of transpiles) {
@@ -219,7 +219,7 @@ export abstract class AbstractFileResolve
 
   protected async atranspile(
     content: string,
-    id?: AbstractFileResolve.Cache.Identity
+    id?: AbstractFileResolve.Cache.Identity,
   ): Promise<string> {
     const { transpiled, transpiles } = this;
     for (const trans of transpiles) {
@@ -255,7 +255,7 @@ export namespace AbstractFileResolve {
     protected readonly preloadRules = new SettingRules(
       this.context,
       (set) => set.preloadingRules,
-      Rules.pathInterpreter
+      Rules.pathInterpreter,
     );
 
     public constructor(protected readonly context: ModulesPlugin) {
@@ -273,7 +273,7 @@ export namespace AbstractFileResolve {
             return;
           }
           await this.cache(file);
-        })
+        }),
       );
       context.registerEvent(
         vault.on("rename", async (file, oldPath) => {
@@ -282,7 +282,7 @@ export namespace AbstractFileResolve {
             return;
           }
           await this.cache(file);
-        })
+        }),
       );
       context.registerEvent(
         vault.on("modify", async (file) => {
@@ -290,12 +290,12 @@ export namespace AbstractFileResolve {
             return;
           }
           await this.cache(file);
-        })
+        }),
       );
       context.registerEvent(
         vault.on("delete", async (file) => {
           await this.uncache(file.path);
-        })
+        }),
       );
       context.register(preloadRules.onChanged.listen(preload));
       preload().catch((error: unknown) => {
@@ -397,7 +397,7 @@ export class CompositeResolve implements Resolve {
     ...args: Parameters<Resolve["invalidateAll"]>
   ): Promise<Awaited<ReturnType<Resolve["invalidateAll"]>>> {
     await Promise.all(
-      this.delegates.map(async (de) => de.invalidateAll(...args))
+      this.delegates.map(async (de) => de.invalidateAll(...args)),
     );
   }
 }
@@ -413,8 +413,8 @@ export class InternalModulesResolve extends AbstractResolve implements Resolve {
     context.register(
       settings.onMutate(
         (set) => set.exposeInternalModules,
-        async () => this.invalidateAll0()
-      )
+        async () => this.invalidateAll0(),
+      ),
     );
   }
 
@@ -439,7 +439,7 @@ export class InternalModulesResolve extends AbstractResolve implements Resolve {
 
   public override async aresolve(
     id: string,
-    context: Context
+    context: Context,
   ): Promise<Resolved | null> {
     this.validate0(id, context);
     const {
@@ -505,7 +505,7 @@ export class MarkdownLinkResolve
     return (
       metadataCache.getFirstLinkpathDest(
         getLinkpath(link.path),
-        context.cwds[context.cwds.length - 1] ?? ""
+        context.cwds[context.cwds.length - 1] ?? "",
       )?.path ?? null
     );
   }
@@ -544,7 +544,7 @@ export class WikilinkResolve extends AbstractFileResolve implements Resolve {
     return (
       metadataCache.getFirstLinkpathDest(
         getLinkpath(link.path),
-        context.cwds[context.cwds.length - 1] ?? ""
+        context.cwds[context.cwds.length - 1] ?? "",
       )?.path ?? null
     );
   }
@@ -601,7 +601,7 @@ function parseMarkdownLink(link: string): {
   function parseComponent(
     str: string,
     escaper: CodePoint,
-    delimiters: readonly [CodePoint, CodePoint]
+    delimiters: readonly [CodePoint, CodePoint],
   ): readonly [ret: string, read: number] {
     const [start, end] = delimiters;
     let ret = "",
@@ -678,7 +678,7 @@ function parseMarkdownLink(link: string): {
 }
 
 function parseWikilink(
-  link: string
+  link: string,
 ): { readonly display: string; readonly path: string } | null {
   const match = /^!?\[\[(?<path>[^|]+)\|?(?<display>.*?)\]\]/u.exec(link);
   if (!match) {
@@ -703,7 +703,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
     protected readonly tsTranspile: TypeScriptTranspile,
     protected readonly sourceRoot = "",
     protected readonly fetchPool = context.fetchPool,
-    protected readonly workerPool = context.workerPool
+    protected readonly workerPool = context.workerPool,
   ) {
     super(context);
     const {
@@ -725,7 +725,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
           }
         }
       },
-      { passive: true }
+      { passive: true },
     );
     context.register(
       settings.onMutate(
@@ -733,8 +733,8 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
         async (_0, _1, set) => {
           await this.invalidateAll0();
           await preload(set.preloadedExternalLinks);
-        }
-      )
+        },
+      ),
     );
     context.register(
       settings.onMutate(
@@ -742,8 +742,8 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
         async (cur, prev) => {
           const prev2 = new Set(prev);
           await preload(cur.filter((cur2) => !prev2.has(cur2)));
-        }
-      )
+        },
+      ),
     );
     preload(settings.value.preloadedExternalLinks).catch((error: unknown) => {
       self.console.error(error);
@@ -775,7 +775,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
         if (isObject(id2)) {
           tsTranspile.invalidate(id2);
         }
-      })
+      }),
     );
   }
 
@@ -807,7 +807,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
 
   public override async aresolve(
     id: string,
-    context: Context
+    context: Context,
   ): Promise<Resolved | null> {
     const cwd = context.cwds[context.cwds.length - 1] ?? void 0,
       href0 = this.normalizeURL(id, cwd);
@@ -829,7 +829,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
 
   protected async aresolve0(
     id: string,
-    cwd?: string
+    cwd?: string,
   ): Promise<
     readonly [null, null] | readonly [string, ExternalLinkResolve.Identity]
   > {
@@ -896,7 +896,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
                 code: ret.code,
                 href,
                 requireExpression: `self[${escJSStr(
-                  settings.value.requireName
+                  settings.value.requireName,
                 )}]`,
               },
             ]);
@@ -912,7 +912,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
             /* @__PURE__ */ self.console.debug(error);
           }
           return ret;
-        })())
+        })()),
       );
       if (awaiting) {
         await this.invalidate0(href);
@@ -933,7 +933,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
     ...args: Parameters<typeof normalizeURL>
   ): ReturnType<typeof normalizeURL> {
     const href = normalizeURL(...args);
-    return href === null ? null : this.redirects.get(href) ?? href;
+    return href === null ? null : (this.redirects.get(href) ?? href);
   }
 
   protected async anormalizeURL(

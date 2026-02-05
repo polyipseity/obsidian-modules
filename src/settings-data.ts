@@ -28,7 +28,7 @@ export namespace LocalSettings {
       lastReadChangelogVersion: opaqueOrDefault(
         semVerString,
         String(unc.lastReadChangelogVersion),
-        NULL_SEM_VER_STRING
+        NULL_SEM_VER_STRING,
       ),
     });
   }
@@ -90,7 +90,7 @@ export namespace Settings {
         DEFAULT,
         unc,
         "autoReloadStartupModules",
-        ["boolean"]
+        ["boolean"],
       ),
       enableExternalLinks: fixTyped(DEFAULT, unc, "enableExternalLinks", [
         "boolean",
@@ -107,7 +107,7 @@ export namespace Settings {
         DEFAULT,
         unc,
         "markdownCodeBlockLanguagesToLoad",
-        ["string"]
+        ["string"],
       ),
       noticeTimeout: fixTyped(DEFAULT, unc, "noticeTimeout", ["number"]),
       openChangelogOnUpdate: fixTyped(DEFAULT, unc, "openChangelogOnUpdate", [
