@@ -16,7 +16,7 @@
     "i18next": "^25.8.1",
     "lodash-es": "^4.17.23",
     "monkey-around": "^3.0.0",
-    "obsidian": "~1.11.4",
+    "obsidian": "~1.4.11",
     "p-lazy": "^5.0.0",
     "promise-pool-executor": "^2.0.0",
     "semver": "^7.7.3",
