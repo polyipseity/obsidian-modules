@@ -2,266 +2,257 @@
  * Public API for `obsidian-modules`.
  */
 declare module "obsidian-modules" {
+  /**
+   * API exposed on the plugin instance as the property `api`.
+   */
+  interface API {
+    /**
+     * Object mapping global objects to {@link Require}s.
+     */
+    readonly requires: WeakMap<typeof globalThis, Require>;
+  }
 
-	/**
-	 * API exposed on the plugin instance as the property `api`.
-	 */
-	interface API {
+  /**
+   * Custom `require`s.
+   */
+  interface Require {
+    /**
+     * Imports a module, CommonJS style.
+     *
+     * @param id module specifier
+     * @param opts options
+     * @return the requested module
+     * @throws if the requested module cannot be found
+     */
+    (id: string, opts?: RequireOptions): unknown;
 
-		/**
-		 * Object mapping global objects to {@link Require}s.
-		 */
-		readonly requires: WeakMap<typeof globalThis, Require>
-	}
+    /**
+     * Imports a module, ES-module style.
+     *
+     * @param id module specifier
+     * @param opts options
+     * @returns the requested module
+     * @throws if the requested module cannot be found
+     */
+    readonly import: (id: string, opts?: ImportOptions) => unknown;
 
-	/**
-	 * Custom `require`s.
-	 */
-	interface Require {
+    /**
+     * Invalidate the cache of a module or an alias.
+     *
+     * @param id module specifier
+     * @returns void
+     */
+    readonly invalidate: (id: string) => AsyncOrSync<void>;
 
-		/**
-		 * Imports a module, CommonJS style.
-		 *
-		 * @param id module specifier
-		 * @param opts options
-		 * @return the requested module
-		 * @throws if the requested module cannot be found
-		 */
-		(id: string, opts?: RequireOptions): unknown
+    /**
+     * Invalidate all caches.
+     *
+     * @returns void
+     */
+    readonly invalidateAll: () => AsyncOrSync<void>;
 
-		/**
-		 * Imports a module, ES-module style.
-		 *
-		 * @param id module specifier
-		 * @param opts options
-		 * @returns the requested module
-		 * @throws if the requested module cannot be found
-		 */
-		readonly import: (id: string, opts?: ImportOptions) => unknown
+    /**
+     * Module invalidation event.
+     */
+    readonly onInvalidate: EventEmitterLite<readonly [id: string]>;
 
-		/**
-		 * Invalidate the cache of a module or an alias.
-		 *
-		 * @param id module specifier
-		 * @returns void
-		 */
-		readonly invalidate: (id: string) => AsyncOrSync<void>
+    /**
+     * Object for resolving module specifiers.
+     */
+    readonly resolve: Resolve;
 
-		/**
-		 * Invalidate all caches.
-		 *
-		 * @returns void
-		 */
-		readonly invalidateAll: () => AsyncOrSync<void>
+    /**
+     * Cache for loaded modules.
+     */
+    readonly cache: Map<string, ModuleCache>;
 
-		/**
-		 * Module invalidation event.
-		 */
-		readonly onInvalidate: EventEmitterLite<readonly [id: string]>
+    /**
+     * Aliased modules.
+     */
+    readonly aliased: Map<string, string>;
 
-		/**
-		 * Object for resolving module specifiers.
-		 */
-		readonly resolve: Resolve
+    /**
+     * Module aliases.
+     */
+    readonly aliases: Map<string, Set<string>>;
 
-		/**
-		 * Cache for loaded modules.
-		 */
-		readonly cache: Map<string, ModuleCache>
+    /**
+     * Associated {@link App}.
+     */
+    readonly app: App;
 
-		/**
-		 * Aliased modules.
-		 */
-		readonly aliased: Map<string, string>
+    /**
+     * Context for loading modules.
+     */
+    readonly context: Context;
 
-		/**
-		 * Module aliases.
-		 */
-		readonly aliases: Map<string, Set<string>>
+    /**
+     * Module dependants.
+     */
+    readonly dependants: Map<string, Set<string>>;
 
-		/**
-		 * Associated {@link App}.
-		 */
-		readonly app: App
+    /**
+     * Module dependencies.
+     */
+    readonly dependencies: Map<string, Set<string>>;
+  }
 
-		/**
-		 * Context for loading modules.
-		 */
-		readonly context: Context
+  /**
+   * Options for {@link Require} and {@link Require.import},
+   */
+  interface CommonOptions {
+    /**
+     * Current working directory for resolving contextual module specifiers.
+     *
+     * `undefined` does not change the working directory, while `null`
+     * overrides it with no working directory.
+     *
+     * @default string automatically inferred if possible
+     */
+    readonly cwd?: string | null | undefined;
+  }
 
-		/**
-		 * Module dependants.
-		 */
-		readonly dependants: Map<string, Set<string>>
+  /**
+   * Options for {@link Require}.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  interface RequireOptions extends CommonOptions {}
 
-		/**
-		 * Module dependencies.
-		 */
-		readonly dependencies: Map<string, Set<string>>
-	}
+  /**
+   * Options for {@link Require.import}.
+   */
+  interface ImportOptions extends CommonOptions {
+    /**
+     * Enable loading CommonJS modules.
+     *
+     * @default false|true depending on settings
+     */
+    readonly commonJSInterop?: boolean | undefined;
+  }
 
-	/**
-	 * Options for {@link Require} and {@link Require.import},
-	 */
-	interface CommonOptions {
+  /**
+   * Cache for loaded modules.
+   */
+  interface ModuleCache {
+    /**
+     * Module exports when loaded as a CommonJS module.
+     */
+    readonly commonJS?: unknown;
 
-		/**
-		 * Current working directory for resolving contextual module specifiers.
-		 *
-		 * `undefined` does not change the working directory, while `null`
-		 * overrides it with no working directory.
-		 *
-		 * @default string automatically inferred if possible
-		 */
-		readonly cwd?: string | null | undefined
-	}
+    /**
+     * Module exports when loaded as an ES module.
+     */
+    readonly esModule?: unknown;
 
-	/**
-	 * Options for {@link Require}.
-	 */
-	// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-	interface RequireOptions extends CommonOptions { }
+    /**
+     * Module exports when loaded as an ES module with CommonJS interop.
+     */
+    readonly esModuleWithCommonJS?: unknown;
+  }
 
-	/**
-	 * Options for {@link Require.import}.
-	 */
-	interface ImportOptions extends CommonOptions {
+  /**
+   * Object for resolving module specifiers.
+   */
+  interface Resolve {
+    /**
+     * Module resolution invalidation event.
+     */
+    readonly onInvalidate: EventEmitterLite<readonly [id: string]>;
 
-		/**
-		 * Enable loading CommonJS modules.
-		 *
-		 * @default false|true depending on settings
-		 */
-		readonly commonJSInterop?: boolean | undefined
-	}
+    /**
+     * Resolves a module specifier.
+     *
+     * @param id module specifier
+     * @param context resolve context
+     * @returns the resolved module data or `null` if not found
+     */
+    readonly resolve: (id: string, context: Context) => Resolved | null;
 
-	/**
-	 * Cache for loaded modules.
-	 */
-	interface ModuleCache {
+    /**
+     * Resolves a module specifier, supporting async resources.
+     *
+     * @param args see {@link resolve}
+     * @returns see {@link resolve}
+     */
+    readonly aresolve: (
+      ...args: Parameters<Resolve["resolve"]>
+    ) => AsyncOrSync<ReturnType<Resolve["resolve"]>>;
 
-		/**
-		 * Module exports when loaded as a CommonJS module.
-		 */
-		readonly commonJS?: unknown
+    /**
+     * Invalidate the cache of a module resolution.
+     *
+     * @param id module specifier
+     * @returns void
+     */
+    readonly invalidate: (id: string) => AsyncOrSync<void>;
 
-		/**
-		 * Module exports when loaded as an ES module.
-		 */
-		readonly esModule?: unknown
+    /**
+     * Invalidate all caches.
+     *
+     * @returns void
+     */
+    readonly invalidateAll: () => AsyncOrSync<void>;
+  }
 
-		/**
-		 * Module exports when loaded as an ES module with CommonJS interop.
-		 */
-		readonly esModuleWithCommonJS?: unknown
-	}
+  /**
+   * Data of a resolved module.
+   */
+  interface Resolved {
+    /**
+     * Module specifier of the resolved module.
+     */
+    readonly id: string;
 
-	/**
-	 * Object for resolving module specifiers.
-	 */
-	interface Resolve {
+    /**
+     * Code of the resolved module.
+     */
+    readonly code: string;
 
-		/**
-		 * Module resolution invalidation event.
-		 */
-		readonly onInvalidate: EventEmitterLite<readonly [id: string]>
+    /**
+     * Compiled code of the resolved module.
+     *
+     * Only used by {@link Require} but not {@link Require.import}.
+     */
+    readonly compiledSyncCode?: string | undefined;
 
-		/**
-		 * Resolves a module specifier.
-		 *
-		 * @param id module specifier
-		 * @param context resolve context
-		 * @returns the resolved module data or `null` if not found
-		 */
-		readonly resolve: (id: string, context: Context) => Resolved | null
+    /**
+     * Whether to use cache.
+     *
+     * @default true
+     */
+    readonly cache?: boolean | undefined;
 
-		/**
-		 * Resolves a module specifier, supporting async resources.
-		 *
-		 * @param args see {@link resolve}
-		 * @returns see {@link resolve}
-		 */
-		readonly aresolve: (
-			...args: Parameters<Resolve["resolve"]>
-		) => AsyncOrSync<ReturnType<Resolve["resolve"]>>
+    /**
+     * Working directory of the resolved module.
+     *
+     * `undefined` is an alias for `null`.
+     */
+    readonly cwd?: string | null | undefined;
 
-		/**
-		 * Invalidate the cache of a module resolution.
-		 *
-		 * @param id module specifier
-		 * @returns void
-		 */
-		readonly invalidate: (id: string) => AsyncOrSync<void>
+    /**
+     * Exports of the resolved module.
+     */
+    readonly value?: unknown;
+  }
 
-		/**
-		 * Invalidate all caches.
-		 *
-		 * @returns void
-		 */
-		readonly invalidateAll: () => AsyncOrSync<void>
-	}
+  /**
+   * Context for loading modules.
+   */
+  interface Context {
+    /**
+     * Current working directory.
+     *
+     * `null` means no working directory.
+     */
+    readonly cwds: (string | null)[];
 
-	/**
-	 * Data of a resolved module.
-	 */
-	interface Resolved {
-
-		/**
-		 * Module specifier of the resolved module.
-		 */
-		readonly id: string
-
-		/**
-		 * Code of the resolved module.
-		 */
-		readonly code: string
-
-		/**
-		 * Compiled code of the resolved module.
-		 *
-		 * Only used by {@link Require} but not {@link Require.import}.
-		 */
-		readonly compiledSyncCode?: string | undefined
-
-		/**
-		 * Whether to use cache.
-		 *
-		 * @default true
-		 */
-		readonly cache?: boolean | undefined
-
-		/**
-		 * Working directory of the resolved module.
-		 *
-		 * `undefined` is an alias for `null`.
-		 */
-		readonly cwd?: string | null | undefined
-
-		/**
-		 * Exports of the resolved module.
-		 */
-		readonly value?: unknown
-	}
-
-	/**
-	 * Context for loading modules.
-	 */
-	interface Context {
-
-		/**
-		 * Current working directory.
-		 *
-		 * `null` means no working directory.
-		 */
-		readonly cwds: (string | null)[]
-
-		/**
-		 * Identity of the parent module being loaded.
-		 */
-		readonly parents: (string | undefined)[]
-	}
+    /**
+     * Identity of the parent module being loaded.
+     */
+    readonly parents: (string | undefined)[];
+  }
 }
-import type { } from "obsidian-modules"
-import type { App } from "obsidian"
-import type { AsyncOrSync } from "ts-essentials"
-import type { EventEmitterLite } from "@polyipseity/obsidian-plugin-library"
+import type {} from "obsidian-modules";
+import type { App } from "obsidian";
+import type { AsyncOrSync } from "ts-essentials";
+import type { EventEmitterLite } from "@polyipseity/obsidian-plugin-library";

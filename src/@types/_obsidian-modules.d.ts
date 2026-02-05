@@ -1,1 +1,1 @@
-declare module "obsidian-modules" { }
+declare module "obsidian-modules" {}

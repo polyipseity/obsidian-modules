@@ -11,19 +11,18 @@ import {
 } from "@polyipseity/obsidian-plugin-library";
 import { LocalSettings, Settings } from "./settings-data.js";
 import { MAX_FETCH_CONCURRENCY, PLUGIN_UNLOAD_DELAY } from "./magic.js";
-import { type Pool, pool } from "workerpool"
-import type { API } from "obsidian-modules"
- 
-import PLazy from "p-lazy"
+import { type Pool, pool } from "workerpool";
+import type { API } from "obsidian-modules";
+
+import PLazy from "p-lazy";
 import { PluginLocales } from "../assets/locales.js";
-import { PromisePoolExecutor } from "promise-pool-executor"
+import { PromisePoolExecutor } from "promise-pool-executor";
 import { isNil } from "lodash-es";
 import { loadDocumentations } from "./documentations.js";
-import { loadRequire } from "./require/require.js"
+import { loadRequire } from "./require/require.js";
 import { loadSettings } from "./settings.js";
-import { toObjectURL } from "@polyipseity/esbuild-plugin-inline-worker/utils"
-// eslint-disable-next-line import/no-unresolved
-import worker from "worker:./worker.js"
+import { toObjectURL } from "@polyipseity/esbuild-plugin-inline-worker/utils";
+import worker from "worker:./worker.js";
 
 export class ModulesPlugin
   extends Plugin
@@ -34,23 +33,25 @@ export class ModulesPlugin
   public readonly localSettings: StorageSettingsManager<LocalSettings>;
   public readonly settings: SettingsManager<Settings>;
 
-	public readonly api: API = Object.freeze({ requires: new WeakMap() })
-	public readonly fetchPool = new PromisePoolExecutor({
-		concurrencyLimit: MAX_FETCH_CONCURRENCY,
-	})
+  public readonly api: API = Object.freeze({ requires: new WeakMap() });
+  public readonly fetchPool = new PromisePoolExecutor({
+    concurrencyLimit: MAX_FETCH_CONCURRENCY,
+  });
 
-	public readonly workerPool = PLazy.from(async (): Promise<Pool> => {
-		const url = toObjectURL(await worker)
-		try {
-			this.register(() => { URL.revokeObjectURL(url) })
-			const ret = pool(url, { workerType: "web" })
-			this.register(async () => ret.terminate(true))
-			return ret
-		} catch (error) {
-			URL.revokeObjectURL(url)
-			throw error
-		}
-	})
+  public readonly workerPool = PLazy.from(async (): Promise<Pool> => {
+    const url = toObjectURL(await worker);
+    try {
+      this.register(() => {
+        URL.revokeObjectURL(url);
+      });
+      const ret = pool(url, { workerType: "web" });
+      this.register(async () => ret.terminate(true));
+      return ret;
+    } catch (error) {
+      URL.revokeObjectURL(url);
+      throw error;
+    }
+  });
 
   public constructor(app: App, manifest: PluginManifest) {
     super(app, manifest);
@@ -65,7 +66,7 @@ export class ModulesPlugin
         defaultNS: PluginLocales.DEFAULT_NAMESPACE,
         fallbackLng: PluginLocales.FALLBACK_LANGUAGES,
         returnNull: PluginLocales.RETURN_NULL,
-      }),
+      })
     );
     this.localSettings = new StorageSettingsManager(this, LocalSettings.fix);
     this.settings = new SettingsManager(this, Settings.fix);
@@ -111,7 +112,7 @@ export class ModulesPlugin
           Promise.resolve().then(() => {
             loadSettings(this, loadDocumentations(this, isNil(loaded)));
           }),
-					loadRequire(this),
+          loadRequire(this),
         ]);
       } catch (error) {
         self.console.error(error);

@@ -1,1 +1,1 @@
-declare module "dataview" { }
+declare module "dataview" {}

@@ -1,1 +1,1 @@
-declare module "templater-obsidian" { }
+declare module "templater-obsidian" {}

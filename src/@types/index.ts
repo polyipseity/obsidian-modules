@@ -1,4 +1,4 @@
 declare module "*.md" {}
-declare module "worker:*" { }
+declare module "worker:*" {}
 import type {} from "*.md";
-import type { } from "worker:*"
+import type {} from "worker:*";
