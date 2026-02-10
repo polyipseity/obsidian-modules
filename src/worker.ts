@@ -10,6 +10,7 @@ const obsidian = new Proxy<Record<string | number | symbol, unknown>>(
   {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     get(target, property, _receiver): unknown {
+      // eslint-disable-next-line @typescript-eslint/no-extraneous-class
       return (target[property] ??= class {});
     },
   },
