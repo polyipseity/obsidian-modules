@@ -20,7 +20,7 @@ import { BUNDLE } from "../import.js";
 import type { ModulesPlugin } from "../main.js";
 import { PRECOMPILE_SYNC_PREFIX } from "../magic.js";
 import { isObject } from "lodash-es";
-import { normalizeURL } from "../util.js";
+import { normalizeURL } from "../utils.js";
 
 const tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")>(
   BUNDLE,

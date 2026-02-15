@@ -1,7 +1,7 @@
 import { type Options, parse, parseExpressionAt } from "acorn";
 import { createProject, type ts } from "@ts-morph/bootstrap";
 import { generate } from "astring";
-import { normalizeURL } from "./util.js";
+import { normalizeURL } from "./utils.js";
 import { simple } from "acorn-walk";
 import { worker } from "workerpool";
 
