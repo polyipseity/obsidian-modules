@@ -427,7 +427,7 @@ export class InternalModulesResolve extends AbstractResolve implements Resolve {
       return null;
     }
 
-    let value = null;
+    let value;
     try {
       value = dynamicRequireSync(new Map(), id);
     } catch (error) {
@@ -449,7 +449,7 @@ export class InternalModulesResolve extends AbstractResolve implements Resolve {
       return null;
     }
 
-    let value = null;
+    let value;
     try {
       value = await dynamicRequire(new Map(), id);
     } catch (error) {
