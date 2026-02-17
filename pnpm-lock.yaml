@@ -16,10 +16,10 @@ importers:
         version: 6.39.12
       '@polyipseity/esbuild-plugin-inline-worker':
         specifier: ^1.0.3
-        version: 1.0.3(esbuild@0.27.2)
+        version: 1.0.3(esbuild@0.27.3)
       '@polyipseity/obsidian-plugin-library':
         specifier: ^1.35.0
-        version: 1.35.0(@codemirror/state@6.5.4)(@codemirror/view@6.39.12)(esbuild@0.27.2)(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+        version: 1.35.0(@codemirror/state@6.5.4)(@codemirror/view@6.39.12)(esbuild@0.27.3)(eslint@10.0.0(jiti@2.6.1))(typescript@5.9.3)
       '@ts-morph/bootstrap':
         specifier: ^0.28.1
         version: 0.28.1
@@ -1060,10 +1060,6 @@ packages:
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
-  balanced-match@4.0.2:
-    resolution: {integrity: sha512-x0K50QvKQ97fdEz2kPehIerj+YTeptKF9hyYkKf6egnwmMWAkADiO0QCzSp0R5xN8FTZgYaBfSaue46Ej62nMg==}
-    engines: {node: 20 || >=22}
-
   better-path-resolve@1.0.0:
     resolution: {integrity: sha512-pbnl5XzGBdrFU/wT4jqmJVPn2B6UHPBOhzMQkY/SPUPB6QtUXtmBHBIwCbXJol93mOpGMnQyP/+BB19q04xj7g==}
     engines: {node: '>=4'}
@@ -1073,10 +1069,6 @@ packages:
 
   brace-expansion@2.0.2:
     resolution: {integrity: sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==}
-
-  brace-expansion@5.0.2:
-    resolution: {integrity: sha512-Pdk8c9poy+YhOgVWw1JNN22/HcivgKWwpxKq04M/jTmHyCZn12WPJebZxdjSa5TmBqISrUSgNYU3eRORljfCCw==}
-    engines: {node: 20 || >=22}
 
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
@@ -1783,10 +1775,6 @@ packages:
     resolution: {integrity: sha512-HGYWWS/ehqTV3xN10i23tkPkpH46MLCIMFNCaaKNavAXTF1RkqxawEPtnjnGZ6XKSInBKkiOA5BKS+aZiY3AvA==}
     engines: {node: '>=8'}
 
-  jackspeak@4.2.3:
-    resolution: {integrity: sha512-ykkVRwrYvFm1nb2AJfKKYPr0emF6IiXDYUaFx4Zn9ZuIH7MrzEZ3sD5RlqGXNRpHtvUHJyOnCEFxOlNDtGo7wg==}
-    engines: {node: 20 || >=22}
-
   jiti@2.6.1:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
     hasBin: true
@@ -2044,9 +2032,6 @@ packages:
   minimatch@10.1.2:
     resolution: {integrity: sha512-fu656aJ0n2kcXwsnwnv9g24tkU5uSmOlTjd6WyyaKm2Z+h1qmY6bAjrcaIxF/BslFqbZ8UBtbJi7KgQOZD2PTw==}
     engines: {node: 20 || >=22}
-
-  minimatch@3.1.2:
-    resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
 
   minimatch@9.0.5:
     resolution: {integrity: sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow==}
@@ -3169,7 +3154,7 @@ snapshots:
     dependencies:
       '@eslint/object-schema': 3.0.1
       debug: 4.4.3
-      minimatch: 10.2.1
+      minimatch: 10.1.2
     transitivePeerDependencies:
       - supports-color
 
@@ -3268,12 +3253,12 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
 
-  '@polyipseity/esbuild-plugin-inline-worker@1.0.3(esbuild@0.27.2)':
+  '@polyipseity/esbuild-plugin-inline-worker@1.0.3(esbuild@0.27.3)':
     dependencies:
-      esbuild: 0.27.2
+      esbuild: 0.27.3
       nanoid: 5.1.5
 
-  '@polyipseity/obsidian-plugin-library@1.35.0(@codemirror/state@6.5.4)(@codemirror/view@6.39.12)(esbuild@0.27.2)(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
+  '@polyipseity/obsidian-plugin-library@1.35.0(@codemirror/state@6.5.4)(@codemirror/view@6.39.12)(esbuild@0.27.3)(eslint@10.0.0(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
       '@capacitor/core': 8.0.2
       '@capacitor/filesystem': 8.1.0(@capacitor/core@8.0.2)
@@ -3688,10 +3673,6 @@ snapshots:
 
   balanced-match@1.0.2: {}
 
-  balanced-match@4.0.2:
-    dependencies:
-      jackspeak: 4.2.3
-
   better-path-resolve@1.0.0:
     dependencies:
       is-windows: 1.0.2
@@ -3704,10 +3685,6 @@ snapshots:
   brace-expansion@2.0.2:
     dependencies:
       balanced-match: 1.0.2
-
-  brace-expansion@5.0.2:
-    dependencies:
-      balanced-match: 4.0.2
 
   braces@3.0.3:
     dependencies:
@@ -4050,7 +4027,7 @@ snapshots:
       imurmurhash: 0.1.4
       is-glob: 4.0.3
       json-stable-stringify-without-jsonify: 1.0.1
-      minimatch: 10.2.1
+      minimatch: 10.1.2
       natural-compare: 1.4.0
       optionator: 0.9.4
     optionalDependencies:
@@ -4454,10 +4431,6 @@ snapshots:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.1
 
-  jackspeak@4.2.3:
-    dependencies:
-      '@isaacs/cliui': 9.0.0
-
   jiti@2.6.1: {}
 
   js-tokens@10.0.0: {}
@@ -4841,10 +4814,6 @@ snapshots:
   minimatch@10.1.2:
     dependencies:
       '@isaacs/brace-expansion': 5.0.1
-
-  minimatch@3.1.2:
-    dependencies:
-      brace-expansion: 5.0.2
 
   minimatch@9.0.5:
     dependencies:
