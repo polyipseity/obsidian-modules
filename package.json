@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "@codemirror/state": "^6.5.4",
-    "@codemirror/view": "^6.39.12",
+    "@codemirror/view": "^6.39.14",
     "@polyipseity/esbuild-plugin-inline-worker": "^1.0.3",
     "@polyipseity/obsidian-plugin-library": "^1.35.0",
     "@ts-morph/bootstrap": "^0.28.1",
