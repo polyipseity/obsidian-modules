@@ -43,6 +43,7 @@ Refs: dependabot config improvement
 - **Header should be ≤ 72 characters (use 72 as a human-friendly buffer; tooling still accepts up to 100).**
 - **Body lines must be hard-wrapped at 100 characters or less.** Prefer 72 for body lines intended for human readers.
 - All agents and contributors must comply; see `AGENTS.md` for enforcement policy.
+  - Example changeset workflow (releases / public API): run `pnpm changeset` to create a changeset, choose the appropriate release type, then run `pnpm version` or `pnpm build` to verify the change.
 - Example (compliant):
 
   ```text

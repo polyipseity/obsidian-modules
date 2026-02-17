@@ -35,6 +35,7 @@ This guide provides clear, actionable instructions for AI coding agents working 
 
 - **Versioning**
   - Use `changesets` for PRs; version lifecycle scripts are configured (`version` / `postversion`).
+  - Example changeset workflow: run `pnpm changeset` to add a changeset, choose the appropriate release type, then run `pnpm version` or `pnpm build` to verify the change. Add a changeset whenever you change public APIs or prepare a release.
 
 - **Localization**
   - Add locales by copying `assets/locales/en/translation.json` and updating `assets/locales/*/language.json` as needed. See `assets/locales/README.md` for conventions.
@@ -63,6 +64,8 @@ Quick reference for scripts in `package.json`. Use `pnpm` (preferred).
 - `version` / `postversion` — version lifecycle scripts (`node scripts/version.mjs`, `node scripts/version-post.mjs`).
 
 > CI tip: Use `pnpm install --frozen-lockfile` in CI for deterministic installs.
+
+- Metafile guidance: production builds write a `metafile.json` (see `scripts/build.mjs`). After significant bundle or dependency changes, inspect `metafile.json` for large/new imports and consider adding a size‑budget note or rationale in the PR if the bundle grows.
 
 ## Testing ✅
 
@@ -118,6 +121,16 @@ Helpful local resources:
   4. Document any infra changes in `AGENTS.md`.  
 
 If you need help designing a test or mocking a dependency, ask for a short example to be added to `tests/fixtures/`.
+
+### Security checklist — changes to module-loading or dynamic execution 🔐
+
+- Scope: applies when editing `src/require/**`, dynamic loaders, `eval`, or any code that alters runtime module resolution.
+- Required for PRs touching these areas:
+  - Add unit and integration tests that validate input sanitization, failure modes, and sandboxing assumptions.
+  - Provide a short threat-model note in the PR describing possible attack vectors and mitigations.
+  - Tag the PR with `security` and request at least one reviewer with security expertise.
+  - Avoid `eval`/untrusted dynamic execution; if unavoidable, document justification and show input validation/whitelisting.
+  - Add manual verification steps or CI checks if loader behavior or resolution rules changed.
 
 ## 3. Coding Conventions
 
@@ -267,7 +280,7 @@ This section contains concise, actionable rules and project-specific examples to
 - Start by inspecting `src/main.ts`, `src/settings-data.ts`, and `assets/locales.ts` to learn core patterns: Manager classes (LanguageManager, SettingsManager), `.fix()` validators, and `PluginLocales` usage.
 - Settings pattern: always prefer `.fix()` functions (see `Settings.fix`/`LocalSettings.fix`) to validate/normalize external inputs before persisting or mutating settings.
 - I18n: use `createI18n(PluginLocales.RESOURCES, ...)` and `language.value.t(...)` for translations. Never hardcode translatable strings—use existing translation keys in `assets/locales/`.
-- Build/Dev pattern: `scripts/build.mjs` uses esbuild `context()`; pass `dev` as argv[2] to enable watch mode. Tests mock `esbuild` in `tests/scripts/build.test.mjs`—use those tests as canonical examples for safe refactors.
+- Build/Dev pattern: `scripts/build.mjs` uses esbuild `context()`; pass `dev` as `argv[2]` to enable watch mode. Tests mock `esbuild` in `tests/scripts/build.test.mjs`—use those tests as canonical examples for safe refactors.
 - Script behavior: `scripts/obsidian-install.mjs` exits 1 with a short error message when `manifest.json` is missing. Make changes in scripts with tests mirroring error conditions (see `tests/scripts/obsidian-install.test.mjs`).
 - Test conventions: `*.spec.*` = unit (fast, isolated); `*.test.*` = integration (may use filesystem or child processes). Follow the one-test-file-per-source-file convention and place tests under `tests/` mirroring `src/`.
 - Formatting & linting: run `pnpm run format` and `pnpm run check` before committing. CI uses `pnpm install --frozen-lockfile`.

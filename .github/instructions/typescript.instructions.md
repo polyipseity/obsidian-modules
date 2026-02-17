@@ -10,6 +10,7 @@ description: Guidelines for TypeScript files in obsidian-plugin-template
 
 - Use the strictest TypeScript configuration (`tsconfig.json`).
 - Validate and normalize all settings and local settings via `.fix()` functions (see `src/settings-data.ts`).
+- When using dynamic imports (`await import(...)`) or editing module-loading code (for example `src/require/**`), include tests and document the security rationale — see `AGENTS.md` for the Security checklist.
 - Prefer type-safe patterns; **never** use the `any` type. **Prefer `unknown` over `any`.** When accepting unknown inputs, validate or narrow `unknown` with type guards or runtime validators before use. If `any` is truly unavoidable, document the reason and add a test asserting safety.
 - Reference translation keys via `language.value.t(...)` or `$t(key)` in UI code. Avoid hardcoding user-facing strings.
 - Use the project managers (`LanguageManager`, `SettingsManager`, `StorageSettingsManager`) as in `src/main.ts` to ensure consistent lifecycle and persistence behaviour.
@@ -19,6 +20,7 @@ description: Guidelines for TypeScript files in obsidian-plugin-template
 - When creating new settings, add a `fix()` entry and default in `Settings.DEFAULT` / `LocalSettings` and add a test that validates malformed data is corrected by `fix()`.
 - When writing UI code, prefer the i18n accessor from `context.language.value.t(...)` rather than importing `i18next` directly.
 - For lifecycle-sensitive managers, call `.load()` and ensure `.unload()` tasks are registered (see `PLACEHOLDERPlugin.onload()` pattern in `src/main.ts`).
+- Bundle / dependency changes: if a change introduces new runtime dependencies or increases bundle size, run a production build, inspect `metafile.json`, and add a short justification in the PR (attach the `metafile.json` when useful).
 
 ## Do / Don't
 

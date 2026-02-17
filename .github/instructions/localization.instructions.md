@@ -15,7 +15,7 @@ description: Rules for translation and localization files
 
 ## Practical guidance
 
-- When adding a new user-facing string, add an entry in `assets/locales/en/translation.json` and add/adjust tests that reference `language.value.t('your.key')` to help detect regressions.
+- When adding a new user-facing string, add an entry in `assets/locales/en/translation.json` and add/adjust tests that reference `language.value.t('your.key')` to help detect regressions. Also include a short "localization note" in the PR when adding or removing keys so translators can easily track changes and reviewers can verify intent.
 - Avoid changing interpolation tokens or `$t()` usage inside translation values—these are runtime references and translators should not modify structural tokens.
 - If you add a new translation key, add a short test or documentation note so CI and reviewers can validate the change.
 
