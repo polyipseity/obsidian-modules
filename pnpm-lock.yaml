@@ -90,9 +90,6 @@ importers:
       '@types/semver':
         specifier: ^7.7.1
         version: 7.7.1
-      '@types/workerpool':
-        specifier: ^9.0.0
-        version: 9.0.0
       '@vitest/coverage-v8':
         specifier: ^4.0.18
         version: 4.0.18(vitest@4.0.18(@types/node@25.1.0)(happy-dom@20.6.1)(jiti@2.6.1)(jsdom@28.0.0)(yaml@2.8.2))
@@ -861,10 +858,6 @@ packages:
 
   '@types/whatwg-mimetype@3.0.2':
     resolution: {integrity: sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==}
-
-  '@types/workerpool@9.0.0':
-    resolution: {integrity: sha512-gEiZU7P4NzkhqcSwHlSx1CddtzzEjFD/uWegp2tV5DXQABOE4qlH4H8ptCm/S5DDvCViqFj7yMrN3yMBh1pkQg==}
-    deprecated: This is a stub types definition. workerpool provides its own type definitions, so you do not need this installed.
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
@@ -3440,10 +3433,6 @@ snapshots:
   '@types/unist@2.0.11': {}
 
   '@types/whatwg-mimetype@3.0.2': {}
-
-  '@types/workerpool@9.0.0':
-    dependencies:
-      workerpool: 10.0.1
 
   '@types/ws@8.18.1':
     dependencies:

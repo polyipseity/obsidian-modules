@@ -5,10 +5,8 @@ declare module "obsidian" {
   interface CanvasNodeInfo extends Private<$CanvasNodeInfo, PrivateKey> {}
   interface MarkdownEmbedInfo extends Private<$MarkdownEmbedInfo, PrivateKey> {}
   interface MarkdownFileInfo extends Private<unknown, PrivateKey> {}
-  interface MarkdownPreviewRenderer extends Private<
-    $MarkdownPreviewRenderer,
-    PrivateKey
-  > {}
+  interface MarkdownPreviewRenderer
+    extends Private<$MarkdownPreviewRenderer, PrivateKey> {}
   namespace Plugins {
     interface Mapping {
       readonly dataview: DataviewPlugin;
