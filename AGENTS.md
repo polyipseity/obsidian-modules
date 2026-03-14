@@ -34,7 +34,7 @@ This guide provides clear, actionable instructions for AI coding agents working 
 
 - **Versioning**
   - Use `changesets` for PRs; version lifecycle scripts are configured (`version` / `postversion`).
-  - Example changeset workflow: run `pnpm changeset` to add a changeset, choose the appropriate release type, then run `pnpm version` or `pnpm build` to verify the change. Add a changeset whenever you change public APIs or prepare a release.
+  - Example changeset workflow: run `bun changeset` to add a changeset, choose the appropriate release type, then run `bun version` or `bun build` to verify the change. Add a changeset whenever you change public APIs or prepare a release.
 
 - **Localization**
   - Add locales by copying `assets/locales/en/translation.json` and updating `assets/locales/*/language.json` as needed. See `assets/locales/README.md` for conventions.
