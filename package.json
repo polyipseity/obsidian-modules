@@ -12,7 +12,6 @@
     "acorn": "^8.16.0",
     "acorn-walk": "^8.3.5",
     "astring": "^1.9.0",
-    "espree": "^11.1.1",
     "i18next": "^25.8.14",
     "lodash-es": "^4.17.23",
     "monkey-around": "^3.0.0",
