@@ -5,10 +5,10 @@
   },
   "dependencies": {
     "@codemirror/state": "^6.5.4",
-    "@codemirror/view": "^6.39.16",
+    "@codemirror/view": "^6.43.0",
     "@polyipseity/esbuild-plugin-inline-worker": "^1.0.3",
     "@polyipseity/obsidian-plugin-library": "file:./vendor/obsidian-plugin-library",
-    "@ts-morph/bootstrap": "^0.28.1",
+    "@ts-morph/bootstrap": "^0.29.0",
     "acorn": "^8.16.0",
     "acorn-walk": "^8.3.5",
     "astring": "^1.9.0",
