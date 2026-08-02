@@ -1,5 +1,3 @@
-import type { AsyncOrSync, Writable } from "ts-essentials";
-import { isPrimitive } from "es-toolkit";
 import {
   type CodePoint,
   EventEmitterLite,
@@ -13,14 +11,16 @@ import {
   escapeJavaScriptString as escJSStr,
   isNonNil,
 } from "@polyipseity/obsidian-plugin-library";
-import type { Context, Resolve, Resolved } from "obsidian-modules";
+import { isPrimitive } from "es-toolkit";
 import { TFile, getLinkpath, normalizePath, requestUrl } from "obsidian";
-import type { Transpile, TypeScriptTranspile } from "./transpile.js";
-import type { attachSourceMap, parseAndRewriteRequire } from "../worker.js";
+import type { Context, Resolve, Resolved } from "obsidian-modules";
+import type { AsyncOrSync, Writable } from "ts-essentials";
 import { BUNDLE } from "../import.js";
-import type { ModulesPlugin } from "../main.js";
 import { PRECOMPILE_SYNC_PREFIX } from "../magic.js";
+import type { ModulesPlugin } from "../main.js";
 import { normalizeURL } from "../utils.js";
+import type { attachSourceMap, parseAndRewriteRequire } from "../worker.js";
+import type { Transpile, TypeScriptTranspile } from "./transpile.js";
 
 const tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")>(
   BUNDLE,
@@ -756,10 +756,11 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
     await super.invalidate(id);
     redirects.delete(id);
     identities.delete(idr ?? id);
-    const id3 = await Promise.resolve(id2).catch(() => {});
-    if (!isPrimitive(id3) && id3 !== void 0) {
-      tsTranspile.invalidate(id3);
+    const id3 = await Promise.resolve(id2).catch(() => null);
+    if (isPrimitive(id3)) {
+      return;
     }
+    tsTranspile.invalidate(id3);
   }
 
   public override async invalidateAll(): Promise<void> {
@@ -770,10 +771,11 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
     clearProperties(identities);
     await Promise.all(
       ids.map(async (id) => {
-        const id2 = await Promise.resolve(id).catch(() => {});
-        if (!isPrimitive(id2) && id2 !== void 0) {
-          tsTranspile.invalidate(id2);
+        const id2 = await Promise.resolve(id).catch(() => null);
+        if (isPrimitive(id2)) {
+          return;
         }
+        tsTranspile.invalidate(id2);
       }),
     );
   }

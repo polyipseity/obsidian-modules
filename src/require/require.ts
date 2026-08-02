@@ -1,14 +1,4 @@
 import {
-  AbstractFileResolve,
-  CompositeResolve,
-  ExternalLinkResolve,
-  InternalModulesResolve,
-  MarkdownLinkResolve,
-  RelativePathResolve,
-  VaultPathResolve,
-  WikilinkResolve,
-} from "./resolve.js";
-import {
   type AnyObject,
   EventEmitterLite,
   Functions,
@@ -23,6 +13,9 @@ import {
   promisePromise,
   sleep2,
 } from "@polyipseity/obsidian-plugin-library";
+import { parse } from "acorn";
+import { isPrimitive, noop } from "es-toolkit";
+import { around } from "monkey-around";
 import type {
   Context,
   ImportOptions,
@@ -32,20 +25,27 @@ import type {
   Resolve,
   Resolved,
 } from "obsidian-modules";
-import { MarkdownTranspile, TypeScriptTranspile } from "./transpile.js";
-import { isPrimitive, noop } from "es-toolkit";
+import { PRECOMPILE_SYNC_PREFIX } from "../magic.js";
+import type { ModulesPlugin } from "../main.js";
+import type { attachSourceMap } from "../worker.js";
 import {
   patchContextForDataview,
   patchContextForEditor,
   patchContextForPreview,
   patchContextForTemplater,
 } from "./context.js";
-import type { ModulesPlugin } from "../main.js";
-import { PRECOMPILE_SYNC_PREFIX } from "../magic.js";
-import { around } from "monkey-around";
-import type { attachSourceMap } from "../worker.js";
+import {
+  AbstractFileResolve,
+  CompositeResolve,
+  ExternalLinkResolve,
+  InternalModulesResolve,
+  MarkdownLinkResolve,
+  RelativePathResolve,
+  VaultPathResolve,
+  WikilinkResolve,
+} from "./resolve.js";
 import { loadStartupModules } from "./startup-modules.js";
-import { parse } from "acorn";
+import { MarkdownTranspile, TypeScriptTranspile } from "./transpile.js";
 
 export const REQUIRE_TAG = Symbol("require");
 
@@ -423,15 +423,15 @@ function createRequire(
                     ]),
               ]);
               if (key === "esModuleWithCommonJS") {
-                const mod = !isPrimitive(ret2)
-                    ? ret2
-                    : Object.assign({}, ret2 ?? {}),
+                const mod = isPrimitive(ret2)
+                    ? Object.assign({}, ret2 ?? {})
+                    : ret2,
                   { exports: exports0 } = launderUnchecked<AnyObject>(
                     launderUnchecked<AnyObject>(mod)["module"],
                   ),
-                  exports = !isPrimitive(exports0)
-                    ? exports0
-                    : Object.assign({}, exports0 ?? {}),
+                  exports = isPrimitive(exports0)
+                    ? Object.assign({}, exports0 ?? {})
+                    : exports0,
                   functions = new Map();
                 if (!isPrimitive(exports)) {
                   Reflect.defineProperty(exports, Symbol.toStringTag, {
