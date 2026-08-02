@@ -137,17 +137,17 @@ export async function tsc(input: tsc.Input): Promise<tsc.Output> {
     }),
     source = project.createSourceFile("index.ts", content),
     program = project.createProgram();
-  let result = null;
+  const result: { value: string | null } = { value: null };
   const { diagnostics } = program.emit(source, (filename, string) => {
     if (filename.endsWith("index.js")) {
-      result = string;
+      result.value = string;
     }
   });
 
-  if (result === null) {
+  if (result.value === null) {
     throw new Error(project.formatDiagnosticsWithColorAndContext(diagnostics));
   }
-  return result;
+  return result.value;
 }
 export namespace tsc {
   export interface Input {

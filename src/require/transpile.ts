@@ -135,20 +135,20 @@ export class TypeScriptTranspile
       }),
       source = project.createSourceFile("index.ts", content),
       program = project.createProgram();
-    let ret2 = null;
+    const ret2: { value: string | null } = { value: null };
     const { diagnostics } = program.emit(source, (filename, string) => {
       if (filename.endsWith("index.js")) {
-        ret2 = string;
+        ret2.value = string;
       }
     });
 
-    if (ret2 === null) {
+    if (ret2.value === null) {
       throw new Error(
         project.formatDiagnosticsWithColorAndContext(diagnostics),
       );
     }
-    this.cache.set(id, ret2);
-    return ret2;
+    this.cache.set(id, ret2.value);
+    return ret2.value;
   }
 
   public override atranspile(
