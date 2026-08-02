@@ -75,12 +75,10 @@ export async function loadRequire(context: ModulesPlugin): Promise<void> {
     callback() {
       const { lastEvent } = app;
       (async (): Promise<void> => {
-        try {
-          await requires.get(activeSelf(lastEvent))?.invalidateAll();
-        } catch (error) {
-          activeSelf(lastEvent).console.error(error);
-        }
-      })();
+        await requires.get(activeSelf(lastEvent))?.invalidateAll();
+      })().catch((error: unknown) => {
+        activeSelf(lastEvent).console.error(error);
+      });
     },
     icon: i18n.t("asset:commands.clear-cache-icon"),
     id: "clear-cache",
@@ -170,10 +168,10 @@ function createRequire(
     ];
   }
 
-  function cache0<T>(
+  function cache0(
     cache: ModuleCache,
     key: keyof ModuleCache,
-    get: () => T,
+    get: () => unknown,
   ): void {
     Object.defineProperty(cache, key, {
       configurable: true,
@@ -296,6 +294,7 @@ function createRequire(
           )(
             module,
             module.exports,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime guard: environments (e.g. mobile WebView) may lack process; types declare it non-optional
             self0.process ?? { env: { NODE_DEV: "production" } },
             ret.app,
           );
@@ -402,6 +401,7 @@ function createRequire(
               const { importTimeout } = ctx.settings.value;
               preload(cleanup, rd, context);
               let ret2: unknown = await Promise.race([
+                // eslint-disable-next-line no-unsanitized/method -- blob: URL from in-code compilation, not user input; dynamic import is inherent to the require feature
                 import(url),
                 ...(importTimeout === 0
                   ? []
@@ -489,6 +489,7 @@ function createRequire(
                             this: unknown,
                             ...args: readonly unknown[]
                           ): unknown {
+                            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime guard: undefined when invoked without new; native TS mis-types new.target
                             if (new.target) {
                               return Reflect.construct(
                                 ret4,
