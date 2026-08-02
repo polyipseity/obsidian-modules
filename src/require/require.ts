@@ -96,9 +96,7 @@ export async function loadRequire(context: ModulesPlugin): Promise<void> {
 
 function createRequire(
   ctx: ModulesPlugin,
-  // eslint-disable-next-line eslint-comments/no-restricted-disable -- See below.
-  // eslint-disable-next-line obsidianmd/no-global-this -- globalThis is intentional for worker/main duality
-  self0: typeof globalThis,
+  self0: typeof window,
   resolve: Resolve,
   oldRequire?: Require,
   sourceRoot = "",
@@ -621,9 +619,7 @@ function createRequire(
 
 function patchRequire(
   context: ModulesPlugin,
-  // eslint-disable-next-line eslint-comments/no-restricted-disable -- See below.
-  // eslint-disable-next-line obsidianmd/no-global-this -- globalThis is intentional for worker/main duality
-  self0: typeof globalThis,
+  self0: typeof window,
   resolve: Resolve,
 ): () => void {
   const { settings } = context;
@@ -659,9 +655,7 @@ function patchRequire(
 
 function createAndSetRequire(
   context: ModulesPlugin,
-  // eslint-disable-next-line eslint-comments/no-restricted-disable -- See below.
-  // eslint-disable-next-line obsidianmd/no-global-this -- globalThis is intentional for worker/main duality
-  self0: typeof globalThis,
+  self0: typeof window,
   name: string,
   resolve: Resolve,
 ): () => void {

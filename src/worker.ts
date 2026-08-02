@@ -9,7 +9,7 @@ const obsidian = new Proxy<Record<string | number | symbol, unknown>>(
   {},
   {
     get(target, property, _receiver): unknown {
-      // eslint-disable-next-line @typescript-eslint/no-extraneous-class -- a class is needed to emulate Obsidian module classes
+      // eslint-disable-next-line @typescript-eslint/no-extraneous-class -- a class is versatile enough to be used as a dummy class, a dummy function (since classes are functions), and a dummy object (since classes are objects)
       return (target[property] ??= class {});
     },
   },
