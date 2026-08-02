@@ -21,6 +21,7 @@ import { loadDocumentations } from "./documentations.js";
 import { MAX_FETCH_CONCURRENCY, PLUGIN_UNLOAD_DELAY } from "./magic.js";
 import { LocalSettings, Settings } from "./settings-data.js";
 import { loadSettings } from "./settings.js";
+import { loadRequire } from "./require/require.js";
 
 export class ModulesPlugin
   extends Plugin
@@ -109,6 +110,7 @@ export class ModulesPlugin
         Promise.resolve().then(() => {
           loadSettings(this, loadDocumentations(this, isNil(loaded)));
         }),
+        loadRequire(this),
       ]);
     })().catch((error: unknown) => {
       self.console.error(error);
