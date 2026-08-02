@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-require-imports -- The literal `require` is special. Bundlers recognize it to successfully bundle the modules. */
 import { deepFreeze, typedKeys } from "@polyipseity/obsidian-plugin-library";
+
+declare const require: typeof window.require;
 
 // Needed for bundler
 const BUNDLE0 = deepFreeze({
@@ -7,4 +8,3 @@ const BUNDLE0 = deepFreeze({
 });
 export const BUNDLE = new Map(Object.entries(BUNDLE0)),
   MODULES = typedKeys<readonly ["@ts-morph/bootstrap"]>()(BUNDLE0);
-/* eslint-enable @typescript-eslint/no-require-imports -- The literal `require` is special. Bundlers recognize it to successfully bundle the modules. */

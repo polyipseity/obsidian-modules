@@ -144,7 +144,7 @@ function createRequire(
     aliased.set(id, id2);
     (
       aliases.get(id2) ??
-      ((): typeof val => {
+      (() => {
         const val = new Set([id2]);
         aliases.set(id2, val);
         return val;
@@ -162,7 +162,7 @@ function createRequire(
     return [
       resolved,
       cache.get(id2) ??
-        ((): typeof val => {
+        (() => {
           const val = {};
           cache.set(id2, val);
           return val;
@@ -190,7 +190,7 @@ function createRequire(
     }
     (
       dependencies.get(parent) ??
-      ((): typeof val => {
+      (() => {
         const val = new Set<string>();
         dependencies.set(parent, val);
         return val;
@@ -198,7 +198,7 @@ function createRequire(
     ).add(id);
     (
       dependants.get(id) ??
-      ((): typeof val => {
+      (() => {
         const val = new Set<string>();
         dependants.set(id, val);
         return val;
@@ -689,7 +689,7 @@ function createAndSetRequire(
             /* @__PURE__ */ self0.console.debug(error);
             return req(...args);
           }
-        }, req) as unknown as NodeJS.Require;
+        }, req) as unknown as typeof window.require;
       },
       toString: aroundIdentityFactory(),
     });

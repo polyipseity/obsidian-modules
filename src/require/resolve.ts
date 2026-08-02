@@ -793,7 +793,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
 
     const identity =
       this.identities.get(href) ??
-      ((): typeof val => {
+      (() => {
         const val = "await";
         this.identities.set(href, val);
         return val;
@@ -945,7 +945,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
       try {
         return (
           this.redirects.get(href) ??
-          (await (async (): Promise<typeof val> => {
+          (await (async () => {
             const val = (
               await this.fetchPool
                 .addSingleTask({

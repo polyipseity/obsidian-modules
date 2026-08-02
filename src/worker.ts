@@ -1,9 +1,9 @@
-import { type Options, parse, parseExpressionAt } from "acorn";
 import { createProject, type ts } from "@ts-morph/bootstrap";
-import { generate } from "astring";
-import { normalizeURL } from "./utils.js";
+import { type Options, parse, parseExpressionAt } from "acorn";
 import { simple } from "acorn-walk";
+import { generate } from "astring";
 import { worker } from "workerpool";
+import { normalizeURL } from "./utils.js";
 
 const obsidian = new Proxy<Record<string | number | symbol, unknown>>(
   {},
@@ -15,16 +15,17 @@ const obsidian = new Proxy<Record<string | number | symbol, unknown>>(
   },
 );
 
+// eslint-disable-next-line no-undef -- We are intentionally overriding the global `require` function to provide a custom implementation for the worker context. This is necessary because the worker does not have access to the Node.js `require` function, and we need to provide a way to load modules in this environment.
 require = function fn(
   this: typeof self,
-  ...args: Parameters<NodeJS.Require>
-): ReturnType<typeof require> {
+  ...args: Parameters<typeof window.require>
+): ReturnType<typeof window.require> {
   const [id] = args;
   if (id === "obsidian") {
     return obsidian;
   }
   return null;
-} as NodeJS.Require;
+} as typeof window.require;
 const library = import("@polyipseity/obsidian-plugin-library");
 
 worker({ attachSourceMap, parseAndRewriteRequire, tsc }, {});
