@@ -1,5 +1,11 @@
 # obsidian-modules <!-- markdownlint-disable-file MD024 -->
 
+## 2.5.1
+
+### Patch Changes
+
+- 8ae9012: Fix almost all Obsidian plugin automated review problems.
+
 ## 2.5.0
 
 ### Minor Changes
