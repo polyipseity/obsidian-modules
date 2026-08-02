@@ -522,6 +522,7 @@ export class MarkdownLinkResolve
         try {
           resolve(this.resolvePath(...args));
         } catch (error) {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- cannot control `error` type
           reject(error);
         }
       });
@@ -561,6 +562,7 @@ export class WikilinkResolve extends AbstractFileResolve implements Resolve {
         try {
           resolve(this.resolvePath(...args));
         } catch (error) {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- cannot control `error` type
           reject(error);
         }
       });
@@ -951,6 +953,8 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
                 .addSingleTask({
                   data: href,
                   async generator(data) {
+                    // eslint-disable-next-line eslint-comments/no-restricted-disable -- see below
+                    // eslint-disable-next-line no-restricted-globals -- `requestUrl` is Obsidian-specific and is not available in Web Worker
                     return fetch(data, {
                       mode: "cors",
                       redirect: "follow",
