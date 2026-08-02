@@ -20,7 +20,6 @@ import type { loadDocumentations } from "./documentations.js";
 import type { ModulesPlugin } from "./main.js";
 import { REQUIRE_TAG } from "./require/require.js";
 import { Settings } from "./settings-data.js";
-import { isObject } from "./utils.js";
 
 export class SettingTab extends AdvancedSettingTab<Settings> {
   public constructor(
@@ -95,7 +94,10 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
     ui.newSetting(containerEl, (setting) => {
       const { settingEl } = setting,
         req = launderUnchecked<AnyObject>(self)[settings.value.requireName],
-        req2 = isObject(req) ? req : {};
+        req2 =
+          (typeof req === "object" && req !== null) || typeof req === "function"
+            ? req
+            : {};
       setting
         .setName(
           createDocumentFragment(settingEl.ownerDocument, (frag) => {

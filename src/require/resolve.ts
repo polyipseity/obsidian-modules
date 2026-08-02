@@ -1,4 +1,5 @@
 import type { AsyncOrSync, Writable } from "ts-essentials";
+import { isPrimitive } from "es-toolkit";
 import {
   type CodePoint,
   EventEmitterLite,
@@ -19,7 +20,7 @@ import type { attachSourceMap, parseAndRewriteRequire } from "../worker.js";
 import { BUNDLE } from "../import.js";
 import type { ModulesPlugin } from "../main.js";
 import { PRECOMPILE_SYNC_PREFIX } from "../magic.js";
-import { isObject, normalizeURL } from "../utils.js";
+import { normalizeURL } from "../utils.js";
 
 const tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")>(
   BUNDLE,
@@ -756,7 +757,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
     redirects.delete(id);
     identities.delete(idr ?? id);
     const id3 = await Promise.resolve(id2).catch(() => {});
-    if (isObject(id3)) {
+    if (!isPrimitive(id3) && id3 !== void 0) {
       tsTranspile.invalidate(id3);
     }
   }
@@ -770,7 +771,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
     await Promise.all(
       ids.map(async (id) => {
         const id2 = await Promise.resolve(id).catch(() => {});
-        if (isObject(id2)) {
+        if (!isPrimitive(id2) && id2 !== void 0) {
           tsTranspile.invalidate(id2);
         }
       }),
@@ -798,7 +799,7 @@ export class ExternalLinkResolve extends AbstractResolve implements Resolve {
     if (identity instanceof Error) {
       throw identity;
     }
-    return isObject(identity) && ExternalLinkResolve.Identity in identity
+    return !isPrimitive(identity) && ExternalLinkResolve.Identity in identity
       ? { ...identity, cwd: href, id: href }
       : null;
   }

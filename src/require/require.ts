@@ -33,7 +33,7 @@ import type {
   Resolved,
 } from "obsidian-modules";
 import { MarkdownTranspile, TypeScriptTranspile } from "./transpile.js";
-import { noop } from "es-toolkit";
+import { isPrimitive, noop } from "es-toolkit";
 import {
   patchContextForDataview,
   patchContextForEditor,
@@ -42,7 +42,6 @@ import {
 } from "./context.js";
 import type { ModulesPlugin } from "../main.js";
 import { PRECOMPILE_SYNC_PREFIX } from "../magic.js";
-import { isObject } from "../utils.js";
 import { around } from "monkey-around";
 import type { attachSourceMap } from "../worker.js";
 import { loadStartupModules } from "./startup-modules.js";
@@ -303,7 +302,7 @@ function createRequire(
             ret.app,
           );
           const { exports } = module;
-          if (isObject(exports)) {
+          if (!isPrimitive(exports)) {
             Reflect.defineProperty(exports, Symbol.toStringTag, {
               configurable: false,
               enumerable: false,
@@ -424,15 +423,17 @@ function createRequire(
                     ]),
               ]);
               if (key === "esModuleWithCommonJS") {
-                const mod = isObject(ret2) ? ret2 : { ...(ret2 ?? {}) },
+                const mod = !isPrimitive(ret2)
+                    ? ret2
+                    : Object.assign({}, ret2 ?? {}),
                   { exports: exports0 } = launderUnchecked<AnyObject>(
                     launderUnchecked<AnyObject>(mod)["module"],
                   ),
-                  exports = isObject(exports0)
+                  exports = !isPrimitive(exports0)
                     ? exports0
-                    : { ...(exports0 ?? {}) },
+                    : Object.assign({}, exports0 ?? {}),
                   functions = new Map();
-                if (isObject(exports)) {
+                if (!isPrimitive(exports)) {
                   Reflect.defineProperty(exports, Symbol.toStringTag, {
                     configurable: false,
                     enumerable: false,
