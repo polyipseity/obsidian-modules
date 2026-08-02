@@ -1,19 +1,19 @@
 import {
-  EventEmitterLite,
-  type Fixed,
-  cloneAsWritable,
-  deepFreeze,
-  dynamicRequire,
-  dynamicRequireLazy,
-  fixTyped,
-  launderUnchecked,
-  markFixed,
-  splitLines,
+    EventEmitterLite,
+    type Fixed,
+    cloneAsWritable,
+    deepFreeze,
+    dynamicRequire,
+    dynamicRequireLazy,
+    fixTyped,
+    launderUnchecked,
+    markFixed,
+    splitLines,
 } from "@polyipseity/obsidian-plugin-library";
-import type { AsyncOrSync } from "ts-essentials";
-import { BUNDLE } from "../import.js";
-import type { ModulesPlugin } from "../main.js";
 import type { TFile } from "obsidian";
+import type { AsyncOrSync } from "ts-essentials";
+import { BUNDLE } from "../imports.js";
+import type { ModulesPlugin } from "../main.js";
 import type { tsc } from "../worker.js";
 
 const tsMorphBootstrap = dynamicRequire<typeof import("@ts-morph/bootstrap")>(

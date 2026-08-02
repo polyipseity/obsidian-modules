@@ -15,7 +15,7 @@ import { isPrimitive } from "es-toolkit";
 import { TFile, getLinkpath, normalizePath, requestUrl } from "obsidian";
 import type { Context, Resolve, Resolved } from "obsidian-modules";
 import type { AsyncOrSync, Writable } from "ts-essentials";
-import { BUNDLE } from "../import.js";
+import { BUNDLE } from "../imports.js";
 import { PRECOMPILE_SYNC_PREFIX } from "../magic.js";
 import type { ModulesPlugin } from "../main.js";
 import { normalizeURL } from "../utils.js";
