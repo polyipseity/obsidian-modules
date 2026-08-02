@@ -1,14 +1,14 @@
 import {
-    EventEmitterLite,
-    type Fixed,
-    cloneAsWritable,
-    deepFreeze,
-    dynamicRequire,
-    dynamicRequireLazy,
-    fixTyped,
-    launderUnchecked,
-    markFixed,
-    splitLines,
+  EventEmitterLite,
+  type Fixed,
+  cloneAsWritable,
+  deepFreeze,
+  dynamicRequire,
+  dynamicRequireLazy,
+  fixTyped,
+  launderUnchecked,
+  markFixed,
+  splitLines,
 } from "@polyipseity/obsidian-plugin-library";
 import type { TFile } from "obsidian";
 import type { AsyncOrSync } from "ts-essentials";
