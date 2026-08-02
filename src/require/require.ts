@@ -33,7 +33,7 @@ import type {
   Resolved,
 } from "obsidian-modules";
 import { MarkdownTranspile, TypeScriptTranspile } from "./transpile.js";
-import { constant, isObject, noop } from "lodash-es";
+import { noop } from "es-toolkit";
 import {
   patchContextForDataview,
   patchContextForEditor,
@@ -42,6 +42,7 @@ import {
 } from "./context.js";
 import type { ModulesPlugin } from "../main.js";
 import { PRECOMPILE_SYNC_PREFIX } from "../magic.js";
+import { isObject } from "../utils.js";
 import { around } from "monkey-around";
 import type { attachSourceMap } from "../worker.js";
 import { loadStartupModules } from "./startup-modules.js";
@@ -244,7 +245,7 @@ function createRequire(
           return cache.commonJS;
         }
         if ("value" in rd) {
-          cache0(cache, "commonJS", constant(value));
+          cache0(cache, "commonJS", () => value);
           return value;
         }
         const module = {
@@ -358,7 +359,7 @@ function createRequire(
             return cache[key];
           }
           if ("value" in rd) {
-            cache0(cache, key, constant(value));
+            cache0(cache, key, () => value);
             return value;
           }
           const aloader = promisePromise<unknown>();

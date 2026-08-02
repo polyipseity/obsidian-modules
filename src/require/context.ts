@@ -11,7 +11,7 @@ import {
   revealPrivate,
   sleep2,
 } from "@polyipseity/obsidian-plugin-library";
-import { constant, noop } from "lodash-es";
+import { noop } from "es-toolkit";
 import { EditorView } from "@codemirror/view";
 import type { ModulesPlugin } from "../main.js";
 import type { StateField } from "@codemirror/state";
@@ -99,7 +99,7 @@ export function patchContextForEditor(context: ModulesPlugin): void {
                 }
                 return path;
               },
-              constant(path),
+              (): string | undefined => path,
             );
           }
           req?.context.cwds.push(path ?? null);

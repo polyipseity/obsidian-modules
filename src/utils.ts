@@ -26,3 +26,13 @@ export function normalizeURL(id: string, cwd?: string): string | null {
 export namespace normalizeURL {
   export const filter = /^https?:/u;
 }
+
+/**
+ * Checks if `value` is a non-null object or a function, matching the semantics
+ * of lodash `isObject`.
+ */
+export function isObject(value: unknown): value is object {
+  return typeof value === "object"
+    ? value !== null
+    : typeof value === "function";
+}

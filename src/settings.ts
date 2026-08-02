@@ -14,12 +14,13 @@ import {
   rulesList,
   setTextToNumber,
 } from "@polyipseity/obsidian-plugin-library";
-import { constant, identity, isObject } from "lodash-es";
+import { identity } from "es-toolkit";
 import semverLt from "semver/functions/lt.js";
 import type { loadDocumentations } from "./documentations.js";
 import type { ModulesPlugin } from "./main.js";
 import { REQUIRE_TAG } from "./require/require.js";
 import { Settings } from "./settings-data.js";
+import { isObject } from "./utils.js";
 
 export class SettingTab extends AdvancedSettingTab<Settings> {
   public constructor(
@@ -286,7 +287,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                     back: identity,
                     forth: identity,
                   }),
-                  constant(""),
+                  (): string => "",
                   settings.value.preloadedExternalLinks,
                   {
                     callback: async (value): Promise<void> => {
@@ -337,7 +338,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                     back: identity,
                     forth: identity,
                   }),
-                  constant(""),
+                  (): string => "",
                   settings.value.markdownCodeBlockLanguagesToLoad,
                   {
                     callback: async (value): Promise<void> => {
@@ -435,7 +436,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                   back: identity,
                   forth: identity,
                 }),
-                constant(""),
+                (): string => "",
                 settings.value.startupModules,
                 {
                   callback: async (value): Promise<void> => {

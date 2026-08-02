@@ -9,7 +9,7 @@ import {
   createI18n,
   semVerString,
 } from "@polyipseity/obsidian-plugin-library";
-import { isNil } from "lodash-es";
+import { isNil } from "es-toolkit";
 import { type App, Plugin, type PluginManifest } from "obsidian";
 import type { API } from "obsidian-modules";
 import PLazy from "p-lazy";

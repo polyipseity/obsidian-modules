@@ -1,11 +1,10 @@
 import { inlineWorkerPlugin } from "@polyipseity/esbuild-plugin-inline-worker";
-import builtinModules from "builtin-modules";
 import { analyzeMetafile, context, formatMessages } from "esbuild";
 import esbuildCompress from "esbuild-compress";
 import esbuildPluginGlobals from "esbuild-plugin-globals";
 import esbuildPluginTextReplace from "esbuild-plugin-text-replace";
-import { constant } from "lodash-es";
 import { rm, writeFile } from "node:fs/promises";
+import { builtinModules } from "node:module";
 import { argv } from "node:process";
 import { PATHS } from "./utils.mjs";
 
@@ -47,7 +46,7 @@ async function esbuild() {
         moment: "moment",
       }),
       inlineWorkerPlugin({
-        buildOptions: constant({
+        buildOptions: () => ({
           banner: { js: '"use strict";function require(){};' },
           bundle: true,
           color: true,
