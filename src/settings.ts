@@ -15,11 +15,11 @@ import {
   setTextToNumber,
 } from "@polyipseity/obsidian-plugin-library";
 import { constant, identity, isObject } from "lodash-es";
+import semverLt from "semver/functions/lt.js";
+import type { loadDocumentations } from "./documentations.js";
 import type { ModulesPlugin } from "./main.js";
 import { REQUIRE_TAG } from "./require/require.js";
 import { Settings } from "./settings-data.js";
-import type { loadDocumentations } from "./documentations.js";
-import semverLt from "semver/functions/lt.js";
 
 export class SettingTab extends AdvancedSettingTab<Settings> {
   public constructor(
@@ -236,7 +236,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                 rulesList(context, settings.value.preloadingRules, {
                   callback: async (value): Promise<void> => {
                     await settings.mutate((settingsM) => {
-                      settingsM.preloadingRules = value;
+                      settingsM.preloadingRules = [...value];
                     });
                     this.postMutate();
                   },
@@ -291,7 +291,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                   {
                     callback: async (value): Promise<void> => {
                       await settings.mutate((settingsM) => {
-                        settingsM.preloadedExternalLinks = value;
+                        settingsM.preloadedExternalLinks = [...value];
                       });
                       this.postMutate();
                     },
@@ -342,7 +342,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                   {
                     callback: async (value): Promise<void> => {
                       await settings.mutate((settingsM) => {
-                        settingsM.markdownCodeBlockLanguagesToLoad = value;
+                        settingsM.markdownCodeBlockLanguagesToLoad = [...value];
                       });
                       this.postMutate();
                     },
@@ -440,7 +440,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
                 {
                   callback: async (value): Promise<void> => {
                     await settings.mutate((settingsM) => {
-                      settingsM.startupModules = value;
+                      settingsM.startupModules = [...value];
                     });
                     this.postMutate();
                   },
