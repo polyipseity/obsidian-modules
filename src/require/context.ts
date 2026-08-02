@@ -31,6 +31,8 @@ export async function patchContextForDataview(
         const dv = plugin.localApi(
           "",
           comp,
+          // eslint-disable-next-line eslint-comments/no-restricted-disable -- see below
+          // eslint-disable-next-line obsidianmd/prefer-create-el -- TODO: resolve later
           self.document.createElement("div"),
         );
         return around(Object.getPrototypeOf(dv) as unknown as typeof dv, {

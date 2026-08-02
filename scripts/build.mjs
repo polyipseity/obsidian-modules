@@ -66,6 +66,7 @@ async function esbuild() {
           minify: !DEV,
           platform: "browser",
           plugins: [
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call -- JSDoc typings could be not parsed for some reason.
             esbuildCompress({
               compressors: [
                 {

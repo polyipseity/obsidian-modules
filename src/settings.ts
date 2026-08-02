@@ -13,6 +13,7 @@ import {
   resetButton,
   rulesList,
   setTextToNumber,
+  setSanitizedInnerHTML,
 } from "@polyipseity/obsidian-plugin-library";
 import { identity } from "es-toolkit";
 import semverLt from "semver/functions/lt.js";
@@ -102,7 +103,7 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
         .setName(
           createDocumentFragment(settingEl.ownerDocument, (frag) => {
             createChildElement(frag, "span", (ele) => {
-              ele.innerHTML = i18n.t("settings.require-name-HTML");
+              setSanitizedInnerHTML(ele, i18n.t("settings.require-name-HTML"));
             });
           }),
         )
@@ -151,8 +152,9 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
           .setDesc(
             createDocumentFragment(settingEl.ownerDocument, (frag) => {
               createChildElement(frag, "span", (ele) => {
-                ele.innerHTML = i18n.t(
-                  "settings.expose-internal-modules-description-HTML",
+                setSanitizedInnerHTML(
+                  ele,
+                  i18n.t("settings.expose-internal-modules-description-HTML"),
                 );
               });
             }),
@@ -221,12 +223,12 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
           .setDesc(
             createDocumentFragment(settingEl.ownerDocument, (frag) => {
               createChildElement(frag, "span", (ele) => {
-                ele.innerHTML = i18n.t(
-                  "settings.preloading-rules-description-HTML",
-                  {
+                setSanitizedInnerHTML(
+                  ele,
+                  i18n.t("settings.preloading-rules-description-HTML", {
                     count: settings.value.preloadingRules.length,
                     interpolation: { escapeValue: false },
-                  },
+                  }),
                 );
               });
             }),
@@ -271,10 +273,13 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
           .setDesc(
             createDocumentFragment(settingEl.ownerDocument, (frag) => {
               createChildElement(frag, "span", (ele) => {
-                ele.innerHTML = i18n.t(`${pf}-description-HTML`, {
-                  count: settings.value.preloadedExternalLinks.length,
-                  interpolation: { escapeValue: false },
-                });
+                setSanitizedInnerHTML(
+                  ele,
+                  i18n.t(`${pf}-description-HTML`, {
+                    count: settings.value.preloadedExternalLinks.length,
+                    interpolation: { escapeValue: false },
+                  }),
+                );
               });
             }),
           )
@@ -378,14 +383,14 @@ export class SettingTab extends AdvancedSettingTab<Settings> {
           .setName(
             createDocumentFragment(settingEl.ownerDocument, (frag) => {
               createChildElement(frag, "span", (ele) => {
-                ele.innerHTML = i18n.t(`${pf}-HTML`);
+                setSanitizedInnerHTML(ele, i18n.t(`${pf}-HTML`));
               });
             }),
           )
           .setDesc(
             createDocumentFragment(settingEl.ownerDocument, (frag) => {
               createChildElement(frag, "span", (ele) => {
-                ele.innerHTML = i18n.t(`${pf}-description-HTML`);
+                setSanitizedInnerHTML(ele, i18n.t(`${pf}-description-HTML`));
               });
             }),
           )
