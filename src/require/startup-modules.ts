@@ -136,12 +136,10 @@ export async function loadStartupModules(
     callback() {
       const { lastEvent } = app;
       (async (): Promise<void> => {
-        try {
-          await startupMods.reload(0, ...settings.value.startupModules);
-        } catch (error) {
-          activeSelf(lastEvent).console.error(error);
-        }
-      })();
+        await startupMods.reload(0, ...settings.value.startupModules);
+      })().catch((error: unknown) => {
+        activeSelf(lastEvent).console.error(error);
+      });
     },
     icon: i18n.t("asset:commands.reload-startup-modules-icon"),
     id: "reload-startup-modules",
@@ -186,5 +184,6 @@ async function loadModule(context: ModulesPlugin, id: string): Promise<void> {
     throw new Error(i18n.t("errors.no-functions-exported"));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call -- No way to type-check the function signature of a module, so we just call it and let it throw if it doesn't work.
   await func();
 }
