@@ -9,6 +9,8 @@ declare module "obsidian-modules" {
     /**
      * Object mapping global objects to {@link Require}s.
      */
+    // eslint-disable-next-line eslint-comments/no-restricted-disable -- See below.
+    // eslint-disable-next-line obsidianmd/no-global-this -- API contract; the same require applies to workers and the main window.
     readonly requires: WeakMap<typeof globalThis, Require>;
   }
 
@@ -115,7 +117,6 @@ declare module "obsidian-modules" {
   /**
    * Options for {@link Require}.
    */
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface RequireOptions extends CommonOptions {}
 
   /**

@@ -460,7 +460,6 @@ export class InternalModulesResolve extends AbstractResolve implements Resolve {
 }
 
 export class VaultPathResolve extends AbstractFileResolve implements Resolve {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override resolvePath(id: string, _context: Context): string | null {
     return parsePath(id);
   }

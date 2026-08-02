@@ -8,9 +8,8 @@ import { worker } from "workerpool";
 const obsidian = new Proxy<Record<string | number | symbol, unknown>>(
   {},
   {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     get(target, property, _receiver): unknown {
-      // eslint-disable-next-line @typescript-eslint/no-extraneous-class
+      // eslint-disable-next-line @typescript-eslint/no-extraneous-class -- a class is needed to emulate Obsidian module classes
       return (target[property] ??= class {});
     },
   },
