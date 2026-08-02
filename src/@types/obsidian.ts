@@ -1,5 +1,8 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type */
 declare module "obsidian" {
+  interface PluginManifest {
+    readonly fundingUrl?: string | Record<string, string>;
+  }
+
   interface Canvas extends Private<$Canvas, PrivateKey> {}
   interface CanvasNode extends Private<$CanvasNode, PrivateKey> {}
   interface CanvasNodeInfo extends Private<$CanvasNodeInfo, PrivateKey> {}
@@ -17,6 +20,8 @@ declare module "obsidian" {
     }
   }
 }
+import type { Private } from "@polyipseity/obsidian-plugin-library";
+import type { DataviewPlugin } from "dataview";
 import type {
   Canvas,
   CanvasNode,
@@ -25,8 +30,6 @@ import type {
   MarkdownEmbedInfo,
   MarkdownFileInfo,
 } from "obsidian";
-import type { DataviewPlugin } from "dataview";
-import type { Private } from "@polyipseity/obsidian-plugin-library";
 import type { TemplaterPlugin } from "templater-obsidian";
 
 declare const PRIVATE_KEY: unique symbol;
