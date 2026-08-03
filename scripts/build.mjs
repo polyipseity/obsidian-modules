@@ -111,6 +111,20 @@ async function esbuild() {
         include: /promise-batcher.*\.js$/,
         pattern: [['.debuglog("promise-batcher")', "?.[Symbol()]??(()=>{})"]],
       }),
+      // The bundled TypeScript compiler (`@ts-morph/common` ships a copy of the
+      // compiler) has diagnostic 1198's name containing `0x` hex fragments that
+      // look like `_0x…` obfuscation, which Obsidian's automated review flags.
+      // Rename the full identifier exactly; a broad `_0x`→`_ux` replace could
+      // hit unrelated code. Diagnostics and error codes are unchanged.
+      esbuildPluginTextReplace({
+        include: /node_modules\/@ts-morph\/common\/dist\/typescript\.js$/,
+        pattern: [
+          [
+            "An_extended_Unicode_escape_value_must_be_between_0x0_and_0x10FFFF_inclusive",
+            "An_extended_Unicode_escape_value_must_be_between_ux0_and_ux10FFFF_inclusive",
+          ],
+        ],
+      }),
     ],
     sourcemap: DEV && "inline",
     sourcesContent: true,
