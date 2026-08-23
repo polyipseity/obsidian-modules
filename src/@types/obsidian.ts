@@ -40,23 +40,23 @@ declare module "@polyipseity/obsidian-plugin-library" {
   }
 }
 
-interface $Canvas {
+export interface $Canvas {
   readonly view: FileView;
 }
 
-interface $CanvasNode {
+export interface $CanvasNode {
   readonly canvas: Canvas;
 }
 
-interface $CanvasNodeInfo extends MarkdownFileInfo {
+export interface $CanvasNodeInfo extends MarkdownFileInfo {
   readonly node: CanvasNode;
 }
 
-interface $MarkdownEmbedInfo extends MarkdownFileInfo {
+export interface $MarkdownEmbedInfo extends MarkdownFileInfo {
   readonly owner: CanvasNodeInfo | MarkdownFileInfo;
 }
 
-interface $MarkdownPreviewRenderer {
+export interface $MarkdownPreviewRenderer {
   readonly owner: MarkdownEmbedInfo | MarkdownFileInfo;
   readonly onRender: () => void;
 }

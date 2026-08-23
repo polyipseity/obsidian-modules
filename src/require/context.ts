@@ -8,9 +8,16 @@ import {
 import {
   Functions,
   patchPlugin,
-  revealPrivate,
+  revealPrivateFilter,
   sleep2,
 } from "@polyipseity/obsidian-plugin-library";
+import type {
+  $Canvas,
+  $CanvasNode,
+  $CanvasNodeInfo,
+  $MarkdownEmbedInfo,
+  $MarkdownPreviewRenderer,
+} from "../@types/obsidian.js";
 import { noop } from "es-toolkit";
 import { EditorView } from "@codemirror/view";
 import type { ModulesPlugin } from "../main.js";
@@ -92,7 +99,9 @@ export function patchContextForEditor(context: ModulesPlugin): void {
           let path = info?.file?.parent?.path;
           if (path === void 0 && info) {
             const info2 = info as CanvasNodeInfo | typeof info;
-            path = revealPrivate(
+            path = revealPrivateFilter<
+              [$Canvas, $CanvasNode, $CanvasNodeInfo]
+            >()(
               context,
               [info2],
               (info3) => {
@@ -123,7 +132,15 @@ export function patchContextForPreview(context: ModulesPlugin): void {
   const {
     api: { requires },
   } = context;
-  revealPrivate(
+  revealPrivateFilter<
+    [
+      $Canvas,
+      $CanvasNode,
+      $CanvasNodeInfo,
+      $MarkdownEmbedInfo,
+      $MarkdownPreviewRenderer,
+    ]
+  >()(
     context,
     [MarkdownPreviewRenderer.prototype],
     (rend) => {
