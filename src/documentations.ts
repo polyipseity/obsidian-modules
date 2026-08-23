@@ -1,5 +1,7 @@
 import {
   $App,
+  $CommunityPluginsSettingTab,
+  $UnknownSettingTab,
   DocumentationMarkdownView,
   StorageSettingsManager,
   activeSelf,
@@ -12,7 +14,6 @@ import {
   toJSONOrString,
   typedKeys,
 } from "@polyipseity/obsidian-plugin-library";
-import { App, CommunityPluginsSettingTab, UnknownSettingTab } from "obsidian";
 import semverLt from "semver/functions/lt.js";
 import { MarkOptional } from "ts-essentials";
 import changelogMd from "../CHANGELOG.md";
@@ -40,7 +41,8 @@ export const DOCUMENTATIONS = deepFreeze({
       context: { app, manifest },
     } = view;
     revealPrivateFilter<
-      [App, $App["setting"], CommunityPluginsSettingTab | UnknownSettingTab]
+      [$App, $CommunityPluginsSettingTab, $UnknownSettingTab],
+      [Document, Element, HTMLElement]
     >()(
       context,
       [app],
